@@ -65,5 +65,7 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
+    implementation 'com.squareup.okio:okio:1.16.0'
+
     implementation(name:'ratchet', ext:'aar')
 }
