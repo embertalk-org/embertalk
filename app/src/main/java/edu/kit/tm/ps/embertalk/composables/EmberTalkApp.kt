@@ -5,12 +5,14 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -18,8 +20,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,9 +35,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.sync.Synchronizer
+import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
-    object Main : Screen("profile", Icons.Filled.Home, R.string.main)
     object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
     object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
 }
@@ -48,21 +54,40 @@ fun EmberTalkApp(
 ) {
     val navController = rememberNavController()
     val items = listOf(
-        Screen.Main,
         Screen.Messages,
         Screen.Settings
     )
     Surface {
+        val context = LocalContext.current
+
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentDestination = navBackStackEntry?.destination
+
+
+        val messages = rememberSaveable { mutableStateOf(Synchronizer.store.messages().toList()) }
+
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("EmberTalk") }
+                    title = { Text("EmberTalk") },
+                    actions = {
+                        IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.start_service)
+                            )
+                        }
+                        IconButton(onClick = { messages.value = Synchronizer.store.messages().toList() }) {
+                            Icon(
+                                imageVector = Icons.Filled.Refresh,
+                                contentDescription = stringResource(R.string.refresh)
+                            )
+                        }
+                    }
                 )
             },
             bottomBar = {
                 BottomAppBar {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
                     items.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = screen.route) },
@@ -80,16 +105,20 @@ fun EmberTalkApp(
                         )
                     }
                 }
-            }
+            },
         ) { innerPadding ->
             Box(modifier = Modifier.padding(innerPadding)) {
                 NavHost(
                     navController = navController,
-                    startDestination = Screen.Main.route,
+                    startDestination = Screen.Messages.route,
                     modifier = Modifier.padding(10.dp)
                 ) {
-                    composable(Screen.Main.route) { MainView() }
-                    composable(Screen.Messages.route) { MessageView() }
+                    composable(Screen.Messages.route) { MessageView(
+                        messages = messages.value,
+                        onMessageSend = {
+                            messages.value = Synchronizer.store.messages().toList()
+                        },
+                    ) }
                     composable(Screen.Settings.route) { SettingsView() }
                 }
             }
