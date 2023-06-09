@@ -28,7 +28,7 @@ fun SubmittableTextField(
     val msgInput = rememberSaveable { mutableStateOf(initialValue) }
 
     val onlyWhitespace: () -> Boolean = { msgInput.value.trim() == "" }
-    val validInput: () -> Boolean = { !onlyWhitespace() || !inputValidator.invoke(msgInput.value) }
+    val validInput: () -> Boolean = { !onlyWhitespace() && inputValidator.invoke(msgInput.value) }
 
     val isError = rememberSaveable { mutableStateOf( !validInput() ) }
     Row {

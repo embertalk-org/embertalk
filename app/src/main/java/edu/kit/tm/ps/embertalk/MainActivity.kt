@@ -34,6 +34,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import edu.kit.tm.ps.embertalk.composables.SubmittableTextField
 import edu.kit.tm.ps.embertalk.storage.Message
+import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 import edu.kit.tm.ps.embertalk.ui.theme.EmberTalkTheme
@@ -90,6 +91,7 @@ fun EmberTalk(
                 imageVector = Icons.Rounded.Build,
                 initialValue = prefs.getString("mac", "")!!,
                 clearOnSubmit = false,
+                inputValidator = { MacAddressUtils.isValidMacAddress(it) },
                 onSubmit = { prefs.edit().putString("mac", it.uppercase()).apply() }
             )
             SubmittableTextField(
