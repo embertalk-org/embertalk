@@ -1,46 +1,51 @@
 package edu.kit.tm.ps.embertalk.composables
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.storage.DecodedMessage
+import edu.kit.tm.ps.embertalk.storage.Message
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Preview
 @Composable
 fun MessageView(
-    navController: NavController,
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier.padding(10.dp)
+        modifier = Modifier.fillMaxHeight(),
+        verticalArrangement = Arrangement.Bottom
     ) {
-        TopAppBar(
-            title = { Text("Messages") },
-            navigationIcon = {
-                IconButton(
-                    onClick = { navController.popBackStack() }
-                ) {
-                    Icon(imageVector = Icons.Rounded.ArrowBack, contentDescription = "Back")
-                }
-            }
-        )
-        LazyColumn {
-            itemsIndexed(Synchronizer.store.messages().map { it.bytes.decodeToString() }) { index, item ->
-                MessageCard(message = DecodedMessage("Ember", item))
+        val messages = rememberSaveable { mutableStateOf(Synchronizer.store.messages().toList()) }
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth().weight(9f)
+        ) {
+            itemsIndexed(messages.value) { _, item ->
+                val msgContent = item.bytes.decodeToString()
+                MessageCard(message = DecodedMessage("Ember", msgContent))
             }
         }
+        SubmittableTextField(
+            label = { Text(stringResource(R.string.your_message)) },
+            imageVector = Icons.Rounded.Send,
+            onSubmit = {
+                Synchronizer.store.save(Message(it.encodeToByteArray()))
+                messages.value = Synchronizer.store.messages().toList()
+            },
+            modifier = Modifier.fillMaxWidth().weight(1f)
+        )
     }
 }

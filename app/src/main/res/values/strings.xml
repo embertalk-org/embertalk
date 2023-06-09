@@ -11,4 +11,7 @@
     <string name="show_messages">Show messages</string>
     <string name="your_message">Your Message</string>
     <string name="your_mac_address">Your Mac-Address</string>
+    <string name="main">Main</string>
+    <string name="messages">Messages</string>
+    <string name="settings">Settings</string>
 </resources>
