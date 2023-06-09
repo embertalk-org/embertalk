@@ -1,7 +1,6 @@
 package edu.kit.tm.ps.embertalk.composables
 
 import android.preference.PreferenceManager
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -59,8 +58,6 @@ fun MainView(
             }
             TextButton(onClick = {
                 navController.navigate("messages")
-                val decodedMessages = Synchronizer.store.messages().map { it.bytes.decodeToString() }
-                Toast.makeText(context, decodedMessages.joinToString("\n"), Toast.LENGTH_SHORT).show()
             }) {
                 Text(stringResource(R.string.show_messages))
             }
