@@ -19,26 +19,40 @@ fun SubmittableTextField(
     label: @Composable () -> Unit,
     imageVector: ImageVector,
     onSubmit: (String) -> Unit,
+    inputValidator: (String) -> Boolean = { true },
     initialValue: String = "",
     clearOnSubmit: Boolean = true,
     contentDescription: String = "",
     modifier: Modifier = Modifier
 ) {
     val msgInput = rememberSaveable { mutableStateOf(initialValue) }
+
+    val onlyWhitespace: () -> Boolean = { msgInput.value.trim() == "" }
+    val validInput: () -> Boolean = { !onlyWhitespace() || !inputValidator.invoke(msgInput.value) }
+
+    val isError = rememberSaveable { mutableStateOf( !validInput() ) }
     Row {
         OutlinedTextField(
             value = msgInput.value,
             label = label,
             singleLine = true,
-            onValueChange = { msgInput.value = it }
+            isError = isError.value,
+            onValueChange = {
+                msgInput.value = it
+                isError.value = !validInput()
+            }
         )
         IconButton(
             onClick = {
-                onSubmit.invoke(msgInput.value)
-                if (clearOnSubmit) {
-                    msgInput.value = ""
+                if (validInput()) {
+                    onSubmit.invoke(msgInput.value)
+                    if (clearOnSubmit) {
+                        msgInput.value = ""
+                    }
+                    isError.value = !validInput()
                 }
             },
+            enabled = !isError.value,
             modifier = Modifier.align(Alignment.CenterVertically)
         ) {
             Icon(
