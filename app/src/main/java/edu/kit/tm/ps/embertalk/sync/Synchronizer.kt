@@ -43,6 +43,7 @@ class Synchronizer(private val messageRepository: MessageRepository) {
             exchangeMessages(messagesToSend, theirMessages, protocol)
             Log.d(TAG, "Exchanged messages")
             theirMessages.forEach { runBlocking { messageRepository.insert(it) } }
+            messageRepository.notifyObservers()
             Log.d(TAG, "Synced successfully")
             true
         } catch (e: IOException) {

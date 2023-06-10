@@ -24,8 +24,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.storage.MessageDb
-import edu.kit.tm.ps.embertalk.storage.OfflineMessageRepository
+import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.time.Instant
 import java.util.UUID
@@ -35,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
 
-    private val synchronizer: Synchronizer = Synchronizer(OfflineMessageRepository(MessageDb.getDb(this).messageDao()))
+    private var synchronizer: Synchronizer? = null
     private var started = false
     private var serviceUuidAndAddress: UUID? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -43,7 +42,7 @@ class BluetoothSyncService : Service() {
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var bluetoothClassicServer: Thread? = null
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
-    private val clientExecutorService: ClientExecutorService = ClientExecutorService(synchronizer)
+    private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -149,7 +148,7 @@ class BluetoothSyncService : Service() {
 
                         val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
                         val remoteDevice = bluetoothAdapter!!.getRemoteDevice(remoteDeviceMacAddress)
-                        clientExecutorService.enqueue(remoteDevice, uuid.uuid) {
+                        clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer!!) {
                             devicesLastSynced[serviceUuidAndAddress!!] = Instant.now()
                         }
                     }
@@ -194,6 +193,8 @@ class BluetoothSyncService : Service() {
             Log.d(TAG, "Started again")
             return START_REDELIVER_INTENT
         }
+        val app = this.application as EmberTalkApplication
+        synchronizer = Synchronizer(app.container.messageRepository)
 
         bluetoothAdapter = getBluetoothAdapter(this)
 
@@ -214,7 +215,7 @@ class BluetoothSyncService : Service() {
         startBluetoothLeDiscovery(startId)
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter!!)
+        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer!!, bluetoothAdapter!!)
         bluetoothClassicServer!!.start()
 
         Log.d(TAG, "Started")

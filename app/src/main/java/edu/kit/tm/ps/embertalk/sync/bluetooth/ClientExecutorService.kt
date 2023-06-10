@@ -7,14 +7,12 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-class ClientExecutorService(
-    private val synchronizer: Synchronizer
-) {
+class ClientExecutorService {
 
     private val taskQueue: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
     private val service = Executors.newCachedThreadPool()
 
-    fun enqueue(remoteDevice: BluetoothDevice, uuid: UUID, onFinishAction: () -> Unit) {
+    fun enqueue(remoteDevice: BluetoothDevice, uuid: UUID, synchronizer: Synchronizer, onFinishAction: () -> Unit) {
         if (!taskQueue.contains(uuid)) {
             taskQueue.add(uuid)
             val client = BluetoothClassicClient(
