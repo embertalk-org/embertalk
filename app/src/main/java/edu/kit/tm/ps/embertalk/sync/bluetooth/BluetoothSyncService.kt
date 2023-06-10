@@ -201,13 +201,14 @@ class BluetoothSyncService : Service() {
     override fun onDestroy() {
         started = false
 
-        stopBluetoothLeDiscovery()
+        if (bluetoothAdapter != null) {
+            stopBluetoothLeDiscovery()
+            bluetoothClassicServer!!.interrupt()
+            bluetoothClassicServer!!.interrupt()
 
-        bluetoothClassicServer!!.interrupt()
-        clientExecutorService.shutdownNow()
-
-        Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
-        Log.d(TAG, "Stopped")
+            Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
+            Log.d(TAG, "Stopped")
+        }
         super.onDestroy()
     }
 
