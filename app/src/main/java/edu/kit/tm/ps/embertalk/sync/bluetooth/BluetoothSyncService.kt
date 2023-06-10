@@ -21,11 +21,9 @@ import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import edu.kit.tm.ps.embertalk.R
-
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
 
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
@@ -37,7 +35,7 @@ class BluetoothSyncService : Service() {
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var bluetoothClassicServer: Thread? = null
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
-    private val executorService = Executors.newCachedThreadPool()
+    private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -127,9 +125,9 @@ class BluetoothSyncService : Service() {
 
                         val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
                         val remoteDevice = bluetoothAdapter!!.getRemoteDevice(remoteDeviceMacAddress)
-
-                        val client = BluetoothClassicClient(remoteDevice, uuid.uuid) { devicesLastSynced[serviceUuidAndAddress!!] = Instant.now() }
-                        executorService.submit(client)
+                        clientExecutorService.enqueue(remoteDevice, uuid.uuid) {
+                            devicesLastSynced[serviceUuidAndAddress!!] = Instant.now()
+                        }
                     }
                 }
             })
@@ -206,7 +204,7 @@ class BluetoothSyncService : Service() {
         stopBluetoothLeDiscovery()
 
         bluetoothClassicServer!!.interrupt()
-        executorService.shutdownNow()
+        clientExecutorService.shutdownNow()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")
