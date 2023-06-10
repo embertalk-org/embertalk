@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.composables.message_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -44,7 +45,15 @@ fun MessageView(
         ) {
             itemsIndexed(messageUiState.messages) { _, item ->
                 val decoded = DecodedMessage.decode(item)
-                MessageCard(message = decoded)
+                val currentName = prefs.getString("currentname", "").toString()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = if (decoded.from == currentName) {Arrangement.End} else {Arrangement.Start}
+                ) {
+                    MessageCard(
+                        message = decoded
+                    )
+                }
             }
         }
         SubmittableTextField(
