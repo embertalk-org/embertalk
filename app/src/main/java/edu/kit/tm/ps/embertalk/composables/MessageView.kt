@@ -10,31 +10,35 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Send
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.storage.DecodedMessage
-import edu.kit.tm.ps.embertalk.storage.Message
-import edu.kit.tm.ps.embertalk.sync.Synchronizer
 
 @Composable
 fun MessageView(
-    messages: List<Message>,
-    onMessageSend: () -> Unit,
+    messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)!!
+
+    val messageUiState by messageViewModel.uiState.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Bottom
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().weight(9f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(9f)
         ) {
-            itemsIndexed(messages) { _, item ->
+            itemsIndexed(messageUiState.messages) { _, item ->
                 val decoded = DecodedMessage.decode(item)
                 MessageCard(message = decoded)
             }
@@ -43,10 +47,11 @@ fun MessageView(
             label = { Text(stringResource(R.string.your_message)) },
             imageVector = Icons.Rounded.Send,
             onSubmit = {
-                Synchronizer.store.save(DecodedMessage(prefs.getString("currentname", "").toString(), it).encode())
-                onMessageSend.invoke()
+                messageViewModel.saveMessage(DecodedMessage(prefs.getString("currentname", "").toString(), it).encode())
             },
-            modifier = Modifier.fillMaxWidth().weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         )
     }
 }

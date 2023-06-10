@@ -20,14 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -35,7 +34,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
@@ -63,8 +61,7 @@ fun EmberTalkApp(
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 
-
-        val messages = rememberSaveable { mutableStateOf(Synchronizer.store.messages().toList()) }
+        val messageViewModel: MessageViewModel = viewModel()
 
         Scaffold(
             topBar = {
@@ -77,7 +74,7 @@ fun EmberTalkApp(
                                 contentDescription = stringResource(R.string.start_service)
                             )
                         }
-                        IconButton(onClick = { messages.value = Synchronizer.store.messages().toList() }) {
+                        IconButton(onClick = { messageViewModel.updateMessages() }) {
                             Icon(
                                 imageVector = Icons.Filled.Refresh,
                                 contentDescription = stringResource(R.string.refresh)
@@ -113,12 +110,7 @@ fun EmberTalkApp(
                     startDestination = Screen.Messages.route,
                     modifier = Modifier.padding(10.dp)
                 ) {
-                    composable(Screen.Messages.route) { MessageView(
-                        messages = messages.value,
-                        onMessageSend = {
-                            messages.value = Synchronizer.store.messages().toList()
-                        },
-                    ) }
+                    composable(Screen.Messages.route) { MessageView(messageViewModel = messageViewModel) }
                     composable(Screen.Settings.route) { SettingsView() }
                 }
             }
