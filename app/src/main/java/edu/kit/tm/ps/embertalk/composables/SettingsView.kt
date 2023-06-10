@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,6 +31,13 @@ fun SettingsView(
             clearOnSubmit = false,
             inputValidator = { MacAddressUtils.isValidMacAddress(it) },
             onSubmit = { prefs.edit().putString("mac", it.uppercase()).apply() }
+        )
+        SubmittableTextField(
+            label = { Text(stringResource(R.string.your_username)) },
+            imageVector = Icons.Rounded.Person,
+            initialValue = prefs.getString("currentname", "")!!,
+            clearOnSubmit = false,
+            onSubmit = { prefs.edit().putString("currentname", it.uppercase()).apply() }
         )
     }
 }
