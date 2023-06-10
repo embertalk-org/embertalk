@@ -2,8 +2,10 @@ package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.storage.Message
-import edu.kit.tm.ps.embertalk.storage.MessageStore
+import edu.kit.tm.ps.embertalk.storage.MessageRepository
 import edu.kit.tm.ps.embertalk.sync.bluetooth.Protocol
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import okio.BufferedSink
 import okio.BufferedSource
 import okio.Okio
@@ -11,12 +13,9 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-object Synchronizer {
-    private const val TAG = "StreamSync"
+class Synchronizer(private val messageRepository: MessageRepository) {
 
-    val store = MessageStore()
-
-    fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream) {
+    fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
         Log.d(TAG, "Starting sync")
 
         val source = Okio.buffer(Okio.source(inputStream))
@@ -27,27 +26,29 @@ object Synchronizer {
             Log.d(TAG, "Handshake successful")
         } catch (e: IOException) {
             Log.e(TAG, "Handshake failed", e)
-            return
+            return false
         }
 
-        val myHashes = store.hashes()
+        val myHashes = runBlocking { messageRepository.hashes().first() }
         val theirHashes = try {
-            exchangeHashes(myHashes, source, sink)
+            exchangeHashes(myHashes.toSet(), source, sink)
         } catch (e: IOException) {
             Log.e(TAG, "Hash exchange failed", e)
-            return
+            return false
         }
 
-        val messagesToSend = store.messagesExcept(theirHashes)
+        val messagesToSend = runBlocking { messageRepository.allExcept(theirHashes).first() }.toSet()
         val theirMessages = HashSet<Message>()
 
         try {
             exchangeMessages(messagesToSend, theirMessages, source, sink)
             Log.d(TAG, "Exchanged messages")
-            theirMessages.forEach { store.save(it) }
+            theirMessages.forEach { runBlocking { messageRepository.insert(it) } }
             Log.d(TAG, "Synced successfully")
+            return true
         } catch (e: IOException) {
             Log.e(TAG, "Message exchange failed", e)
+            return false
         }
     }
 
@@ -93,5 +94,9 @@ object Synchronizer {
             theirMessages.add(msg)
             messageType = Protocol.readMessageType(source)
         }
+    }
+
+    companion object {
+        private const val TAG = "StreamSync"
     }
 }

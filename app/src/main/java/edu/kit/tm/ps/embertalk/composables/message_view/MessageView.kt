@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.composables
+package edu.kit.tm.ps.embertalk.composables.message_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,9 +15,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.composables.MessageCard
+import edu.kit.tm.ps.embertalk.composables.SubmittableTextField
 import edu.kit.tm.ps.embertalk.storage.DecodedMessage
+import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
@@ -47,7 +51,9 @@ fun MessageView(
             label = { Text(stringResource(R.string.your_message)) },
             imageVector = Icons.Rounded.Send,
             onSubmit = {
-                messageViewModel.saveMessage(DecodedMessage(prefs.getString("currentname", "").toString(), it).encode())
+                messageViewModel.viewModelScope.launch {
+                    messageViewModel.saveMessage(DecodedMessage(prefs.getString("currentname", "").toString(), it).encode())
+                }
             },
             modifier = Modifier
                 .fillMaxWidth()

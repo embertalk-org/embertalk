@@ -9,7 +9,13 @@ import java.io.IOException
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
-class BluetoothClassicClient(device: BluetoothDevice, uuid: UUID, private val onSyncFinish: () -> Unit) : Runnable {
+class BluetoothClassicClient(
+    device: BluetoothDevice,
+    private val synchronizer: Synchronizer,
+    uuid: UUID,
+    private val onSyncFinish: () -> Unit,
+    private val onSyncSuccessful: () -> Unit
+) : Runnable {
     var socket: BluetoothSocket? = null
     var macAddress: String? = null
 
@@ -33,7 +39,10 @@ class BluetoothClassicClient(device: BluetoothDevice, uuid: UUID, private val on
             Log.e(TAG, "Failed to connect", connectException)
         }
         try {
-            Synchronizer.bidirectionalSync(socket!!.inputStream, socket!!.outputStream)
+            val successful = synchronizer.bidirectionalSync(socket!!.inputStream, socket!!.outputStream)
+            if (successful) {
+                onSyncSuccessful.invoke()
+            }
             onSyncFinish.invoke()
         } catch (e: IOException) {
             Log.e(TAG, "Failed to sync", e)

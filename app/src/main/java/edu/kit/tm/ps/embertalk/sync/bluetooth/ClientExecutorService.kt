@@ -2,22 +2,28 @@ package edu.kit.tm.ps.embertalk.sync.bluetooth
 
 import android.bluetooth.BluetoothDevice
 import android.util.Log
+import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-class ClientExecutorService {
+class ClientExecutorService(
+    private val synchronizer: Synchronizer
+) {
 
     private val taskQueue: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
     private val service = Executors.newCachedThreadPool()
 
-    fun enqueue(remoteDevice: BluetoothDevice, uuid: UUID, onCompletionAction: () -> Unit) {
+    fun enqueue(remoteDevice: BluetoothDevice, uuid: UUID, onFinishAction: () -> Unit) {
         if (!taskQueue.contains(uuid)) {
             taskQueue.add(uuid)
-            val client = BluetoothClassicClient(remoteDevice, uuid) {
-                onCompletionAction.invoke()
-                taskQueue.remove(uuid)
-            }
+            val client = BluetoothClassicClient(
+                remoteDevice,
+                synchronizer,
+                uuid,
+                { taskQueue.remove(uuid) },
+                { onFinishAction.invoke() },
+            )
             service.submit(client)
             Log.d(TAG, "Submitted sync task for device %s".format(uuid))
         } else {

@@ -10,7 +10,11 @@ import java.io.IOException
 import java.util.UUID
 
 @SuppressLint("MissingPermission")
-class BluetoothClassicServer(uuid: UUID, private val bluetoothAdapter: BluetoothAdapter) : Thread() {
+class BluetoothClassicServer(
+    uuid: UUID,
+    private val synchronizer: Synchronizer,
+    private val bluetoothAdapter: BluetoothAdapter
+    ) : Thread() {
     private var serverSocket: BluetoothServerSocket? = null
 
     init {
@@ -31,7 +35,7 @@ class BluetoothClassicServer(uuid: UUID, private val bluetoothAdapter: Bluetooth
                 Log.d(TAG, "Listening for a client")
                 socket = serverSocket!!.accept()
                 Log.d(TAG, "Opened a socket successfully")
-                Synchronizer.bidirectionalSync(socket.inputStream, socket.outputStream)
+                synchronizer.bidirectionalSync(socket.inputStream, socket.outputStream)
             } catch (connectException: IOException) {
                 Log.e(TAG, "Failed to start a Bluetooth Classic connection", connectException)
             }

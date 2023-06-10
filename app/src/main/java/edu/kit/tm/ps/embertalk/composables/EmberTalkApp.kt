@@ -34,6 +34,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
+import edu.kit.tm.ps.embertalk.composables.message_view.MessageView
+import edu.kit.tm.ps.embertalk.composables.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
@@ -61,7 +64,7 @@ fun EmberTalkApp(
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 
-        val messageViewModel: MessageViewModel = viewModel()
+        val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
         Scaffold(
             topBar = {

@@ -24,6 +24,9 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.storage.MessageDb
+import edu.kit.tm.ps.embertalk.storage.OfflineMessageRepository
+import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -32,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
 
+    private val synchronizer: Synchronizer = Synchronizer(OfflineMessageRepository(MessageDb.getDb(this).messageDao()))
     private var started = false
     private var serviceUuidAndAddress: UUID? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
@@ -39,7 +43,7 @@ class BluetoothSyncService : Service() {
     private var bluetoothLeScanner: BluetoothLeScanner? = null
     private var bluetoothClassicServer: Thread? = null
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
-    private val clientExecutorService: ClientExecutorService = ClientExecutorService()
+    private val clientExecutorService: ClientExecutorService = ClientExecutorService(synchronizer)
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -210,7 +214,7 @@ class BluetoothSyncService : Service() {
         startBluetoothLeDiscovery(startId)
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(uuid, bluetoothAdapter!!)
+        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter!!)
         bluetoothClassicServer!!.start()
 
         Log.d(TAG, "Started")

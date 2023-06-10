@@ -7,7 +7,8 @@ data class DecodedMessage(
     val content: String
 ) {
     fun encode(): Message {
-        return Message(Gson().toJson(this, DecodedMessage::class.java).encodeToByteArray())
+        val bytes = Gson().toJson(this, DecodedMessage::class.java).encodeToByteArray()
+        return Message(hash = bytes.contentHashCode(), bytes = bytes)
     }
 
     companion object Decoder {

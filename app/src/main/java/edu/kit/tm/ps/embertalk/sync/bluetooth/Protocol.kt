@@ -77,6 +77,6 @@ object Protocol {
         val msgLength = source.readInt()
         val bytes = source.readByteArray(msgLength.toLong())
         Log.d(TAG, "Read message of length %s".format(msgLength))
-        return Message(bytes)
+        return Message(hash = bytes.contentHashCode(), bytes = bytes)
     }
 }
