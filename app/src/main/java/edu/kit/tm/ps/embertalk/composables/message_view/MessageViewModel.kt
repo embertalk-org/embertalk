@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.storage.Message
 import edu.kit.tm.ps.embertalk.storage.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.RepositoryObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,12 +15,13 @@ data class MessageUiState(
     val messages: List<Message> = ArrayList()
 )
 
-class MessageViewModel(private val messageRepository: MessageRepository) : ViewModel() {
+class MessageViewModel(private val messageRepository: MessageRepository) : ViewModel(), RepositoryObserver {
     private val _uiState = MutableStateFlow(MessageUiState())
     val uiState: StateFlow<MessageUiState> = _uiState.asStateFlow()
 
     init {
         updateMessages()
+        messageRepository.register(this)
     }
 
     fun updateMessages() {
@@ -30,6 +32,10 @@ class MessageViewModel(private val messageRepository: MessageRepository) : ViewM
 
     suspend fun saveMessage(message: Message) {
         messageRepository.insert(message)
+        updateMessages()
+    }
+
+    override fun notifyChange() {
         updateMessages()
     }
 }
