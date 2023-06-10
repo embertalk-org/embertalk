@@ -18,6 +18,6 @@ interface MessageDao {
     @Query("SELECT hash FROM messages")
     fun hashes(): Flow<List<Int>>
 
-    @Query("SELECT * FROM messages WHERE hash in (:hashes)")
-    fun allExcept(hashes: Set<Int>): Flow<List<Message>>
+    @Query("SELECT * FROM messages WHERE hash not in (:hashes)")
+    fun allExcept(hashes: List<Int>): Flow<List<Message>>
 }

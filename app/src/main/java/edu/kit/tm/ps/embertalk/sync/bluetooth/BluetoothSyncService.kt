@@ -228,7 +228,6 @@ class BluetoothSyncService : Service() {
         if (bluetoothAdapter != null) {
             stopBluetoothLeDiscovery()
             bluetoothClassicServer!!.interrupt()
-            bluetoothClassicServer!!.interrupt()
 
             Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
             Log.d(TAG, "Stopped")

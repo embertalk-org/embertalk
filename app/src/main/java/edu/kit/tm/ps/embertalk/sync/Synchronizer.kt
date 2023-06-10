@@ -6,9 +6,8 @@ import edu.kit.tm.ps.embertalk.storage.MessageRepository
 import edu.kit.tm.ps.embertalk.sync.bluetooth.Protocol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import okio.BufferedSink
-import okio.BufferedSource
-import okio.Okio
+import java.io.DataInputStream
+import java.io.DataOutputStream
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
@@ -18,11 +17,10 @@ class Synchronizer(private val messageRepository: MessageRepository) {
     fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
         Log.d(TAG, "Starting sync")
 
-        val source = Okio.buffer(Okio.source(inputStream))
-        val sink = Okio.buffer(Okio.sink(outputStream))
+        val protocol = Protocol(DataInputStream(inputStream), DataOutputStream(outputStream))
 
         try {
-            handshake(source, sink)
+            handshake(protocol)
             Log.d(TAG, "Handshake successful")
         } catch (e: IOException) {
             Log.e(TAG, "Handshake failed", e)
@@ -31,68 +29,68 @@ class Synchronizer(private val messageRepository: MessageRepository) {
 
         val myHashes = runBlocking { messageRepository.hashes().first() }
         val theirHashes = try {
-            exchangeHashes(myHashes.toSet(), source, sink)
+            exchangeHashes(myHashes.toSet(), protocol)
         } catch (e: IOException) {
             Log.e(TAG, "Hash exchange failed", e)
             return false
         }
 
         val messagesToSend = runBlocking { messageRepository.allExcept(theirHashes).first() }.toSet()
+        Log.d(TAG, "Retrieved %s messages to send".format(messagesToSend.size))
         val theirMessages = HashSet<Message>()
 
-        try {
-            exchangeMessages(messagesToSend, theirMessages, source, sink)
+        return try {
+            exchangeMessages(messagesToSend, theirMessages, protocol)
             Log.d(TAG, "Exchanged messages")
             theirMessages.forEach { runBlocking { messageRepository.insert(it) } }
             Log.d(TAG, "Synced successfully")
-            return true
+            true
         } catch (e: IOException) {
             Log.e(TAG, "Message exchange failed", e)
-            return false
+            false
         }
     }
 
     private fun exchangeHashes(
         myHashes: Set<Int>,
-        source: BufferedSource,
-        sink: BufferedSink
+        protocol: Protocol
     ): Set<Int> {
-        Protocol.writeHashes(sink, myHashes)
+        protocol.writeHashes(myHashes)
 
-        val msgType = Protocol.readMessageType(source)
+        val msgType = protocol.readMessageType()
         if (msgType != Protocol.HASHES_ID) {
             throw IOException("Received HASHES with wrong msgType %s".format(msgType))
         }
 
-        return Protocol.readHashes(source)
+        return protocol.readHashes()
     }
 
-    private fun handshake(source: BufferedSource, sink: BufferedSink) {
-        Protocol.writeHello(sink)
+    private fun handshake(protocol: Protocol) {
+        protocol.writeHello()
 
-        val msgType = Protocol.readMessageType(source)
+        val msgType = protocol.readMessageType()
         if (msgType != Protocol.HELLO_ID) {
             throw IOException("Received HELLO with wrong msgType %s".format(msgType))
         }
-        val protocolName = Protocol.readHello(source)
+        val protocolName = protocol.readHello()
         if (protocolName != Protocol.PROTOCOL_NAME) {
-            throw IOException("Protocol \"$protocolName\" not supported")
+            throw IOException("protocol \"$protocolName\" not supported")
         }
     }
 
-    private fun exchangeMessages(myMessages: Set<Message>, theirMessages: MutableSet<Message>, source: BufferedSource, sink: BufferedSink) {
+    private fun exchangeMessages(myMessages: Set<Message>, theirMessages: MutableSet<Message>, protocol: Protocol) {
         myMessages.forEach {
-            Protocol.writeMessage(sink, it)
+            protocol.writeMessage(it)
         }
         Log.d(TAG, "Wrote %s message(s)".format(myMessages.size))
-        Protocol.writeGoodBye(sink)
+        protocol.writeGoodBye()
 
-        var messageType = Protocol.readMessageType(source)
+        var messageType = protocol.readMessageType()
 
         while (messageType == Protocol.MESSAGE_ID) {
-            val msg = Protocol.readMessage(source)
+            val msg = protocol.readMessage()
             theirMessages.add(msg)
-            messageType = Protocol.readMessageType(source)
+            messageType = protocol.readMessageType()
         }
     }
 
