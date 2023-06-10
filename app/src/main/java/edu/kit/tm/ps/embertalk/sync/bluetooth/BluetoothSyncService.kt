@@ -19,10 +19,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.os.ParcelUuid
-import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import java.time.Instant
 import java.util.UUID

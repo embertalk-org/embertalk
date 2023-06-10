@@ -1,6 +1,5 @@
 package edu.kit.tm.ps.embertalk.composables
 
-import android.preference.PreferenceManager
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -14,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.storage.DecodedMessage
 import edu.kit.tm.ps.embertalk.storage.Message
