@@ -55,7 +55,7 @@ fun SettingsView(
             imageVector = Icons.Rounded.Person,
             initialValue = prefs.getString("currentname", "")!!,
             clearOnSubmit = false,
-            onSubmit = { prefs.edit().putString("currentname", it.uppercase()).apply() }
+            onSubmit = { prefs.edit().putString("currentname", it).apply() }
         )
     }
 }
