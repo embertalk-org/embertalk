@@ -16,4 +16,8 @@
     <string name="settings">Settings</string>
     <string name="refresh">Refresh</string>
     <string name="your_username">Your current Name</string>
+    <string name="where_to_find_mac">Where to find the Mac-Address?</string>
+    <string name="mac_address_how_to_text">It depends upon your device where the address is shown,
+        but most often it can be found under Settings->About Device->Status or in a comparable location></string>
+    <string name="mac_address_how_to">How to</string>
 </resources>
