@@ -1,6 +1,8 @@
 package edu.kit.tm.ps.embertalk.sync.bluetooth
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -20,10 +22,12 @@ import android.os.ParcelUuid
 import android.preference.PreferenceManager
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import edu.kit.tm.ps.embertalk.R
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+
 
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
@@ -39,6 +43,22 @@ class BluetoothSyncService : Service() {
 
     init {
         Log.i("SyncService", "Started Sync Service")
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        val channel = NotificationChannel(
+            TAG,
+            "EmberTalk Bluetooth Sync Service",
+            NotificationManager.IMPORTANCE_NONE
+        )
+        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+            channel
+        )
+        val notification = NotificationCompat.Builder(this, TAG)
+            .setContentTitle("EmberTalk Bluetooth Sync")
+            .setContentText("Service is running in the background...").build()
+        startForeground(1, notification)
     }
 
     override fun onBind(intent: Intent): IBinder? {
@@ -168,7 +188,7 @@ class BluetoothSyncService : Service() {
 
         if (started) {
             Log.d(TAG, "Started again")
-            return START_STICKY
+            return START_REDELIVER_INTENT
         }
 
         bluetoothAdapter = getBluetoothAdapter(this)
@@ -195,7 +215,7 @@ class BluetoothSyncService : Service() {
 
         Log.d(TAG, "Started")
         Toast.makeText(this, R.string.bluetooth_sync_started, Toast.LENGTH_LONG).show()
-        return START_STICKY
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
@@ -213,7 +233,7 @@ class BluetoothSyncService : Service() {
     }
 
     companion object {
-        const val TAG = "BluetoothSyncService"
+        private const val TAG = "BluetoothSyncService"
 
         fun canStart(context: Context): CanStartResult {
             val packageManager = context.packageManager
@@ -235,7 +255,7 @@ class BluetoothSyncService : Service() {
             when (canStart(context)) {
                 CanStartResult.CAN_START -> {
                     Log.d(TAG, "Starting BLE sync service")
-                    context.startService(Intent(context, BluetoothSyncService::class.java))
+                    context.startForegroundService(Intent(context, BluetoothSyncService::class.java))
                 }
                 CanStartResult.BLUETOOTH_OR_BLE_UNSUPPORTED -> {
                     Log.d(TAG, "BLE not supported, not starting BLE sync service")

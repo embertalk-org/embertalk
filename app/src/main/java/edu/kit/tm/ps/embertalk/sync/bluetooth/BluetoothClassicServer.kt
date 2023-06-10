@@ -15,9 +15,9 @@ class BluetoothClassicServer(uuid: UUID, private val bluetoothAdapter: Bluetooth
 
     init {
         try {
-            serverSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(BluetoothSyncService.TAG, uuid)
+            serverSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(TAG, uuid)
         } catch (e: IOException) {
-            Log.e(BluetoothSyncService.TAG, "Failed to set up Bluetooth Classic connection as a server", e)
+            Log.e(TAG, "Failed to set up Bluetooth Classic connection", e)
         }
 
     }
@@ -36,7 +36,7 @@ class BluetoothClassicServer(uuid: UUID, private val bluetoothAdapter: Bluetooth
                 Log.e(TAG, "Failed to start a Bluetooth Classic connection", connectException)
             }
             socket!!.close()
-            Log.d(BluetoothSyncService.TAG, "Closed socket")
+            Log.d(TAG, "Closed socket")
         }
     }
 
