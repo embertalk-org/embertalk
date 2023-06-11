@@ -7,18 +7,15 @@ import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
-import android.bluetooth.le.AdvertiseData
 import android.bluetooth.le.AdvertiseSettings
 import android.bluetooth.le.BluetoothLeAdvertiser
 import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
-import android.bluetooth.le.ScanSettings
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.IBinder
-import android.os.ParcelUuid
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -75,37 +72,11 @@ class BluetoothSyncService : Service() {
         BLUETOOTH_ADDRESS_UNAVAILABLE
     }
 
-    private fun buildAdvertiseData(): AdvertiseData {
-        val builder = AdvertiseData.Builder()
-        builder.addServiceUuid(ParcelUuid(serviceUuidAndAddress))
-        builder.setIncludeDeviceName(false)
-        return builder.build()
-    }
-
-    private fun buildAdvertiseSettings(): AdvertiseSettings {
-        val builder = AdvertiseSettings.Builder()
-        builder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-        builder.setTimeout(0) // Advertise as long as Bluetooth is on, blatantly ignoring Google's advice.
-        builder.setConnectable(false)
-        return builder.build()
-    }
-
-    private fun buildScanSettings(): ScanSettings {
-        val builder = ScanSettings.Builder()
-        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-
-        builder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
-        builder.setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
-        builder.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
-
-        return builder.build()
-    }
-
     private fun startBluetoothLeDiscovery(startId: Int) {
         Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuidAndAddress))
         bluetoothLeAdvertiser!!.startAdvertising(
-            buildAdvertiseSettings(),
-            buildAdvertiseData(),
+            BleSettings.buildAdvertiseSettings(),
+            BleSettings.buildAdvertiseData(serviceUuidAndAddress),
             object : AdvertiseCallback() {
                 override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
                     super.onStartSuccess(settingsInEffect)
@@ -122,7 +93,7 @@ class BluetoothSyncService : Service() {
 
         bluetoothLeScanner!!.startScan(
             listOf(), //TODO see how these filters work
-            buildScanSettings(),
+            BleSettings.buildScanSettings(),
             object : ScanCallback() {
                 override fun onScanFailed(errorCode: Int) {
                     super.onScanFailed(errorCode)
