@@ -5,14 +5,15 @@ import java.util.UUID
 
 object ServiceUtils {
 
-    private val SERVICE_UUID_HALF = UUID.fromString("7ba323d4-7021-23c4-0000-000000000000")!!
+    val SERVICE_UUID = UUID.fromString("7ba323d4-7021-23c4-0000-000000000000")!!
+    val SERVICE_MASK = UUID.fromString("FFFFFFFF-FFFF-FFFF-0000-000000000000")!!
 
     fun matchesService(uuid: UUID): Boolean {
-        return SERVICE_UUID_HALF.mostSignificantBits == uuid.mostSignificantBits
+        return SERVICE_UUID.mostSignificantBits == uuid.mostSignificantBits
     }
 
     fun toUuid(macAddress: String): UUID {
-        return UUID(SERVICE_UUID_HALF.mostSignificantBits, toLong(macAddress))
+        return UUID(SERVICE_UUID.mostSignificantBits, toLong(macAddress))
     }
 
     fun fromParcelUuid(serviceUuid: ParcelUuid): String {

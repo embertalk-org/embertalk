@@ -75,7 +75,7 @@ class BluetoothSyncService : Service() {
     private fun startBluetoothLeDiscovery(startId: Int) {
         Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuidAndAddress))
         bluetoothLeAdvertiser!!.startAdvertising(
-            BleSettings.buildAdvertiseSettings(),
+            BleSettings.ADVERTISE_SETTINGS,
             BleSettings.buildAdvertiseData(serviceUuidAndAddress),
             object : AdvertiseCallback() {
                 override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
@@ -92,8 +92,8 @@ class BluetoothSyncService : Service() {
             })
 
         bluetoothLeScanner!!.startScan(
-            listOf(), //TODO see how these filters work
-            BleSettings.buildScanSettings(),
+            BleSettings.SCAN_FILTERS,
+            BleSettings.SCAN_SETTINGS,
             object : ScanCallback() {
                 override fun onScanFailed(errorCode: Int) {
                     super.onScanFailed(errorCode)
