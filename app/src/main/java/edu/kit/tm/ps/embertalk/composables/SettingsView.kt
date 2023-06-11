@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Build
-import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -33,7 +33,7 @@ fun SettingsView(
         Column {
             SubmittableTextField(
                 label = { Text(stringResource(R.string.your_mac_address)) },
-                imageVector = Icons.Rounded.Build,
+                imageVector = Icons.Filled.Save,
                 initialValue = prefs.getString("mac", "")!!,
                 clearOnSubmit = false,
                 inputValidator = { MacAddressUtils.isValidMacAddress(it) },
@@ -52,7 +52,7 @@ fun SettingsView(
         }
         SubmittableTextField(
             label = { Text(stringResource(R.string.your_username)) },
-            imageVector = Icons.Rounded.Person,
+            imageVector = Icons.Rounded.Save,
             initialValue = prefs.getString("currentname", "")!!,
             clearOnSubmit = false,
             onSubmit = { prefs.edit().putString("currentname", it).apply() }
