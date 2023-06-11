@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
@@ -75,12 +74,6 @@ fun EmberTalkApp(
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = stringResource(R.string.start_service)
-                            )
-                        }
-                        IconButton(onClick = { messageViewModel.updateMessages() }) {
-                            Icon(
-                                imageVector = Icons.Filled.Refresh,
-                                contentDescription = stringResource(R.string.refresh)
                             )
                         }
                     }
