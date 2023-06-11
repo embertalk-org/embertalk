@@ -1,8 +1,6 @@
 package edu.kit.tm.ps.embertalk.sync.bluetooth
 
 import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
@@ -18,10 +16,10 @@ import android.content.pm.PackageManager
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
+import edu.kit.tm.ps.embertalk.notification.PersistentNotification
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.time.Instant
 import java.util.UUID
@@ -47,18 +45,8 @@ class BluetoothSyncService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val channel = NotificationChannel(
-            TAG,
-            "EmberTalk Bluetooth Sync Service",
-            NotificationManager.IMPORTANCE_NONE
-        )
-        (getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
-            channel
-        )
-        val notification = NotificationCompat.Builder(this, TAG)
-            .setContentTitle("EmberTalk Bluetooth Sync")
-            .setContentText("Service is running in the background...").build()
-        startForeground(1, notification)
+        startForeground(1, PersistentNotification
+            .build(this, "EmberTalk Bluetooth Sync", "Service is running in the background..."))
     }
 
     override fun onBind(intent: Intent): IBinder? {
