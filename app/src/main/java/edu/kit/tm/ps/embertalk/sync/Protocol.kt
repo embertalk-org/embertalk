@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.sync.bluetooth
+package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.storage.Message
@@ -76,28 +76,28 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         Log.d(TAG, "Read message of length %s".format(bytes.size))
         return Message(hash = bytes.contentHashCode(), bytes = bytes)
     }
-}
 
-private fun DataOutputStream.writeString(string: String) {
-    this.writeByteArray(string.encodeToByteArray())
-}
-
-private fun DataInputStream.readString(): String {
-    return this.readByteArray().decodeToString()
-}
-
-private fun DataInputStream.readByteArray(): ByteArray {
-    val bytes = ByteArray(this.readInt())
-    for (i in bytes.indices) {
-        bytes[i] = this.readByte()
+    private fun DataOutputStream.writeString(string: String) {
+        this.writeByteArray(string.encodeToByteArray())
     }
-    return bytes
-}
+
+    private fun DataInputStream.readString(): String {
+        return this.readByteArray().decodeToString()
+    }
+
+    private fun DataInputStream.readByteArray(): ByteArray {
+        val bytes = ByteArray(this.readInt())
+        for (i in bytes.indices) {
+            bytes[i] = this.readByte()
+        }
+        return bytes
+    }
 
 
-private fun DataOutputStream.writeByteArray(bytes: ByteArray) {
-    this.writeInt(bytes.size)
-    for (byte in bytes) {
-        this.writeByte(byte.toInt())
+    private fun DataOutputStream.writeByteArray(bytes: ByteArray) {
+        this.writeInt(bytes.size)
+        for (byte in bytes) {
+            this.writeByte(byte.toInt())
+        }
     }
 }

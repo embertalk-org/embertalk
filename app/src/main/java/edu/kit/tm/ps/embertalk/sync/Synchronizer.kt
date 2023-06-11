@@ -3,7 +3,6 @@ package edu.kit.tm.ps.embertalk.sync
 import android.util.Log
 import edu.kit.tm.ps.embertalk.storage.Message
 import edu.kit.tm.ps.embertalk.storage.MessageRepository
-import edu.kit.tm.ps.embertalk.sync.bluetooth.Protocol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
