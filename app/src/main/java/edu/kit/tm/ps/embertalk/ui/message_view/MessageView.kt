@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.composables.message_view
+package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.composables.MessageCard
-import edu.kit.tm.ps.embertalk.composables.SubmittableTextField
 import edu.kit.tm.ps.embertalk.storage.DecodedMessage
+import edu.kit.tm.ps.embertalk.ui.MessageCard
+import edu.kit.tm.ps.embertalk.ui.SubmittableTextField
 import kotlinx.coroutines.launch
 
 @Composable

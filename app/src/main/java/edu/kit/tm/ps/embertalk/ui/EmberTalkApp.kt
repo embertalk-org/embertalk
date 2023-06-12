@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.composables
+package edu.kit.tm.ps.embertalk.ui
 
 import android.content.res.Configuration
 import androidx.annotation.StringRes
@@ -34,9 +34,9 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
-import edu.kit.tm.ps.embertalk.composables.message_view.MessageView
-import edu.kit.tm.ps.embertalk.composables.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
+import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
+import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
     object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)

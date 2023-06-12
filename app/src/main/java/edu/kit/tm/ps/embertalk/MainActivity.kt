@@ -9,7 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import edu.kit.tm.ps.embertalk.composables.EmberTalkApp
+import edu.kit.tm.ps.embertalk.ui.EmberTalkApp
 import edu.kit.tm.ps.embertalk.ui.theme.EmberTalkTheme
 
 class MainActivity : ComponentActivity() {

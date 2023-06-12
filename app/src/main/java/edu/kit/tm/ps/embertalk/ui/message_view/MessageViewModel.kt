@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.composables.message_view
+package edu.kit.tm.ps.embertalk.ui.message_view
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
