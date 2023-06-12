@@ -29,13 +29,13 @@ import java.util.concurrent.ConcurrentHashMap
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
 
-    private var synchronizer: Synchronizer? = null
+    private lateinit var synchronizer: Synchronizer
+    private lateinit var serviceUuidAndAddress: UUID
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private lateinit var bluetoothLeAdvertiser: BluetoothLeAdvertiser
+    private lateinit var bluetoothLeScanner: BluetoothLeScanner
+    private lateinit var bluetoothClassicServer: Thread
     private var started = false
-    private var serviceUuidAndAddress: UUID? = null
-    private var bluetoothAdapter: BluetoothAdapter? = null
-    private var bluetoothLeAdvertiser: BluetoothLeAdvertiser? = null
-    private var bluetoothLeScanner: BluetoothLeScanner? = null
-    private var bluetoothClassicServer: Thread? = null
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
     private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
@@ -62,7 +62,7 @@ class BluetoothSyncService : Service() {
 
     private fun startBluetoothLeDiscovery(startId: Int) {
         Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuidAndAddress))
-        bluetoothLeAdvertiser!!.startAdvertising(
+        bluetoothLeAdvertiser.startAdvertising(
             BleSettings.ADVERTISE_SETTINGS,
             BleSettings.buildAdvertiseData(serviceUuidAndAddress),
             object : AdvertiseCallback() {
@@ -79,7 +79,7 @@ class BluetoothSyncService : Service() {
                 }
             })
 
-        bluetoothLeScanner!!.startScan(
+        bluetoothLeScanner.startScan(
             BleSettings.SCAN_FILTERS,
             BleSettings.SCAN_SETTINGS,
             object : ScanCallback() {
@@ -100,15 +100,15 @@ class BluetoothSyncService : Service() {
                         if (!ServiceUtils.matchesService(uuid.uuid)) {
                             continue
                         }
-                        if (devicesLastSynced[serviceUuidAndAddress!!] != null &&
-                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress!!]!!.plusSeconds(60))) {
+                        if (devicesLastSynced[serviceUuidAndAddress] != null &&
+                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(60))) {
                             continue
                         }
 
                         val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
-                        val remoteDevice = bluetoothAdapter!!.getRemoteDevice(remoteDeviceMacAddress)
-                        clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer!!) {
-                            devicesLastSynced[serviceUuidAndAddress!!] = Instant.now()
+                        val remoteDevice = bluetoothAdapter.getRemoteDevice(remoteDeviceMacAddress)
+                        clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer) {
+                            devicesLastSynced[serviceUuidAndAddress] = Instant.now()
                         }
                     }
                 }
@@ -116,27 +116,23 @@ class BluetoothSyncService : Service() {
     }
 
     private fun stopBluetoothLeDiscovery() {
-        if (!bluetoothAdapter!!.isEnabled) {
+        if (!bluetoothAdapter.isEnabled) {
             return
         }
 
-        if (bluetoothLeAdvertiser != null) {
-            bluetoothLeAdvertiser!!.stopAdvertising(object : AdvertiseCallback() {
-                override fun onStartFailure(errorCode: Int) {
-                    super.onStartFailure(errorCode)
-                    Log.e(TAG, "BLE advertise failed to stop: error $errorCode")
-                }
-            })
-        }
+        bluetoothLeAdvertiser.stopAdvertising(object : AdvertiseCallback() {
+            override fun onStartFailure(errorCode: Int) {
+                super.onStartFailure(errorCode)
+                Log.e(TAG, "BLE advertise failed to stop: error $errorCode")
+            }
+        })
 
-        if (bluetoothLeScanner != null) {
-            bluetoothLeScanner!!.stopScan(object : ScanCallback() {
-                override fun onScanFailed(errorCode: Int) {
-                    super.onScanFailed(errorCode)
-                    Log.e(TAG, "BLE scan failed to stop: error $errorCode")
-                }
-            })
-        }
+        bluetoothLeScanner.stopScan(object : ScanCallback() {
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                Log.e(TAG, "BLE scan failed to stop: error $errorCode")
+            }
+        })
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -169,13 +165,13 @@ class BluetoothSyncService : Service() {
         val uuid = ServiceUtils.toUuid(macAddress)
         serviceUuidAndAddress = uuid
 
-        bluetoothLeAdvertiser = bluetoothAdapter!!.bluetoothLeAdvertiser
-        bluetoothLeScanner = bluetoothAdapter!!.bluetoothLeScanner
+        bluetoothLeAdvertiser = bluetoothAdapter.bluetoothLeAdvertiser
+        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         startBluetoothLeDiscovery(startId)
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer!!, bluetoothAdapter!!)
-        bluetoothClassicServer!!.start()
+        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter)
+        bluetoothClassicServer.start()
 
         Log.d(TAG, "Started")
         Toast.makeText(this, R.string.bluetooth_sync_started, Toast.LENGTH_LONG).show()
@@ -185,13 +181,11 @@ class BluetoothSyncService : Service() {
     override fun onDestroy() {
         started = false
 
-        if (bluetoothAdapter != null) {
-            stopBluetoothLeDiscovery()
-            bluetoothClassicServer!!.interrupt()
+        stopBluetoothLeDiscovery()
+        bluetoothClassicServer!!.interrupt()
 
-            Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
-            Log.d(TAG, "Stopped")
-        }
+        Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
+        Log.d(TAG, "Stopped")
         super.onDestroy()
     }
 
@@ -203,7 +197,7 @@ class BluetoothSyncService : Service() {
             val bluetoothAdapter = getBluetoothAdapter(context)
             if (!packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH) || !packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
                 return CanStartResult.BLUETOOTH_OR_BLE_UNSUPPORTED
-            } else if (bluetoothAdapter == null || !bluetoothAdapter.isEnabled) {
+            } else if (!bluetoothAdapter.isEnabled) {
                 return CanStartResult.BLUETOOTH_OFF
             } else if (!bluetoothAdapter.isMultipleAdvertisementSupported) {
                 return CanStartResult.BLUETOOTH_OR_BLE_UNSUPPORTED
@@ -236,7 +230,7 @@ class BluetoothSyncService : Service() {
             }
         }
 
-        private fun getBluetoothAdapter(context: Context): BluetoothAdapter? {
+        private fun getBluetoothAdapter(context: Context): BluetoothAdapter {
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             return bluetoothManager.adapter
         }
