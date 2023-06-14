@@ -27,5 +27,5 @@ fun MessageCard(
 @Preview
 @Composable
 private fun MessageCardPreview() {
-    MessageCard(message = DecodedMessage("Hello there my friend!"))
+    MessageCard(message = DecodedMessage("Hello there my friend!", 0))
 }

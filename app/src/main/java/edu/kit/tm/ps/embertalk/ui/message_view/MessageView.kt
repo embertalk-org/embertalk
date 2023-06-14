@@ -38,7 +38,7 @@ fun MessageView(
                 .fillMaxWidth()
                 .weight(9f)
         ) {
-            itemsIndexed(messageUiState.messages.mapNotNull { DecodedMessage.decode(it) }) { _, item ->
+            itemsIndexed(messageUiState.messages.mapNotNull { DecodedMessage.decode(it, 0) }) { _, item ->
                 MessageCard(
                     message = item
                 )
@@ -49,7 +49,7 @@ fun MessageView(
             imageVector = Icons.Rounded.Send,
             onSubmit = {
                 messageViewModel.viewModelScope.launch {
-                    messageViewModel.saveMessage(DecodedMessage(it).encode())
+                    messageViewModel.saveMessage(DecodedMessage(it, 0).encode())
                 }
             },
             modifier = Modifier

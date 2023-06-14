@@ -4,6 +4,7 @@ import java.nio.ByteBuffer
 
 data class DecodedMessage(
     val content: String,
+    val epoch: Long,
 ) {
     fun encode(): Message {
         val bytes = ByteBuffer.allocate(Int.SIZE_BYTES)
@@ -12,13 +13,13 @@ data class DecodedMessage(
     }
 
     companion object {
-        fun decode(message: Message): DecodedMessage? {
+        fun decode(message: Message, epoch: Long): DecodedMessage? {
             val buffer = ByteBuffer.wrap(message.bytes)
             val contentHash = buffer.int
             val contentBytes = ByteArray(buffer.remaining())
             buffer.get(contentBytes)
             val content = contentBytes.decodeToString()
-            return if (contentHash == content.hashCode()) DecodedMessage(content) else null
+            return if (contentHash == content.hashCode()) DecodedMessage(content, epoch) else null
         }
     }
 }
