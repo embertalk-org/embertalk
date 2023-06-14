@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "messages")
-data class Message(
+data class EncryptedMessage(
     @PrimaryKey
     val hash: Int,
     val bytes: ByteArray
@@ -14,7 +14,7 @@ data class Message(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Message
+        other as EncryptedMessage
 
         if (!bytes.contentEquals(other.bytes)) return false
 

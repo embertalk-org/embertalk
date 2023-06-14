@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.storage.encrypted
+package edu.kit.tm.ps.embertalk.storage.decrypted
 
 import androidx.room.Dao
 import androidx.room.Insert
@@ -14,10 +14,4 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages")
     fun all(): Flow<List<Message>>
-
-    @Query("SELECT hash FROM messages")
-    fun hashes(): Flow<List<Int>>
-
-    @Query("SELECT * FROM messages WHERE hash not in (:hashes)")
-    fun allExcept(hashes: List<Int>): Flow<List<Message>>
 }

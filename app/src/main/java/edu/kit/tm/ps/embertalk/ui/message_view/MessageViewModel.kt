@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.storage.EmberObserver
-import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessage
-import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessageRepository
-import edu.kit.tm.ps.embertalk.storage.encrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.decrypted.Message
+import edu.kit.tm.ps.embertalk.storage.decrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,12 +14,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 data class MessageUiState(
-    val messages: List<DecodedMessage> = ArrayList()
+    val messages: List<Message> = ArrayList()
 )
 
 class MessageViewModel(
-    private val messageRepository: DecodedMessageRepository,
-    private val encryptedMessageRepository: MessageRepository
+    private val messageRepository: MessageRepository,
+    private val encryptedMessageRepository: EncryptedMessageRepository
 ) : ViewModel(), EmberObserver {
 
     private val _uiState = MutableStateFlow(MessageUiState())
@@ -36,7 +36,7 @@ class MessageViewModel(
         }
     }
 
-    suspend fun saveMessage(message: DecodedMessage) {
+    suspend fun saveMessage(message: Message) {
         messageRepository.insert(message)
         encryptedMessageRepository.insert(message.encode())
         updateMessages()

@@ -5,17 +5,17 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [Message::class], version = 1, exportSchema = false)
-abstract class MessageDb : RoomDatabase() {
-    abstract fun dao(): MessageDao
+@Database(entities = [EncryptedMessage::class], version = 1, exportSchema = false)
+abstract class EncryptedMessageDb : RoomDatabase() {
+    abstract fun dao(): EncryptedMessageDao
 
     companion object {
         @Volatile
-        private var Instance: MessageDb? = null
+        private var Instance: EncryptedMessageDb? = null
 
-        fun getDb(context: Context): MessageDb {
+        fun getDb(context: Context): EncryptedMessageDb {
             return Instance ?: synchronized(this) {
-                Room.databaseBuilder(context, MessageDb::class.java, "message_db")
+                Room.databaseBuilder(context, EncryptedMessageDb::class.java, "encrypted_db")
                     .fallbackToDestructiveMigration()
                     .build()
                     .also { Instance = it }

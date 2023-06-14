@@ -1,10 +1,10 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessage
-import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessageRepository
-import edu.kit.tm.ps.embertalk.storage.encrypted.Message
-import edu.kit.tm.ps.embertalk.storage.encrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.decrypted.Message
+import edu.kit.tm.ps.embertalk.storage.decrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
+import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessageRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
@@ -14,8 +14,8 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class Synchronizer(
-    private val messageRepository: MessageRepository,
-    private val decodedMessageRepository: DecodedMessageRepository
+    private val encryptedMessageRepository: EncryptedMessageRepository,
+    private val messageRepository: MessageRepository
     ) {
 
     fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
@@ -31,7 +31,7 @@ class Synchronizer(
             return false
         }
 
-        val myHashes = runBlocking { messageRepository.hashes().first() }
+        val myHashes = runBlocking { encryptedMessageRepository.hashes().first() }
         val theirHashes = try {
             exchangeHashes(myHashes.toSet(), protocol)
         } catch (e: IOException) {
@@ -39,16 +39,16 @@ class Synchronizer(
             return false
         }
 
-        val messagesToSend = runBlocking { messageRepository.allExcept(theirHashes).first() }.toSet()
+        val messagesToSend = runBlocking { encryptedMessageRepository.allExcept(theirHashes).first() }.toSet()
         Log.d(TAG, "Retrieved %s messages to send".format(messagesToSend.size))
-        val theirMessages = HashSet<Message>()
+        val theirEncryptedMessages = HashSet<EncryptedMessage>()
 
         return try {
-            exchangeMessages(messagesToSend, theirMessages, protocol)
+            exchangeMessages(messagesToSend, theirEncryptedMessages, protocol)
             Log.d(TAG, "Exchanged messages")
-            theirMessages.forEach { runBlocking { messageRepository.insert(it) } }
-            theirMessages.mapNotNull { DecodedMessage.decode(it, 0) }.forEach { runBlocking { decodedMessageRepository.insert(it) } }
-            decodedMessageRepository.notifyObservers()
+            theirEncryptedMessages.forEach { runBlocking { encryptedMessageRepository.insert(it) } }
+            theirEncryptedMessages.mapNotNull { Message.decode(it, 0) }.forEach { runBlocking { messageRepository.insert(it) } }
+            messageRepository.notifyObservers()
             Log.d(TAG, "Synced successfully")
             true
         } catch (e: IOException) {
@@ -84,18 +84,18 @@ class Synchronizer(
         }
     }
 
-    private fun exchangeMessages(myMessages: Set<Message>, theirMessages: MutableSet<Message>, protocol: Protocol) {
-        myMessages.forEach {
+    private fun exchangeMessages(myEncryptedMessages: Set<EncryptedMessage>, theirEncryptedMessages: MutableSet<EncryptedMessage>, protocol: Protocol) {
+        myEncryptedMessages.forEach {
             protocol.writeMessage(it)
         }
-        Log.d(TAG, "Wrote %s message(s)".format(myMessages.size))
+        Log.d(TAG, "Wrote %s message(s)".format(myEncryptedMessages.size))
         protocol.writeGoodBye()
 
         var messageType = protocol.readMessageType()
 
         while (messageType == Protocol.MESSAGE_ID) {
             val msg = protocol.readMessage()
-            theirMessages.add(msg)
+            theirEncryptedMessages.add(msg)
             messageType = protocol.readMessageType()
         }
     }

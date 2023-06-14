@@ -1,7 +1,7 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.encrypted.Message
+import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -34,9 +34,9 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         Log.d(TAG, "Wrote %s hashes".format(hashes.size))
     }
 
-    fun writeMessage(message: Message) {
+    fun writeMessage(encryptedMessage: EncryptedMessage) {
         outputStream.writeByte(MESSAGE_ID)
-        outputStream.writeByteArray(message.bytes)
+        outputStream.writeByteArray(encryptedMessage.bytes)
         outputStream.flush()
         Log.d(TAG, "Wrote Message")
     }
@@ -71,10 +71,10 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         return hashes
     }
 
-    fun readMessage(): Message {
+    fun readMessage(): EncryptedMessage {
         val bytes = inputStream.readByteArray()
         Log.d(TAG, "Read message of length %s".format(bytes.size))
-        return Message(hash = bytes.contentHashCode(), bytes = bytes)
+        return EncryptedMessage(hash = bytes.contentHashCode(), bytes = bytes)
     }
 
     private fun DataOutputStream.writeString(string: String) {
