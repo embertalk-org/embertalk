@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package edu.kit.tm.ps.embertalk.ui
 
@@ -102,7 +102,7 @@ fun EmberTalkApp(
             }
             composable(Screen.Settings.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
-                    SettingsView()
+                    SettingsView(messageViewModel)
                 }
             }
             composable(

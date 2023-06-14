@@ -20,4 +20,7 @@ interface EncryptedMessageDao {
 
     @Query("SELECT * FROM messages WHERE hash not in (:hashes)")
     fun allExcept(hashes: List<Int>): Flow<List<EncryptedMessage>>
+
+    @Query("DELETE FROM messages")
+    suspend fun deleteAll()
 }

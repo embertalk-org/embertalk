@@ -44,6 +44,11 @@ class MessageViewModel(
         Log.d(TAG, "Got notification from repository!")
     }
 
+    suspend fun deleteAll() {
+        messageManager.deleteAll()
+        updateMessages()
+    }
+
     companion object {
         private const val TAG = "MessageViewModel"
     }

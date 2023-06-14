@@ -14,4 +14,7 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages")
     fun all(): Flow<List<Message>>
+
+    @Query("DELETE from messages")
+    suspend fun deleteAll()
 }

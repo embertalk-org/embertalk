@@ -9,4 +9,6 @@ class OfflineMessageRepository(private val messageDao: MessageDao) : MessageRepo
     override suspend fun insert(message: Message) {
         messageDao.insert(message)
     }
+
+    override suspend fun deleteAll() = messageDao.deleteAll()
 }

@@ -36,4 +36,8 @@ class MessageManager(
     fun hashes(): Flow<List<Int>> = encryptedRepository.hashes()
 
     fun allEncryptedExcept(theirHashes: Set<Int>): Flow<List<EncryptedMessage>> = encryptedRepository.allExcept(theirHashes)
+    suspend fun deleteAll() {
+        messageRepository.deleteAll()
+        encryptedRepository.deleteAll()
+    }
 }

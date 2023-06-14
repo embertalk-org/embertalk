@@ -6,4 +6,6 @@ interface MessageRepository {
     fun all(): Flow<List<Message>>
 
     suspend fun insert(message: Message)
+
+    suspend fun deleteAll()
 }

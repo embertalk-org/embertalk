@@ -10,7 +10,8 @@ class OfflineEncryptedMessageRepository(private val encryptedMessageDao: Encrypt
 
     override fun hashes(): Flow<List<Int>> = encryptedMessageDao.hashes()
 
-    override suspend fun insert(encryptedMessage: EncryptedMessage) {
+    override suspend fun insert(encryptedMessage: EncryptedMessage) =
         encryptedMessageDao.insert(encryptedMessage)
-    }
+
+    override suspend fun deleteAll() = encryptedMessageDao.deleteAll()
 }

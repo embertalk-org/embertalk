@@ -9,4 +9,6 @@ interface EncryptedMessageRepository {
     fun hashes(): Flow<List<Int>>
 
     suspend fun insert(encryptedMessage: EncryptedMessage)
+
+    suspend fun deleteAll()
 }
