@@ -13,6 +13,7 @@ data class Message(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val content: String,
+    val mine: Boolean = false,
     val epoch: Long,
 ): Parcelable {
     fun encode(transformer: (ByteArray) -> ByteArray): EncryptedMessage {

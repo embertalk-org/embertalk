@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,9 +40,14 @@ fun MessageView(
                 .weight(9f)
         ) {
             itemsIndexed(messageUiState.messages) { _, item ->
-                MessageCard(
-                    message = item.content
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = if (item.mine) { Arrangement.End } else { Arrangement.Start }
+                ) {
+                    MessageCard(
+                        message = item.content
+                    )
+                }
             }
         }
         SubmittableTextField(
@@ -49,7 +55,7 @@ fun MessageView(
             imageVector = Icons.Rounded.Send,
             onSubmit = {
                 messageViewModel.viewModelScope.launch {
-                    messageViewModel.saveMessage(Message(content = it, epoch = 0))
+                    messageViewModel.saveMessage(Message(content = it, mine = true, epoch = 0))
                 }
             },
             modifier = Modifier
