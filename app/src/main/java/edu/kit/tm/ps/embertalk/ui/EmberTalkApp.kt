@@ -45,16 +45,16 @@ import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
+import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
-import edu.kit.tm.ps.embertalk.ui.contacts.ScanView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeView
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
     object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
-    object Scan : Screen("contacts/scan", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
+    object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
     object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
     object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
     object QrCode : Screen("qr", Icons.Filled.QrCode, R.string.qr_code)
@@ -85,9 +85,9 @@ fun EmberTalkApp(
                     ContactsView(contactsViewModel = contactsViewModel, navController = navController)
                 }
             }
-            composable(Screen.Scan.route) {
+            composable(Screen.AddContact.route) {
                 EmberScaffold(navController = navController, toolWindow = true) {
-                    ScanView(contactsViewModel, navController)
+                    AddContactView(contactsViewModel, navController)
                 }
             }
             composable(Screen.Messages.route) {

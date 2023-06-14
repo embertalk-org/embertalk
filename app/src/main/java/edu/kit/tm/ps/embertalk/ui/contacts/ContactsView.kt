@@ -47,7 +47,7 @@ fun ContactsView(
         }
         FloatingActionButton(
             onClick = {
-                navController.navigate(Screen.Scan.route)
+                navController.navigate(Screen.AddContact.route)
             },
             modifier = Modifier
                 .fillMaxWidth()

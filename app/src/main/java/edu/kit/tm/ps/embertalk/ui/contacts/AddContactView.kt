@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScanView(
+fun AddContactView(
     contactsViewModel: ContactsViewModel,
     navController: NavController,
 ) {
