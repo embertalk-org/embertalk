@@ -46,7 +46,7 @@ fun ScanView(
             if (result == null || !result.contents.startsWith("embertalk://")) {
                 Toast.makeText(context, "Not a valid EmberTalk-Code", Toast.LENGTH_SHORT).show()
             } else {
-                pubKey.value = result.contents
+                pubKey.value = result.contents.removePrefix("embertalk://")
             }
         }
     )
