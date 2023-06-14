@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package edu.kit.tm.ps.embertalk.ui
 
 import android.content.res.Configuration
@@ -6,6 +8,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode
@@ -30,6 +33,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -55,7 +59,6 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
     object QrCode : Screen("qr", Icons.Filled.QrCode, R.string.qr_code)
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(
     uiMode = Configuration.UI_MODE_NIGHT_YES,
     name = "DefaultPreviewDark"
@@ -66,6 +69,55 @@ fun EmberTalkApp(
 ) {
     val context = LocalContext.current
     val navController = rememberNavController()
+
+    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+
+    Surface {
+        val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Messages.route,
+        ) {
+            composable(Screen.Contacts.route) {
+                EmberScaffold(navController = navController) {
+                    ContactsView(contactsViewModel = contactsViewModel, navController = navController)
+                }
+            }
+            composable(Screen.Scan.route) {
+                EmberScaffold(navController = navController, showBackButton = true, showBottomBar = false) {
+                    ScanView(contactsViewModel, navController)
+                }
+            }
+            composable(Screen.Messages.route) {
+                EmberScaffold(navController = navController) {
+                    MessageView(messageViewModel = messageViewModel)
+                }
+            }
+            composable(Screen.Settings.route) {
+                EmberScaffold(navController = navController) {
+                    SettingsView()
+                }
+            }
+            composable(Screen.QrCode.route) {
+                EmberScaffold(navController = navController, showBackButton = true, showBottomBar = false) {
+                    QrCodeView(prefs.getString("keypair.pubKey", "")!!)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun EmberScaffold(
+    navController: NavController,
+    showBackButton: Boolean = false,
+    showBottomBar: Boolean = true,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val context = LocalContext.current
+    
     val items = listOf(
         Screen.Contacts,
         Screen.Messages,
@@ -74,41 +126,43 @@ fun EmberTalkApp(
 
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    Surface {
-
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentDestination = navBackStackEntry?.destination
-
-        val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { Text("EmberTalk") },
-                    actions = {
-                        IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = stringResource(R.string.start_service)
-                            )
-                        }
-                        IconButton(onClick = {
-                            if (prefs.getString("keypair.pubkey", "") == "") {
-                                Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                navController.navigate(Screen.QrCode.route)
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.QrCode,
-                                contentDescription = stringResource(R.string.start_service)
-                            )
-                        }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("EmberTalk") },
+                navigationIcon = {
+                     if (showBackButton) {
+                         IconButton(onClick = { navController.popBackStack() }) {
+                             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
+                         }
+                     }
+                },
+                actions = {
+                    IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = stringResource(R.string.start_service)
+                        )
                     }
-                )
-            },
-            bottomBar = {
+                    IconButton(onClick = {
+                        if (prefs.getString("keypair.pubkey", "") == "") {
+                            Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            navController.navigate(Screen.QrCode.route)
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.QrCode,
+                            contentDescription = stringResource(R.string.start_service)
+                        )
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            if (showBottomBar) {
                 BottomAppBar {
                     items.forEach { screen ->
                         NavigationBarItem(
@@ -127,21 +181,11 @@ fun EmberTalkApp(
                         )
                     }
                 }
-            },
-        ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
-                NavHost(
-                    navController = navController,
-                    startDestination = Screen.Messages.route,
-                    modifier = Modifier.padding(10.dp)
-                ) {
-                    composable(Screen.Contacts.route) { ContactsView(contactsViewModel = contactsViewModel, navController = navController)}
-                    composable(Screen.Scan.route) { ScanView(contactsViewModel, navController) }
-                    composable(Screen.Messages.route) { MessageView(messageViewModel = messageViewModel) }
-                    composable(Screen.Settings.route) { SettingsView() }
-                    composable(Screen.QrCode.route) { QrCodeView(prefs.getString("keypair.pubKey", "")!!) }
-                }
             }
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding).padding(10.dp)) {
+            content.invoke()
         }
     }
 }

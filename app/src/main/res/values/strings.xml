@@ -23,4 +23,5 @@
     <string name="contacts">Contacts</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="qr_code">QR-Code</string>
+    <string name="back">Back</string>
 </resources>
