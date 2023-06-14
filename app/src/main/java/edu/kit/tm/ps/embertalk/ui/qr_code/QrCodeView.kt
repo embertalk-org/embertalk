@@ -22,12 +22,13 @@ fun QrCodeView(
     pubKey: String,
     modifier: Modifier = Modifier
 ) {
+    val qrCodeContent = "embertalk://%s".format(pubKey)
     Box(modifier = Modifier.fillMaxSize()) {
         Card(
             Modifier.padding(25.dp)
         ) {
             Image(
-                bitmap = encodeAsBitmap(pubKey, 1000, 1000).asImageBitmap(),
+                bitmap = encodeAsBitmap(qrCodeContent, 1000, 1000).asImageBitmap(),
                 contentDescription = stringResource(R.string.qr_code)
             )
         }

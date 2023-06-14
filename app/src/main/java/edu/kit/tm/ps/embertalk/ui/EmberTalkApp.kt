@@ -41,6 +41,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.preference.PreferenceManager
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
@@ -101,7 +102,7 @@ fun EmberTalkApp(
             }
             composable(Screen.QrCode.route) {
                 EmberScaffold(navController = navController, showBackButton = true, showBottomBar = false) {
-                    QrCodeView(prefs.getString("keypair.pubKey", "")!!)
+                    QrCodeView(prefs.getString(Preferences.PUBLIC_KEY, "")!!)
                 }
             }
         }
@@ -147,7 +148,7 @@ fun EmberScaffold(
                         )
                     }
                     IconButton(onClick = {
-                        if (prefs.getString("keypair.pubkey", "") == "") {
+                        if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
                             Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
                         } else {
                             navController.navigate(Screen.QrCode.route)

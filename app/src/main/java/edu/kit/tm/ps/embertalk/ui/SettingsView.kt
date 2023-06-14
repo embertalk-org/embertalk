@@ -1,20 +1,31 @@
 package edu.kit.tm.ps.embertalk.ui
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.preference.PreferenceManager
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
 
@@ -33,10 +44,10 @@ fun SettingsView(
             SubmittableTextField(
                 label = { Text(stringResource(R.string.your_mac_address)) },
                 imageVector = Icons.Filled.Save,
-                initialValue = prefs.getString("mac", "")!!,
+                initialValue = prefs.getString(Preferences.MAC_ADDRESS, "")!!,
                 clearOnSubmit = false,
                 inputValidator = { MacAddressUtils.isValidMacAddress(it) },
-                onSubmit = { prefs.edit().putString("mac", it.uppercase()).apply() }
+                onSubmit = { prefs.edit().putString(Preferences.MAC_ADDRESS, it.uppercase()).apply() }
             )
             Row {
                 InfoDialogButton(
@@ -48,6 +59,59 @@ fun SettingsView(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
+            RegenerateKeysButton(prefs)
         }
+    }
+}
+
+@Composable
+fun RegenerateKeysButton(
+    prefs: SharedPreferences,
+    modifier: Modifier = Modifier
+) {
+    val openDialog = remember { mutableStateOf(false) }
+    TextButton(onClick = {
+        openDialog.value = true
+    }) {
+        Row {
+            Icon(
+                imageVector = Icons.Rounded.Warning,
+                contentDescription = "Alert",
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            Text(
+                text = "(Re)generate keys",
+                modifier = Modifier
+                    .padding(5.dp)
+                    .align(Alignment.CenterVertically)
+            )
+        }
+    }
+    if (openDialog.value) {
+        AlertDialog(
+            title = { Text(stringResource(R.string.regenerate_keys_alert_title)) },
+            text = { Text(stringResource(R.string.regenerate_keys_alert_text)) },
+            dismissButton = {
+                Button(onClick = { openDialog.value = false }) {
+                    Text("Cancel")
+                }
+            },
+            confirmButton = {
+                Button(
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                    onClick = {
+                        openDialog.value = false
+                        //TODO actually encode key pair
+                        prefs.edit()
+                            .putString(Preferences.PRIVATE_KEY, "private")
+                            .putString(Preferences.PUBLIC_KEY, "public")
+                            .apply()
+                    }
+                ) {
+                    Text("Confirm")
+                }
+            },
+            onDismissRequest = { openDialog.value = false }
+        )
     }
 }

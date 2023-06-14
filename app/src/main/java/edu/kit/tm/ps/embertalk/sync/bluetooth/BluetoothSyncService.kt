@@ -17,6 +17,7 @@ import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
 import androidx.preference.PreferenceManager
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
 import edu.kit.tm.ps.embertalk.notification.PersistentNotification
@@ -237,7 +238,7 @@ class BluetoothSyncService : Service() {
 
         private fun getBluetoothAdapterAddress(context: Context): String? {
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-            return preferences.getString("mac", null)?.uppercase()
+            return preferences.getString(Preferences.MAC_ADDRESS, null)?.uppercase()
         }
     }
 }
