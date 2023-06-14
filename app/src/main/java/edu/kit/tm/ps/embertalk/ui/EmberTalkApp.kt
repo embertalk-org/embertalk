@@ -36,10 +36,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
@@ -57,7 +59,13 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
     object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
     object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
     object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
-    object QrCode : Screen("qr", Icons.Filled.QrCode, R.string.qr_code)
+    object QrCode : Screen("qr/{pubKey}", Icons.Filled.QrCode, R.string.qr_code)
+
+    companion object {
+        fun qrCodeRoute(pubKey: String): String {
+            return QrCode.route.replace("{pubKey}", pubKey)
+        }
+    }
 }
 
 @Preview(
@@ -100,9 +108,12 @@ fun EmberTalkApp(
                     SettingsView()
                 }
             }
-            composable(Screen.QrCode.route) {
+            composable(
+                Screen.QrCode.route,
+                arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
+            ) {
                 EmberScaffold(navController = navController, toolWindow = true) {
-                    QrCodeView(prefs.getString(Preferences.PUBLIC_KEY, "")!!)
+                    QrCodeView(it.arguments!!.getString("pubKey")!!)
                 }
             }
         }
@@ -151,7 +162,7 @@ fun EmberScaffold(
                             if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
                                 Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
                             } else {
-                                navController.navigate(Screen.QrCode.route)
+                                navController.navigate(Screen.qrCodeRoute(prefs.getString(Preferences.PUBLIC_KEY, "")!!))
                             }
                         }) {
                             Icon(
