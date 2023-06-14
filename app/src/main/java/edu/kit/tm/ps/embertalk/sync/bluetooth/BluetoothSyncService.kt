@@ -149,7 +149,7 @@ class BluetoothSyncService : Service() {
             return START_REDELIVER_INTENT
         }
         val app = this.application as EmberTalkApplication
-        synchronizer = Synchronizer(app.container.messageRepository)
+        synchronizer = Synchronizer(app.container.messageRepository, app.container.decodedMessageRepository)
 
         bluetoothAdapter = getBluetoothAdapter(this)
 
@@ -182,7 +182,7 @@ class BluetoothSyncService : Service() {
         started = false
 
         stopBluetoothLeDiscovery()
-        bluetoothClassicServer!!.interrupt()
+        bluetoothClassicServer.interrupt()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")

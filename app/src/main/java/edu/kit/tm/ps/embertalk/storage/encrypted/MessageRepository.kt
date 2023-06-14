@@ -1,8 +1,8 @@
-package edu.kit.tm.ps.embertalk.storage
+package edu.kit.tm.ps.embertalk.storage.encrypted
 
 import kotlinx.coroutines.flow.Flow
 
-interface MessageRepository : EmberObservable {
+interface MessageRepository {
     fun all(): Flow<List<Message>>
     fun allExcept(hashes: Set<Int>): Flow<List<Message>>
 

@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.storage
+package edu.kit.tm.ps.embertalk.storage.encrypted
 
 import androidx.room.Dao
 import androidx.room.Insert

@@ -1,8 +1,10 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.Message
-import edu.kit.tm.ps.embertalk.storage.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessage
+import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessageRepository
+import edu.kit.tm.ps.embertalk.storage.encrypted.Message
+import edu.kit.tm.ps.embertalk.storage.encrypted.MessageRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
@@ -11,7 +13,10 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 
-class Synchronizer(private val messageRepository: MessageRepository) {
+class Synchronizer(
+    private val messageRepository: MessageRepository,
+    private val decodedMessageRepository: DecodedMessageRepository
+    ) {
 
     fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
         Log.d(TAG, "Starting sync")
@@ -42,7 +47,8 @@ class Synchronizer(private val messageRepository: MessageRepository) {
             exchangeMessages(messagesToSend, theirMessages, protocol)
             Log.d(TAG, "Exchanged messages")
             theirMessages.forEach { runBlocking { messageRepository.insert(it) } }
-            messageRepository.notifyObservers()
+            theirMessages.mapNotNull { DecodedMessage.decode(it, 0) }.forEach { runBlocking { decodedMessageRepository.insert(it) } }
+            decodedMessageRepository.notifyObservers()
             Log.d(TAG, "Synced successfully")
             true
         } catch (e: IOException) {

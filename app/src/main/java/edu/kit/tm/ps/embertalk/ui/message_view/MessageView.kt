@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.storage.DecodedMessage
+import edu.kit.tm.ps.embertalk.storage.decoded.DecodedMessage
 import edu.kit.tm.ps.embertalk.ui.MessageCard
 import edu.kit.tm.ps.embertalk.ui.SubmittableTextField
 import kotlinx.coroutines.launch
@@ -38,9 +38,9 @@ fun MessageView(
                 .fillMaxWidth()
                 .weight(9f)
         ) {
-            itemsIndexed(messageUiState.messages.mapNotNull { DecodedMessage.decode(it, 0) }) { _, item ->
+            itemsIndexed(messageUiState.messages) { _, item ->
                 MessageCard(
-                    message = item
+                    message = item.content
                 )
             }
         }
@@ -49,7 +49,7 @@ fun MessageView(
             imageVector = Icons.Rounded.Send,
             onSubmit = {
                 messageViewModel.viewModelScope.launch {
-                    messageViewModel.saveMessage(DecodedMessage(it, 0).encode())
+                    messageViewModel.saveMessage(DecodedMessage(content = it, epoch = 0))
                 }
             },
             modifier = Modifier

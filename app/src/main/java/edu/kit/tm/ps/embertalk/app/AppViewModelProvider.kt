@@ -9,7 +9,7 @@ import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            MessageViewModel(emberTalkApplication().container.messageRepository)
+            MessageViewModel(emberTalkApplication().container.decodedMessageRepository, emberTalkApplication().container.messageRepository)
         }
     }
 }

@@ -1,9 +1,8 @@
-package edu.kit.tm.ps.embertalk.storage
+package edu.kit.tm.ps.embertalk.storage.encrypted
 
 import kotlinx.coroutines.flow.Flow
 
 class OfflineMessageRepository(private val messageDao: MessageDao) : MessageRepository {
-    private val observers = HashSet<EmberObserver>()
 
     override fun all(): Flow<List<Message>> = messageDao.all()
     override fun allExcept(hashes: Set<Int>): Flow<List<Message>> =
@@ -13,13 +12,5 @@ class OfflineMessageRepository(private val messageDao: MessageDao) : MessageRepo
 
     override suspend fun insert(message: Message) {
         messageDao.insert(message)
-    }
-
-    override fun register(observer: EmberObserver) {
-        observers.add(observer)
-    }
-
-    override fun notifyObservers() {
-        observers.forEach { it.notifyOfChange() }
     }
 }
