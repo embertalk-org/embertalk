@@ -21,4 +21,5 @@
         but most often it can be found under Settings->About Device->Status or in a comparable location</string>
     <string name="mac_address_how_to">How to</string>
     <string name="contacts">Contacts</string>
+    <string name="scan_qr_code">Scan QR Code</string>
 </resources>

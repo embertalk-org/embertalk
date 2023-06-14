@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
@@ -38,13 +39,15 @@ import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
+import edu.kit.tm.ps.embertalk.ui.contacts.ScanView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 
-sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
-    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
-    object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
-    object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
+sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int, val showInNav: Boolean) {
+    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts, true)
+    object Scan : Screen("contacts/scan", Icons.Filled.QrCodeScanner, R.string.scan_qr_code, false)
+    object Messages : Screen("messages", Icons.Filled.Send, R.string.messages, true)
+    object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings, true)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +90,7 @@ fun EmberTalkApp(
             },
             bottomBar = {
                 BottomAppBar {
-                    items.forEach { screen ->
+                    items.filter { it.showInNav }.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = screen.route) },
                             label = { Text(stringResource(screen.resourceId)) },
@@ -112,7 +115,8 @@ fun EmberTalkApp(
                     startDestination = Screen.Messages.route,
                     modifier = Modifier.padding(10.dp)
                 ) {
-                    composable(Screen.Contacts.route) { ContactsView(contactsViewModel = contactsViewModel)}
+                    composable(Screen.Contacts.route) { ContactsView(contactsViewModel = contactsViewModel, navController = navController)}
+                    composable(Screen.Scan.route) { ScanView(contactsViewModel, navController) }
                     composable(Screen.Messages.route) { MessageView(messageViewModel = messageViewModel) }
                     composable(Screen.Settings.route) { SettingsView() }
                 }

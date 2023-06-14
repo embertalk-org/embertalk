@@ -40,6 +40,10 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.journeyapps.barcodescanner.CaptureActivity"
+            android:screenOrientation="user"
+            tools:replace="screenOrientation" />
+
         <service
             android:name=".sync.bluetooth.BluetoothSyncService"
             android:enabled="true"
