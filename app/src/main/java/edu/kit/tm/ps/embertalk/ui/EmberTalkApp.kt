@@ -43,11 +43,11 @@ import edu.kit.tm.ps.embertalk.ui.contacts.ScanView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 
-sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int, val showInNav: Boolean) {
-    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts, true)
-    object Scan : Screen("contacts/scan", Icons.Filled.QrCodeScanner, R.string.scan_qr_code, false)
-    object Messages : Screen("messages", Icons.Filled.Send, R.string.messages, true)
-    object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings, true)
+sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
+    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
+    object Scan : Screen("contacts/scan", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
+    object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
+    object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -90,7 +90,7 @@ fun EmberTalkApp(
             },
             bottomBar = {
                 BottomAppBar {
-                    items.filter { it.showInNav }.forEach { screen ->
+                    items.forEach { screen ->
                         NavigationBarItem(
                             icon = { Icon(screen.icon, contentDescription = screen.route) },
                             label = { Text(stringResource(screen.resourceId)) },
