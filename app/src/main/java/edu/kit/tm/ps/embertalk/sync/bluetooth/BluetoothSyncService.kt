@@ -149,7 +149,7 @@ class BluetoothSyncService : Service() {
             return START_REDELIVER_INTENT
         }
         val app = this.application as EmberTalkApplication
-        synchronizer = Synchronizer(app.container.encryptedMessageRepository, app.container.messageRepository)
+        synchronizer = Synchronizer(app.container.messageManager)
 
         bluetoothAdapter = getBluetoothAdapter(this)
 

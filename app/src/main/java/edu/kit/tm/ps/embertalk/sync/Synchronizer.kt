@@ -1,10 +1,8 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.decrypted.Message
-import edu.kit.tm.ps.embertalk.storage.decrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.storage.MessageManager
 import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessageRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream
@@ -14,8 +12,7 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class Synchronizer(
-    private val encryptedMessageRepository: EncryptedMessageRepository,
-    private val messageRepository: MessageRepository
+    private val messageManager: MessageManager
     ) {
 
     fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
@@ -31,7 +28,7 @@ class Synchronizer(
             return false
         }
 
-        val myHashes = runBlocking { encryptedMessageRepository.hashes().first() }
+        val myHashes = runBlocking { messageManager.hashes().first() }
         val theirHashes = try {
             exchangeHashes(myHashes.toSet(), protocol)
         } catch (e: IOException) {
@@ -39,16 +36,15 @@ class Synchronizer(
             return false
         }
 
-        val messagesToSend = runBlocking { encryptedMessageRepository.allExcept(theirHashes).first() }.toSet()
+        val messagesToSend = runBlocking { messageManager.allEncryptedExcept(theirHashes).first() }.toSet()
         Log.d(TAG, "Retrieved %s messages to send".format(messagesToSend.size))
         val theirEncryptedMessages = HashSet<EncryptedMessage>()
 
         return try {
             exchangeMessages(messagesToSend, theirEncryptedMessages, protocol)
             Log.d(TAG, "Exchanged messages")
-            theirEncryptedMessages.forEach { runBlocking { encryptedMessageRepository.insert(it) } }
-            theirEncryptedMessages.mapNotNull { Message.decode(it, 0) }.forEach { runBlocking { messageRepository.insert(it) } }
-            messageRepository.notifyObservers()
+            theirEncryptedMessages.forEach { runBlocking { messageManager.handle(it) } }
+            messageManager.notifyObservers()
             Log.d(TAG, "Synced successfully")
             true
         } catch (e: IOException) {
