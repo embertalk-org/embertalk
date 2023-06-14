@@ -102,7 +102,7 @@ class BluetoothSyncService : Service() {
                             continue
                         }
                         if (devicesLastSynced[serviceUuidAndAddress] != null &&
-                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(60))) {
+                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(10))) {
                             continue
                         }
 
