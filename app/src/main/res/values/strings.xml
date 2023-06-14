@@ -22,4 +22,5 @@
     <string name="mac_address_how_to">How to</string>
     <string name="contacts">Contacts</string>
     <string name="scan_qr_code">Scan QR Code</string>
+    <string name="qr_code">QR-Code</string>
 </resources>
