@@ -76,10 +76,7 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
 fun EmberTalkApp(
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val navController = rememberNavController()
-
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
     Surface {
         val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)

@@ -35,4 +35,9 @@ class ContactsViewModel(
         contactManager.add(contact)
         updateContacts()
     }
+
+    suspend fun delete(contact: Contact) {
+        contactManager.delete(contact)
+        updateContacts()
+    }
 }
