@@ -65,6 +65,7 @@ fun ScanView(
             OutlinedTextField(
                 label = { Text("Public Key (Scan to fill)") },
                 value = pubKey.value,
+                readOnly = true,
                 singleLine = true,
                 onValueChange = { pubKey.value = it },
                 modifier = Modifier
