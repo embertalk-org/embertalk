@@ -34,5 +34,5 @@
     <string name="add_contact">Add Contact</string>
     <string name="public_key">Public Key</string>
     <string name="delete_all_messages">Delete all messages</string>
-    <string name="delete_all_messages_text">This will delete ALL decrypted messages from your storage</string>
+    <string name="delete_all_messages_text">This will delete ALL messages from your storage</string>
 </resources>
