@@ -4,9 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -24,13 +28,28 @@ fun QrCodeView(
 ) {
     val qrCodeContent = "embertalk://%s".format(pubKey)
     Box(modifier = Modifier.fillMaxSize()) {
-        Card(
-            Modifier.padding(25.dp)
-        ) {
-            Image(
-                bitmap = encodeAsBitmap(qrCodeContent, 1000, 1000).asImageBitmap(),
-                contentDescription = stringResource(R.string.qr_code)
-            )
+        Column {
+            Card(
+                Modifier.padding(25.dp)
+            ) {
+                Image(
+                    bitmap = encodeAsBitmap(qrCodeContent, 1000, 1000).asImageBitmap(),
+                    contentDescription = stringResource(R.string.qr_code)
+                )
+            }
+            Card(
+                Modifier.padding(25.dp).fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.public_key),
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(10.dp)
+                )
+                Text(
+                    text = pubKey,
+                    modifier = Modifier.padding(10.dp)
+                )
+            }
         }
     }
 }
