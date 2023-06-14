@@ -14,12 +14,12 @@ class MessageManager(
 
     suspend fun handle(message: Message) {
         messageRepository.insert(message)
-        encryptedRepository.insert(message.encode())
+        encryptedRepository.insert(message.encode { it })
     }
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         encryptedRepository.insert(encryptedMessage)
-        val message = Message.decode(encryptedMessage, 0)
+        val message = Message.decode(encryptedMessage, 0) { it }
         message?.let { messageRepository.insert(it) }
     }
 

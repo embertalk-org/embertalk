@@ -15,15 +15,17 @@ data class Message(
     val content: String,
     val epoch: Long,
 ): Parcelable {
-    fun encode(): EncryptedMessage {
+    fun encode(transformer: (ByteArray) -> ByteArray): EncryptedMessage {
         val bytes = ByteBuffer.allocate(Int.SIZE_BYTES)
             .putInt(content.hashCode()).array() + content.encodeToByteArray()
-        return EncryptedMessage(hash = bytes.contentHashCode(), bytes = bytes)
+        val transformed = transformer.invoke(bytes)
+        return EncryptedMessage(hash = transformed.contentHashCode(), bytes = transformed)
     }
 
     companion object {
-        fun decode(encryptedMessage: EncryptedMessage, epoch: Long): Message? {
-            val buffer = ByteBuffer.wrap(encryptedMessage.bytes)
+        fun decode(encryptedMessage: EncryptedMessage, epoch: Long, transformer: (ByteArray) -> ByteArray): Message? {
+            val transformed = transformer.invoke(encryptedMessage.bytes)
+            val buffer = ByteBuffer.wrap(transformed)
             val contentHash = buffer.int
             val contentBytes = ByteArray(buffer.remaining())
             buffer.get(contentBytes)
