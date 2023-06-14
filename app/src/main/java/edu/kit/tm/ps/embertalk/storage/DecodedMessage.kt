@@ -1,19 +1,24 @@
 package edu.kit.tm.ps.embertalk.storage
 
-import com.google.gson.Gson
+import java.nio.ByteBuffer
 
 data class DecodedMessage(
-    val from: String,
-    val content: String
+    val content: String,
 ) {
     fun encode(): Message {
-        val bytes = Gson().toJson(this, DecodedMessage::class.java).encodeToByteArray()
+        val bytes = ByteBuffer.allocate(Int.SIZE_BYTES)
+            .putInt(content.hashCode()).array() + content.encodeToByteArray()
         return Message(hash = bytes.contentHashCode(), bytes = bytes)
     }
 
-    companion object Decoder {
-        fun decode(message: Message): DecodedMessage {
-            return Gson().fromJson(message.bytes.decodeToString(), DecodedMessage::class.java)
+    companion object {
+        fun decode(message: Message): DecodedMessage? {
+            val buffer = ByteBuffer.wrap(message.bytes)
+            val contentHash = buffer.int
+            val contentBytes = ByteArray(buffer.remaining())
+            buffer.get(contentBytes)
+            val content = contentBytes.decodeToString()
+            return if (contentHash == content.hashCode()) DecodedMessage(content) else null
         }
     }
 }

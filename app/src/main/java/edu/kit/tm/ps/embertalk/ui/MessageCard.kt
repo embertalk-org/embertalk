@@ -1,9 +1,7 @@
 package edu.kit.tm.ps.embertalk.ui
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,20 +17,15 @@ fun MessageCard(
     ElevatedCard(
         modifier = Modifier.padding(5.dp)
     ) {
-        Column(
+        Text(
+            text = message.content,
             modifier = Modifier.padding(10.dp)
-        ) {
-            Text(
-                text = message.from,
-                style = MaterialTheme.typography.headlineSmall
-            )
-            Text(text = message.content)
-        }
+        )
     }
 }
 
 @Preview
 @Composable
 private fun MessageCardPreview() {
-    MessageCard(message = DecodedMessage("Peter", "Hello there my friend!"))
+    MessageCard(message = DecodedMessage("Hello there my friend!"))
 }

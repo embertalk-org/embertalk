@@ -26,7 +26,7 @@ class MessageViewModel(private val messageRepository: MessageRepository) : ViewM
         messageRepository.register(this)
     }
 
-    fun updateMessages() {
+    private fun updateMessages() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(messages = messageRepository.all().first())
         }

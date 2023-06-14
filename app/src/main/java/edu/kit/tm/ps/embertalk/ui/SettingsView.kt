@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -50,12 +49,5 @@ fun SettingsView(
                 )
             }
         }
-        SubmittableTextField(
-            label = { Text(stringResource(R.string.your_username)) },
-            imageVector = Icons.Rounded.Save,
-            initialValue = prefs.getString("currentname", "")!!,
-            clearOnSubmit = false,
-            onSubmit = { prefs.edit().putString("currentname", it).apply() }
-        )
     }
 }

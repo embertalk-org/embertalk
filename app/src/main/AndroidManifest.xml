@@ -14,6 +14,10 @@
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+
     <application
         android:name=".app.EmberTalkApplication"
         android:allowBackup="true"
@@ -38,6 +42,11 @@
 
         <service
             android:name=".sync.bluetooth.BluetoothSyncService"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".sync.wifip2p.WifiP2pService"
             android:enabled="true"
             android:exported="false" />
 
