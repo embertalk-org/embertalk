@@ -86,7 +86,7 @@ fun EmberTalkApp(
                 }
             }
             composable(Screen.Scan.route) {
-                EmberScaffold(navController = navController, showBackButton = true, showBottomBar = false) {
+                EmberScaffold(navController = navController, toolWindow = true) {
                     ScanView(contactsViewModel, navController)
                 }
             }
@@ -101,7 +101,7 @@ fun EmberTalkApp(
                 }
             }
             composable(Screen.QrCode.route) {
-                EmberScaffold(navController = navController, showBackButton = true, showBottomBar = false) {
+                EmberScaffold(navController = navController, toolWindow = true) {
                     QrCodeView(prefs.getString(Preferences.PUBLIC_KEY, "")!!)
                 }
             }
@@ -112,9 +112,8 @@ fun EmberTalkApp(
 @Composable
 fun EmberScaffold(
     navController: NavController,
-    showBackButton: Boolean = false,
-    showBottomBar: Boolean = true,
     modifier: Modifier = Modifier,
+    toolWindow: Boolean = false,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -134,36 +133,38 @@ fun EmberScaffold(
             TopAppBar(
                 title = { Text("EmberTalk") },
                 navigationIcon = {
-                     if (showBackButton) {
+                     if (toolWindow) {
                          IconButton(onClick = { navController.popBackStack() }) {
                              Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                          }
                      }
                 },
                 actions = {
-                    IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = stringResource(R.string.start_service)
-                        )
-                    }
-                    IconButton(onClick = {
-                        if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
-                            Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
-                        } else {
-                            navController.navigate(Screen.QrCode.route)
+                    if (!toolWindow) {
+                        IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = stringResource(R.string.start_service)
+                            )
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Filled.QrCode,
-                            contentDescription = stringResource(R.string.start_service)
-                        )
+                        IconButton(onClick = {
+                            if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
+                                Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
+                            } else {
+                                navController.navigate(Screen.QrCode.route)
+                            }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.QrCode,
+                                contentDescription = stringResource(R.string.start_service)
+                            )
+                        }
                     }
                 }
             )
         },
         bottomBar = {
-            if (showBottomBar) {
+            if (!toolWindow) {
                 BottomAppBar {
                     items.forEach { screen ->
                         NavigationBarItem(
