@@ -1,6 +1,9 @@
 package edu.kit.tm.ps.embertalk.app
 
 import android.content.Context
+import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
+import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
+import edu.kit.tm.ps.embertalk.model.contacts.OfflineContactRepository
 import edu.kit.tm.ps.embertalk.storage.MessageManager
 import edu.kit.tm.ps.embertalk.storage.decrypted.MessageDb
 import edu.kit.tm.ps.embertalk.storage.decrypted.OfflineMessageRepository
@@ -9,6 +12,7 @@ import edu.kit.tm.ps.embertalk.storage.encrypted.OfflineEncryptedMessageReposito
 
 interface AppContainer {
     val messageManager: MessageManager
+    val contactManager: ContactManager
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -17,6 +21,12 @@ class AppDataContainer(private val context: Context) : AppContainer {
         MessageManager(
             OfflineMessageRepository(MessageDb.getDb(context).dao()),
             OfflineEncryptedMessageRepository(EncryptedMessageDb.getDb(context).dao())
+        )
+    }
+
+    override val contactManager: ContactManager by lazy {
+        ContactManager(
+            OfflineContactRepository(ContactDb.getDb(context).dao())
         )
     }
 }

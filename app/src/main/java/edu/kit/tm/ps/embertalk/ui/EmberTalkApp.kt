@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
@@ -35,10 +36,13 @@ import androidx.navigation.compose.rememberNavController
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
+    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
     object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
     object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
 }
@@ -54,6 +58,7 @@ fun EmberTalkApp(
 ) {
     val navController = rememberNavController()
     val items = listOf(
+        Screen.Contacts,
         Screen.Messages,
         Screen.Settings
     )
@@ -63,6 +68,7 @@ fun EmberTalkApp(
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
 
+        val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
         Scaffold(
@@ -106,6 +112,7 @@ fun EmberTalkApp(
                     startDestination = Screen.Messages.route,
                     modifier = Modifier.padding(10.dp)
                 ) {
+                    composable(Screen.Contacts.route) { ContactsView(contactsViewModel = contactsViewModel)}
                     composable(Screen.Messages.route) { MessageView(messageViewModel = messageViewModel) }
                     composable(Screen.Settings.route) { SettingsView() }
                 }
