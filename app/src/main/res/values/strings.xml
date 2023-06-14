@@ -29,4 +29,7 @@
         If you already used EmberTalk before, this will invalidate your old keypair and contacts will
         need to get your new key to be able to send you messages again!</string>
     <string name="regenerate_keys_alert_title">(Re)generate Keys</string>
+    <string name="embertalk">EmberTalk</string>
+    <string name="share_contact">Share Contact</string>
+    <string name="add_contact">Add Contact</string>
 </resources>

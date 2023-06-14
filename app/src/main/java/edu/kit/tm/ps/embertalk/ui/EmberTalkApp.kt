@@ -89,22 +89,22 @@ fun EmberTalkApp(
             startDestination = Screen.Messages.route,
         ) {
             composable(Screen.Contacts.route) {
-                EmberScaffold(navController = navController) {
+                EmberScaffold(navController = navController, title = stringResource(id = R.string.contacts)) {
                     ContactsView(contactsViewModel = contactsViewModel, navController = navController)
                 }
             }
             composable(Screen.AddContact.route) {
-                EmberScaffold(navController = navController, toolWindow = true) {
+                EmberScaffold(navController = navController, title = stringResource(R.string.add_contact), toolWindow = true) {
                     AddContactView(contactsViewModel, navController)
                 }
             }
             composable(Screen.Messages.route) {
-                EmberScaffold(navController = navController) {
+                EmberScaffold(navController = navController, title = stringResource(id = R.string.messages)) {
                     MessageView(messageViewModel = messageViewModel)
                 }
             }
             composable(Screen.Settings.route) {
-                EmberScaffold(navController = navController) {
+                EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
                     SettingsView()
                 }
             }
@@ -112,7 +112,7 @@ fun EmberTalkApp(
                 Screen.QrCode.route,
                 arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
             ) {
-                EmberScaffold(navController = navController, toolWindow = true) {
+                EmberScaffold(navController = navController, title = stringResource(R.string.share_contact), toolWindow = true) {
                     QrCodeView(it.arguments!!.getString("pubKey")!!)
                 }
             }
@@ -124,6 +124,7 @@ fun EmberTalkApp(
 fun EmberScaffold(
     navController: NavController,
     modifier: Modifier = Modifier,
+    title: String = stringResource(R.string.embertalk),
     toolWindow: Boolean = false,
     content: @Composable () -> Unit,
 ) {
@@ -142,7 +143,7 @@ fun EmberScaffold(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("EmberTalk") },
+                title = { Text(title) },
                 navigationIcon = {
                      if (toolWindow) {
                          IconButton(onClick = { navController.popBackStack() }) {
@@ -197,7 +198,9 @@ fun EmberScaffold(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).padding(10.dp)) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .padding(10.dp)) {
             content.invoke()
         }
     }
