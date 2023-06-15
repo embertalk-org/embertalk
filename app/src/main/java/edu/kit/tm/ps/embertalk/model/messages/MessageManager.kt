@@ -1,9 +1,11 @@
-package edu.kit.tm.ps.embertalk.storage
+package edu.kit.tm.ps.embertalk.model.messages
 
-import edu.kit.tm.ps.embertalk.storage.decrypted.Message
-import edu.kit.tm.ps.embertalk.storage.decrypted.MessageRepository
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessageRepository
+import edu.kit.tm.ps.embertalk.model.EmberObservable
+import edu.kit.tm.ps.embertalk.model.EmberObserver
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageRepository
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageRepository
 import kotlinx.coroutines.flow.Flow
 
 class MessageManager(

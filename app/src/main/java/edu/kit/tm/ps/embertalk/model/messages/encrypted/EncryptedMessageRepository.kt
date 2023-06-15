@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.storage.encrypted
+package edu.kit.tm.ps.embertalk.model.messages.encrypted
 
 import kotlinx.coroutines.flow.Flow
 

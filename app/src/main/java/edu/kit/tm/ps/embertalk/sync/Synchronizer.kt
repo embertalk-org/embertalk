@@ -1,8 +1,8 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.MessageManager
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.DataInputStream

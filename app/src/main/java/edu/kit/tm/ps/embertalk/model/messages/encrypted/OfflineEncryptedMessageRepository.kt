@@ -1,8 +1,9 @@
-package edu.kit.tm.ps.embertalk.storage.encrypted
+package edu.kit.tm.ps.embertalk.model.messages.encrypted
 
 import kotlinx.coroutines.flow.Flow
 
-class OfflineEncryptedMessageRepository(private val encryptedMessageDao: EncryptedMessageDao) : EncryptedMessageRepository {
+class OfflineEncryptedMessageRepository(private val encryptedMessageDao: EncryptedMessageDao) :
+    EncryptedMessageRepository {
 
     override fun all(): Flow<List<EncryptedMessage>> = encryptedMessageDao.all()
     override fun allExcept(hashes: Set<Int>): Flow<List<EncryptedMessage>> =

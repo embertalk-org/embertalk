@@ -1,7 +1,7 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import java.io.DataInputStream
 import java.io.DataOutputStream
 

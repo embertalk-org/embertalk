@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.storage.decrypted.Message
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.ui.MessageCard
 import edu.kit.tm.ps.embertalk.ui.SubmittableTextField
 import kotlinx.coroutines.launch

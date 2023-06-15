@@ -3,9 +3,9 @@ package edu.kit.tm.ps.embertalk.ui.message_view
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.kit.tm.ps.embertalk.storage.EmberObserver
-import edu.kit.tm.ps.embertalk.storage.MessageManager
-import edu.kit.tm.ps.embertalk.storage.decrypted.Message
+import edu.kit.tm.ps.embertalk.model.EmberObserver
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

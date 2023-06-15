@@ -1,9 +1,9 @@
-package edu.kit.tm.ps.embertalk.storage.decrypted
+package edu.kit.tm.ps.embertalk.model.messages.decrypted
 
 import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessage
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 

@@ -4,11 +4,11 @@ import android.content.Context
 import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import edu.kit.tm.ps.embertalk.model.contacts.OfflineContactRepository
-import edu.kit.tm.ps.embertalk.storage.MessageManager
-import edu.kit.tm.ps.embertalk.storage.decrypted.MessageDb
-import edu.kit.tm.ps.embertalk.storage.decrypted.OfflineMessageRepository
-import edu.kit.tm.ps.embertalk.storage.encrypted.EncryptedMessageDb
-import edu.kit.tm.ps.embertalk.storage.encrypted.OfflineEncryptedMessageRepository
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageDb
+import edu.kit.tm.ps.embertalk.model.messages.decrypted.OfflineMessageRepository
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageDb
+import edu.kit.tm.ps.embertalk.model.messages.encrypted.OfflineEncryptedMessageRepository
 
 interface AppContainer {
     val messageManager: MessageManager
