@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -69,20 +71,28 @@ fun AddContactView(
             onValueChange = { name.value = it },
             modifier = Modifier.padding(10.dp)
         )
-        Text(
-            text = "Scanned Key Parts",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        LazyRow {
-            itemsIndexed(keyParts.entries.toList()) { index, item ->
-                if (item.value != "") {
-                    Card(
-                        modifier = Modifier.padding(5.dp)
-                    ) {
-                        Text(
-                            text = "%s".format(item.key),
-                            modifier = Modifier.padding(10.dp)
-                        )
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Scanned Key Parts",
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(10.dp)
+            )
+            LazyRow(
+                Modifier.padding(10.dp)
+            ) {
+                itemsIndexed(keyParts.entries.toList()) { index, item ->
+                    if (item.value != "") {
+                        Card(
+                            modifier = Modifier.padding(5.dp)
+                        ) {
+                            Text(
+                                text = "%s".format(item.key),
+                                modifier = Modifier.padding(10.dp)
+                            )
+                        }
                     }
                 }
             }
