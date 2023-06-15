@@ -1,5 +1,7 @@
 package edu.kit.tm.ps.embertalk.model.messages
 
+import edu.kit.tm.ps.PublicKey
+import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
@@ -11,17 +13,18 @@ import kotlinx.coroutines.flow.Flow
 class MessageManager(
     private val messageRepository: MessageRepository,
     private val encryptedRepository: EncryptedMessageRepository,
+    private val keys: Keys,
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun handle(message: Message) {
+    suspend fun handle(message: Message, publicKey: PublicKey) {
         messageRepository.insert(message)
-        encryptedRepository.insert(message.encode { it })
+        encryptedRepository.insert(message.encode { publicKey.encrypt(it) })
     }
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         encryptedRepository.insert(encryptedMessage)
-        val message = Message.decode(encryptedMessage, 0) { it }
+        val message = Message.decode(encryptedMessage, 0) { keys.private().decrypt(it) }
         message?.let { messageRepository.insert(it) }
     }
 

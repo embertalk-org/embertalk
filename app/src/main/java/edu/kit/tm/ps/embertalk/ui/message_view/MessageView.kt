@@ -1,29 +1,51 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+
 package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Send
+import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
+import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.ui.MessageCard
-import edu.kit.tm.ps.embertalk.ui.SubmittableTextField
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
+    contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -50,17 +72,93 @@ fun MessageView(
                 }
             }
         }
-        SubmittableTextField(
-            label = { Text(stringResource(R.string.your_message)) },
-            imageVector = Icons.Rounded.Send,
-            onSubmit = {
-                messageViewModel.viewModelScope.launch {
-                    messageViewModel.saveMessage(Message(content = it, mine = true, epoch = 0))
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+        SendMessageField(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+    }
+}
+
+@Composable
+fun SendMessageField(
+    contactsViewModel: ContactsViewModel,
+    messageViewModel: MessageViewModel,
+    modifier: Modifier = Modifier,
+) {
+    val message = rememberSaveable { mutableStateOf("") }
+    Row {
+        OutlinedTextField(
+            label = { Text(stringResource(id = R.string.your_message)) },
+            value = message.value,
+            onValueChange = { message.value = it }
         )
+        Spacer(modifier = Modifier.weight(1f))
+        SubmitButton(
+            message = message.value,
+            contactsViewModel = contactsViewModel,
+            messageViewModel = messageViewModel
+        )
+    }
+}
+
+@Composable
+fun SubmitButton(
+    message: String,
+    contactsViewModel: ContactsViewModel,
+    messageViewModel: MessageViewModel,
+    modifier: Modifier = Modifier
+) {
+    val keys = Keys(PreferenceManager.getDefaultSharedPreferences(LocalContext.current))
+    val openDialog = remember { mutableStateOf(false) }
+    IconButton(
+        enabled = message != "",
+        onClick = {
+            openDialog.value = true
+        }
+    ) {
+        Row {
+            Icon(
+                imageVector = Icons.Filled.Send,
+                contentDescription = stringResource(R.string.send_message),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+        }
+    }
+    if (openDialog.value) {
+        Dialog(
+            onDismissRequest = { openDialog.value = false }
+        ) {
+            Card {
+                Column(
+                    modifier = Modifier.padding(10.dp)
+                ) {
+                    Text(
+                        text = "Send to...",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    LazyColumn {
+                        items(contactsViewModel.uiState.value.contacts) { item ->
+                            ElevatedCard {
+                                Row {
+                                    Text(
+                                        text = item.name,
+                                        modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically)
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            openDialog.value = false
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message, mine = true, epoch = 0), keys.decode(item.pubKey)) }
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Send,
+                                            contentDescription = stringResource(R.string.send_message),
+                                            modifier = Modifier.align(Alignment.CenterVertically)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

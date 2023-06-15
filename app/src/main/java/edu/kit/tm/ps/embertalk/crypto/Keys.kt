@@ -26,4 +26,8 @@ class Keys(
     fun public(): PublicKey {
         return PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
     }
+
+    fun decode(pubKey: String): PublicKey {
+        return PublicKey.deserialize(Base64.decode(pubKey, Base64.URL_SAFE))
+    }
 }
