@@ -5,57 +5,83 @@ import android.graphics.Color
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import edu.kit.tm.ps.embertalk.R
+
 
 @Composable
 fun QrCodeView(
     pubKey: String,
     modifier: Modifier = Modifier
 ) {
-    val qrCodeContent = "embertalk://%s".format(pubKey)
+    val keys = pubKey.chunked(750)
+    val contents = keys.mapIndexed { index, key ->
+        "ember://%s/%s".format(index, key)
+    }
+    val currentPage = rememberSaveable { mutableStateOf(0) }
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             Card(
                 Modifier.padding(25.dp)
             ) {
                 Image(
-                    bitmap = encodeAsBitmap(qrCodeContent, 1000, 1000).asImageBitmap(),
+                    bitmap = encodeAsBitmap(contents[currentPage.value], 1500, 1500).asImageBitmap(),
                     contentDescription = stringResource(R.string.qr_code)
                 )
             }
-            Card(
-                Modifier.padding(25.dp).fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(R.string.public_key),
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(10.dp)
-                )
-                Text(
-                    text = pubKey,
-                    modifier = Modifier.padding(10.dp)
-                )
+            Row {
+                IconButton(
+                    enabled = currentPage.value > 0,
+                    onClick = { currentPage.value = (currentPage.value - 1).coerceAtLeast(0) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+                Spacer(modifier = modifier.weight(1f))
+                Text("%s of %s".format(currentPage.value, contents.size - 1))
+                Spacer(modifier = modifier.weight(1f))
+                IconButton(
+                    enabled = currentPage.value < contents.size - 1,
+                    onClick = { currentPage.value = (currentPage.value + 1).coerceAtMost(contents.size - 1) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowForward,
+                        contentDescription = "Back"
+                    )
+                }
             }
         }
     }
 }
 
 fun encodeAsBitmap(content: String, width: Int, height: Int): Bitmap {
-    val result: BitMatrix = MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height)
+    val result: BitMatrix = MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, mapOf(
+        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L
+    ))
     val w = result.width
     val h = result.height
     val pixels = IntArray(w * h)

@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import kotlinx.coroutines.launch
@@ -101,15 +102,12 @@ fun RegenerateKeysButton(
                 }
             },
             confirmButton = {
+                val coroutineScope = rememberCoroutineScope()
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
                     onClick = {
                         openDialog.value = false
-                        //TODO actually encode key pair
-                        prefs.edit()
-                            .putString(Preferences.PRIVATE_KEY, "private")
-                            .putString(Preferences.PUBLIC_KEY, "public")
-                            .apply()
+                        coroutineScope.launch { Keys(prefs).regenerate() }
                     }
                 ) {
                     Text("Confirm")

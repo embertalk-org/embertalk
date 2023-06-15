@@ -9,6 +9,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
+import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.ui.EmberTalkApp
 import edu.kit.tm.ps.embertalk.ui.theme.EmberTalkTheme
 
@@ -23,6 +25,10 @@ class MainActivity : ComponentActivity() {
             checkAndRequest(this, Manifest.permission.BLUETOOTH_CONNECT)
             checkAndRequest(this, Manifest.permission.BLUETOOTH_SCAN)
             checkAndRequest(this, Manifest.permission.BLUETOOTH_ADVERTISE)
+        }
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        if (!prefs.contains(Preferences.PRIVATE_KEY) && !prefs.contains(Preferences.PUBLIC_KEY)) {
+            Keys(prefs).regenerate()
         }
         setContent {
             EmberTalkTheme {

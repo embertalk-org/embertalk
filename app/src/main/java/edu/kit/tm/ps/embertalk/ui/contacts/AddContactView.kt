@@ -5,16 +5,22 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,15 +44,17 @@ fun AddContactView(
     val context = LocalContext.current
 
     val name = rememberSaveable { mutableStateOf ("") }
-    val pubKey = rememberSaveable { mutableStateOf("") }
+    val keyParts = remember { mutableStateMapOf(0 to "") }
 
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract(),
         onResult = { result ->
-            if (result == null || !result.contents.startsWith("embertalk://")) {
+            if (result == null || !result.contents.startsWith("ember://")) {
                 Toast.makeText(context, "Not a valid EmberTalk-Code", Toast.LENGTH_SHORT).show()
             } else {
-                pubKey.value = result.contents.removePrefix("embertalk://")
+                val withoutPrefix = result.contents.removePrefix("ember://")
+                val parts = withoutPrefix.split("/")
+                keyParts[parts[0].toInt()] = parts[1]
             }
         }
     )
@@ -61,17 +69,47 @@ fun AddContactView(
             onValueChange = { name.value = it },
             modifier = Modifier.padding(10.dp)
         )
+        Text(
+            text = "Scanned Key Parts",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        LazyRow {
+            itemsIndexed(keyParts.entries.toList()) { index, item ->
+                if (item.value != "") {
+                    Card(
+                        modifier = Modifier.padding(5.dp)
+                    ) {
+                        Text(
+                            text = "%s".format(item.key),
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                }
+            }
+        }
         Row {
-            OutlinedTextField(
-                label = { Text("Public Key (Scan to fill)") },
-                value = pubKey.value,
-                readOnly = true,
-                singleLine = true,
-                onValueChange = { pubKey.value = it },
+            IconButton(
+                onClick = {
+                    if (name.value != "") {
+                        contactsViewModel.viewModelScope.launch {
+                            val pubKey = buildString {
+                                for (i in 1..keyParts.size) {
+                                    append(keyParts[i])
+                                }
+                            }
+                            contactsViewModel.add(Contact(name = name.value, pubKey = pubKey))
+                        }
+                        navController.popBackStack()
+                    }
+                },
                 modifier = Modifier
                     .padding(10.dp)
-                    .weight(3f)
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Save,
+                    contentDescription = stringResource(R.string.scan_qr_code)
+                )
+            }
             IconButton(
                 onClick = { scanLauncher.launch(ScanOptions()) },
                 modifier = Modifier
@@ -84,23 +122,6 @@ fun AddContactView(
                     contentDescription = stringResource(R.string.scan_qr_code)
                 )
             }
-        }
-        IconButton(
-            onClick = {
-                if (name.value != "" && pubKey.value != "") {
-                    contactsViewModel.viewModelScope.launch {
-                        contactsViewModel.add(Contact(name = name.value, pubKey = pubKey.value))
-                    }
-                    navController.popBackStack()
-                }
-            },
-            modifier = Modifier
-                .padding(10.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Save,
-                contentDescription = stringResource(R.string.scan_qr_code)
-            )
         }
     }
 }
