@@ -16,6 +16,7 @@ class BluetoothClassicServer(
     private val bluetoothAdapter: BluetoothAdapter
     ) : Thread() {
     private var serverSocket: BluetoothServerSocket? = null
+    private var running = false
 
     init {
         try {
@@ -27,9 +28,10 @@ class BluetoothClassicServer(
     }
 
     override fun run() {
+        running = true
         var socket: BluetoothSocket? = null
 
-        while (bluetoothAdapter.isEnabled) {
+        while (bluetoothAdapter.isEnabled && running) {
             try {
                 // This will block until there is a connection
                 Log.d(TAG, "Listening for a client")
@@ -42,6 +44,10 @@ class BluetoothClassicServer(
             socket!!.close()
             Log.d(TAG, "Closed socket")
         }
+    }
+
+    fun shutdown() {
+        running = false
     }
 
     companion object {

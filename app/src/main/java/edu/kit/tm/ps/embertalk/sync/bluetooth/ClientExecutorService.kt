@@ -29,8 +29,8 @@ class ClientExecutorService {
         }
     }
 
-    fun shutdownNow() {
-        service.shutdownNow()
+    fun shutdown() {
+        service.shutdown()
     }
 
     companion object {

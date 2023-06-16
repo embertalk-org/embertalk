@@ -36,7 +36,7 @@ class BluetoothSyncService : Service() {
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeAdvertiser: BluetoothLeAdvertiser
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
-    private lateinit var bluetoothClassicServer: Thread
+    private lateinit var bluetoothClassicServer: BluetoothClassicServer
     private var started = false
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
     private val clientExecutorService: ClientExecutorService = ClientExecutorService()
@@ -188,7 +188,8 @@ class BluetoothSyncService : Service() {
         started = false
 
         stopBluetoothLeDiscovery()
-        bluetoothClassicServer.interrupt()
+        bluetoothClassicServer.shutdown()
+        clientExecutorService.shutdown()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")
