@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -91,7 +92,7 @@ fun SendMessageField(
         )
         Spacer(modifier = Modifier.weight(1f))
         SubmitButton(
-            message = message.value,
+            message = message,
             contactsViewModel = contactsViewModel,
             messageViewModel = messageViewModel
         )
@@ -100,7 +101,7 @@ fun SendMessageField(
 
 @Composable
 fun SubmitButton(
-    message: String,
+    message: MutableState<String>,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
@@ -108,7 +109,7 @@ fun SubmitButton(
     val keys = Keys(PreferenceManager.getDefaultSharedPreferences(LocalContext.current))
     val openDialog = remember { mutableStateOf(false) }
     IconButton(
-        enabled = message != "",
+        enabled = message.value != "",
         onClick = {
             openDialog.value = true
         }
@@ -144,7 +145,8 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message, mine = true, epoch = 0), keys.decode(item.pubKey)) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, epoch = 0), keys.decode(item.pubKey)) }
+                                            message.value = ""
                                         }
                                     ) {
                                         Icon(
