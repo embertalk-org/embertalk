@@ -44,14 +44,21 @@ class Keys(
             .apply()
     }
 
+    fun remainingRatchets(): Long {
+        return epochProvider.current() - private.currentEpoch()
+    }
+
     fun ratchetPrivateToCurrent() {
         ratchetPrivateTo(epochProvider.current())
     }
 
-    fun ratchetPrivateTo(epoch: Long) {
+    private fun ratchetPrivateTo(epoch: Long) {
         for (i in 0 until epoch - private.currentEpoch()) {
             private.ratchet()
             Log.d(TAG, "Ratchet")
+            if (i % 10 == 0L) {
+                storeKeys()
+            }
         }
         storeKeys()
     }

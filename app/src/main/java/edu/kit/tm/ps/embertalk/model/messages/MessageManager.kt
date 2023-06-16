@@ -30,10 +30,7 @@ class MessageManager(
     }
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
-        val currentEpoch = epochProvider.current()
-        Log.d(TAG, "Handling encrypted message at epoch %s".format(currentEpoch))
-        keys.ratchetPrivateTo(currentEpoch)
-        val message = Message.decode(encryptedMessage, currentEpoch) { keys.private().decrypt(it) }
+        val message = Message.decode(encryptedMessage, keys.private().currentEpoch()) { keys.private().decrypt(it) }
         encryptedRepository.insert(encryptedMessage)
         if (message != null) {
             messageRepository.insert(message)

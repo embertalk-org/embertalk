@@ -5,12 +5,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -63,8 +66,38 @@ fun SettingsView(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
+            RatchetState(keys)
             RegenerateKeysButton(keys)
             DeleteAllButton(messageViewModel = messageViewModel)
+        }
+    }
+}
+
+@Composable
+fun RatchetState(
+    keys: Keys,
+) {
+    val calcRemaining = { keys.remainingRatchets() }
+    val remainingRatchets = remember { mutableStateOf(calcRemaining()) }
+    Column(
+        Modifier.padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        Text(
+            text = "Synchronization State",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Row {
+            Text(
+                text = "Remaining epochs: %s".format(remainingRatchets.value),
+                modifier = Modifier.align(Alignment.CenterVertically)
+            )
+            IconButton(
+                onClick = { remainingRatchets.value = calcRemaining() },
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                Icon(imageVector = Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh))
+            }
         }
     }
 }
