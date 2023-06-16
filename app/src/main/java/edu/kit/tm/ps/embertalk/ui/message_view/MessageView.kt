@@ -31,12 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
@@ -46,6 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
+    keys: Keys,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
@@ -73,12 +72,13 @@ fun MessageView(
                 }
             }
         }
-        SendMessageField(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+        SendMessageField(keys = keys, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
     }
 }
 
 @Composable
 fun SendMessageField(
+    keys: Keys,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier,
@@ -92,6 +92,7 @@ fun SendMessageField(
         )
         Spacer(modifier = Modifier.weight(1f))
         SubmitButton(
+            keys = keys,
             message = message,
             contactsViewModel = contactsViewModel,
             messageViewModel = messageViewModel
@@ -101,12 +102,12 @@ fun SendMessageField(
 
 @Composable
 fun SubmitButton(
+    keys: Keys,
     message: MutableState<String>,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
-    val keys = Keys(PreferenceManager.getDefaultSharedPreferences(LocalContext.current))
     val openDialog = remember { mutableStateOf(false) }
     IconButton(
         enabled = message.value != "",

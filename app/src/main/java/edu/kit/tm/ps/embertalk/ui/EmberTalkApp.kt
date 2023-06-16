@@ -2,7 +2,6 @@
 
 package edu.kit.tm.ps.embertalk.ui
 
-import android.content.res.Configuration
 import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
@@ -31,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -47,6 +45,7 @@ import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
+import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
@@ -69,12 +68,9 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
     }
 }
 
-@Preview(
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    name = "DefaultPreviewDark"
-)
 @Composable
 fun EmberTalkApp(
+    keys: Keys,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -98,12 +94,12 @@ fun EmberTalkApp(
             }
             composable(Screen.Messages.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.messages)) {
-                    MessageView(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+                    MessageView(keys = keys, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
                 }
             }
             composable(Screen.Settings.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
-                    SettingsView(messageViewModel)
+                    SettingsView(keys, messageViewModel)
                 }
             }
             composable(

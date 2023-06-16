@@ -1,6 +1,5 @@
 package edu.kit.tm.ps.embertalk.ui
 
-import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +34,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsView(
+    keys: Keys,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -63,7 +63,7 @@ fun SettingsView(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
-            RegenerateKeysButton(prefs)
+            RegenerateKeysButton(keys)
             DeleteAllButton(messageViewModel = messageViewModel)
         }
     }
@@ -71,7 +71,7 @@ fun SettingsView(
 
 @Composable
 fun RegenerateKeysButton(
-    prefs: SharedPreferences,
+    keys: Keys,
     modifier: Modifier = Modifier
 ) {
     val openDialog = remember { mutableStateOf(false) }
@@ -107,7 +107,7 @@ fun RegenerateKeysButton(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
                     onClick = {
                         openDialog.value = false
-                        coroutineScope.launch { Keys(prefs).regenerate() }
+                        coroutineScope.launch { keys.regenerate() }
                     }
                 ) {
                     Text("Confirm")
@@ -151,7 +151,6 @@ fun DeleteAllButton(
                 }
             },
             confirmButton = {
-                val coroutineScope = rememberCoroutineScope()
                 Button(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
                     onClick = {

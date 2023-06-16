@@ -1,5 +1,6 @@
 package edu.kit.tm.ps.embertalk.model.messages
 
+import android.util.Log
 import edu.kit.tm.ps.PublicKey
 import edu.kit.tm.ps.embertalk.crypto.Keys
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
@@ -21,6 +22,7 @@ class MessageManager(
 
     suspend fun handle(message: Message, publicKey: PublicKey) {
         val currentEpoch = epochProvider.current()
+        Log.d(TAG, "Handling message at epoch %s".format(currentEpoch))
         keys.ratchetPublicTo(publicKey, currentEpoch)
         val messageWithEpoch = message.copy(epoch = currentEpoch)
         messageRepository.insert(messageWithEpoch)
@@ -29,10 +31,16 @@ class MessageManager(
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         val currentEpoch = epochProvider.current()
+        Log.d(TAG, "Handling encrypted message at epoch %s".format(currentEpoch))
         keys.ratchetPrivateTo(currentEpoch)
         val message = Message.decode(encryptedMessage, currentEpoch) { keys.private().decrypt(it) }
         encryptedRepository.insert(encryptedMessage)
-        message?.let { messageRepository.insert(it) }
+        if (message != null) {
+            messageRepository.insert(message)
+            Log.d(TAG, "Message inserted")
+        } else {
+            Log.d(TAG, "Message could not be decrypted")
+        }
     }
 
     fun messages(): Flow<List<Message>> = messageRepository.all()
@@ -51,5 +59,9 @@ class MessageManager(
     suspend fun deleteAll() {
         messageRepository.deleteAll()
         encryptedRepository.deleteAll()
+    }
+
+    companion object {
+        private const val TAG = "MessageManager"
     }
 }

@@ -16,6 +16,7 @@ import edu.kit.tm.ps.embertalk.model.messages.encrypted.OfflineEncryptedMessageR
 interface AppContainer {
     val messageManager: MessageManager
     val contactManager: ContactManager
+    val keys: Keys
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
@@ -25,7 +26,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
             SysTimeEpochprovider(),
             OfflineMessageRepository(MessageDb.getDb(context).dao()),
             OfflineEncryptedMessageRepository(EncryptedMessageDb.getDb(context).dao()),
-            Keys(PreferenceManager.getDefaultSharedPreferences(context))
+            keys
         )
     }
 
@@ -33,5 +34,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
         ContactManager(
             OfflineContactRepository(ContactDb.getDb(context).dao())
         )
+    }
+    override val keys: Keys by lazy {
+        Keys(SysTimeEpochprovider(), PreferenceManager.getDefaultSharedPreferences(context))
     }
 }
