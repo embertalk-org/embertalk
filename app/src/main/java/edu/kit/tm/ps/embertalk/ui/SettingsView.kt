@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.Warning
@@ -105,6 +106,15 @@ fun RatchetState(
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 Icon(imageVector = Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh))
+            }
+            IconButton(
+                onClick = {
+                    keys.private().ratchet()
+                    remainingRatchets.value = calcRemaining()
+                },
+                modifier = Modifier.align(Alignment.CenterVertically)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(id = R.string.refresh))
             }
         }
     }
