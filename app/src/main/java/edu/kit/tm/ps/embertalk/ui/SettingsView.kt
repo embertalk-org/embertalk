@@ -88,10 +88,18 @@ fun RatchetState(
             style = MaterialTheme.typography.headlineSmall
         )
         Row {
-            Text(
-                text = "Remaining epochs: %s".format(remainingRatchets.value),
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
+            if (remainingRatchets.value != 0L) {
+                Text(
+                    text = "Remaining epochs: %s".format(remainingRatchets.value),
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            } else {
+                Text(
+                    text = "Synchronized!",
+                    color = Color.Green,
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
             IconButton(
                 onClick = { remainingRatchets.value = calcRemaining() },
                 modifier = Modifier.align(Alignment.CenterVertically)
