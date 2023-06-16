@@ -231,6 +231,10 @@ class BluetoothSyncService : Service() {
             }
         }
 
+        fun stop(context: Context) {
+            context.stopService(Intent(context, BluetoothSyncService::class.java))
+        }
+
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter {
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             return bluetoothManager.adapter

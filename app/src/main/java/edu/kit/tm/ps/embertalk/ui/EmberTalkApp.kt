@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -155,6 +156,12 @@ fun EmberScaffold(
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = stringResource(R.string.start_service)
+                            )
+                        }
+                        IconButton(onClick = { BluetoothSyncService.stop(context) }) {
+                            Icon(
+                                imageVector = Icons.Filled.Stop,
+                                contentDescription = stringResource(R.string.stop_service)
                             )
                         }
                         IconButton(onClick = {
