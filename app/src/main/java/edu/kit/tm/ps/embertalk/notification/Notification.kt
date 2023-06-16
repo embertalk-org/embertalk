@@ -3,26 +3,27 @@ package edu.kit.tm.ps.embertalk.notification
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Service
+import android.content.Context
 import android.content.Context.NOTIFICATION_SERVICE
 import androidx.core.app.NotificationCompat
 
-object PersistentNotification {
+object Notification {
     fun build(
-        service: Service,
+        context: Context,
         channelName: String,
-        contentText: String
-    ): Notification? {
+        contentText: String,
+        importance: Int = NotificationManager.IMPORTANCE_DEFAULT
+    ): Notification {
 
         val channel = NotificationChannel(
-            service.javaClass.name,
+            context.javaClass.name,
             channelName,
-            NotificationManager.IMPORTANCE_NONE
+            importance
         )
-        (service.getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
+        (context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(
             channel
         )
-        return NotificationCompat.Builder(service, service.javaClass.name)
+        return NotificationCompat.Builder(context, context.javaClass.name)
             .setContentTitle(channelName)
             .setContentText(contentText).build()
     }
