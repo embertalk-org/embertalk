@@ -88,7 +88,7 @@ fun RatchetState(
             style = MaterialTheme.typography.headlineSmall
         )
         Row {
-            if (remainingRatchets.value != 0L) {
+            if (keys.inSync()) {
                 Text(
                     text = "Remaining epochs: %s".format(remainingRatchets.value),
                     modifier = Modifier.align(Alignment.CenterVertically)

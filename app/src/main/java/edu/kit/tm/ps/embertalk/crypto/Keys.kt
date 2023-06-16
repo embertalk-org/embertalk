@@ -44,6 +44,10 @@ class Keys(
             .apply()
     }
 
+    fun inSync(): Boolean {
+        return remainingRatchets() == 0L
+    }
+
     fun remainingRatchets(): Long {
         return epochProvider.current() - private.currentEpoch()
     }
