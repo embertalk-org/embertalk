@@ -59,9 +59,9 @@ class Keys(
     private fun ratchetPrivateTo(epoch: Long) {
         for (i in 0 until epoch - private.currentEpoch()) {
             private.ratchet()
-            Log.d(TAG, "Ratchet")
             if (i % 10 == 0L) {
                 storeKeys()
+                Log.d(TAG, "Stored intermediate ratchet result")
             }
         }
         storeKeys()
