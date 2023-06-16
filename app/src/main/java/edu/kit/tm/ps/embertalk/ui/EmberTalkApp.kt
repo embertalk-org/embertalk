@@ -110,7 +110,8 @@ fun EmberTalkApp(
                 arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
             ) {
                 EmberScaffold(navController = navController, title = stringResource(R.string.share_contact), toolWindow = true) {
-                    QrCodeView(it.arguments!!.getString("pubKey")!!)
+                    val key = it.arguments!!.getString("pubKey")!!
+                    QrCodeView(key)
                 }
             }
         }

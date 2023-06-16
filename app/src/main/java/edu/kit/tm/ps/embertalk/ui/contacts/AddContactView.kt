@@ -56,7 +56,7 @@ fun AddContactView(
             } else {
                 val withoutPrefix = result.contents.removePrefix("ember://")
                 val parts = withoutPrefix.split("/")
-                keyParts[parts[0].toInt()] = parts[1]
+                keyParts[parts[0].toInt()] = parts[1].trim()
             }
         }
     )
@@ -103,8 +103,8 @@ fun AddContactView(
                     if (name.value != "") {
                         contactsViewModel.viewModelScope.launch {
                             val pubKey = buildString {
-                                for (i in 1..keyParts.size) {
-                                    append(keyParts[i])
+                                for (i in 0 until keyParts.size) {
+                                    append(keyParts[i]!!)
                                 }
                             }
                             contactsViewModel.add(Contact(name = name.value, pubKey = pubKey))

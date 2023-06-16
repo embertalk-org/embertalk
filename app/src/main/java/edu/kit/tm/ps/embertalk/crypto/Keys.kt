@@ -14,8 +14,8 @@ class Keys(
     fun regenerate() {
         val keyPair = KeyGen.generateKeypair()
         prefs.edit()
-            .putString(Preferences.PRIVATE_KEY, Base64.encodeToString(keyPair.privateKey().serialize(), Base64.URL_SAFE))
-            .putString(Preferences.PUBLIC_KEY, Base64.encodeToString(keyPair.publicKey().serialize(), Base64.URL_SAFE))
+            .putString(Preferences.PRIVATE_KEY, privKeyString(keyPair.privateKey()))
+            .putString(Preferences.PUBLIC_KEY, pubKeyString(keyPair.publicKey()))
             .apply()
     }
 
@@ -29,5 +29,13 @@ class Keys(
 
     fun decode(pubKey: String): PublicKey {
         return PublicKey.deserialize(Base64.decode(pubKey, Base64.URL_SAFE))
+    }
+
+    private fun privKeyString(priv: PrivateKey): String? {
+        return Base64.encodeToString(priv.serialize(), Base64.URL_SAFE)
+    }
+
+    private fun pubKeyString(pub: PublicKey): String? {
+        return Base64.encodeToString(pub.serialize(), Base64.URL_SAFE)
     }
 }
