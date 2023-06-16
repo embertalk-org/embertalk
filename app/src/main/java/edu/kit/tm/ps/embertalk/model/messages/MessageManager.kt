@@ -21,7 +21,7 @@ class MessageManager(
 
     suspend fun handle(message: Message, publicKey: PublicKey) {
         val currentEpoch = epochProvider.current()
-        //TODO ratchet key up until current epoch
+        keys.ratchetPublicTo(publicKey, currentEpoch)
         val messageWithEpoch = message.copy(epoch = currentEpoch)
         messageRepository.insert(messageWithEpoch)
         encryptedRepository.insert(messageWithEpoch.encode { publicKey.encrypt(it) })
@@ -29,9 +29,8 @@ class MessageManager(
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         val currentEpoch = epochProvider.current()
-        val priv = keys.private()
-        //TODO ratchet key up until current epoch
-        val message = Message.decode(encryptedMessage, currentEpoch) { priv.decrypt(it) }
+        keys.ratchetPrivateTo(currentEpoch)
+        val message = Message.decode(encryptedMessage, currentEpoch) { keys.private().decrypt(it) }
         encryptedRepository.insert(encryptedMessage)
         message?.let { messageRepository.insert(it) }
     }
