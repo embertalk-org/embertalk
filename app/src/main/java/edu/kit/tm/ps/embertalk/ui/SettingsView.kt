@@ -90,13 +90,13 @@ fun RatchetState(
         Row {
             if (keys.inSync()) {
                 Text(
-                    text = "Remaining epochs: %s".format(remainingRatchets.value),
+                    text = "Synchronized!",
+                    color = Color.Green,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             } else {
                 Text(
-                    text = "Synchronized!",
-                    color = Color.Green,
+                    text = "Remaining epochs: %s".format(remainingRatchets.value),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
