@@ -24,11 +24,10 @@
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="qr_code">QR-Code</string>
     <string name="back">Back</string>
-    <string name="regenerate_keys_alert_text">This will (re)generate your keys.
-        If you just set up the app this is totally safe and needs to be done so you are able to communicate.
+    <string name="regenerate_keys_alert_text">This will regenerate your keys.
         If you already used EmberTalk before, this will invalidate your old keypair and contacts will
-        need to get your new key to be able to send you messages again!</string>
-    <string name="regenerate_keys_alert_title">(Re)generate Keys</string>
+        need to get your new key to be able to send you messages again! This might take a few seconds.</string>
+    <string name="regenerate_keys_alert_title">Regenerate Keys</string>
     <string name="embertalk">EmberTalk</string>
     <string name="share_contact">Share Contact</string>
     <string name="add_contact">Add Contact</string>
