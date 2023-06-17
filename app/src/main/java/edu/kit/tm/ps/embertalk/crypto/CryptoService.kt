@@ -19,7 +19,7 @@ class CryptoService(
         ratchetToCurrent()
     }
 
-    private suspend fun ratchetToCurrent() {
+    suspend fun ratchetToCurrent() {
         lock.withLock {
             keys.ratchetPrivateToCurrent()
         }
@@ -32,7 +32,6 @@ class CryptoService(
     }
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
-        ratchetToCurrent()
         return Message.decode(encryptedMessage, keys.private().currentEpoch(), keys.private()::decrypt)
     }
 
