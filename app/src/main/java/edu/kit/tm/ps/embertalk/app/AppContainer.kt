@@ -2,7 +2,7 @@ package edu.kit.tm.ps.embertalk.app
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import edu.kit.tm.ps.embertalk.crypto.Keys
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.epoch.SysTimeEpochprovider
 import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
@@ -16,17 +16,16 @@ import edu.kit.tm.ps.embertalk.model.messages.encrypted.OfflineEncryptedMessageR
 interface AppContainer {
     val messageManager: MessageManager
     val contactManager: ContactManager
-    val keys: Keys
+    val cryptoService: CryptoService
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
 
     override val messageManager: MessageManager by lazy {
         MessageManager(
-            SysTimeEpochprovider(),
             OfflineMessageRepository(MessageDb.getDb(context).dao()),
             OfflineEncryptedMessageRepository(EncryptedMessageDb.getDb(context).dao()),
-            keys
+            cryptoService
         )
     }
 
@@ -35,7 +34,7 @@ class AppDataContainer(private val context: Context) : AppContainer {
             OfflineContactRepository(ContactDb.getDb(context).dao())
         )
     }
-    override val keys: Keys by lazy {
-        Keys(SysTimeEpochprovider(), PreferenceManager.getDefaultSharedPreferences(context))
+    override val cryptoService: CryptoService by lazy {
+        CryptoService(SysTimeEpochprovider(), PreferenceManager.getDefaultSharedPreferences(context))
     }
 }

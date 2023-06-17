@@ -45,7 +45,7 @@ import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
-import edu.kit.tm.ps.embertalk.crypto.Keys
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
@@ -70,7 +70,7 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
 
 @Composable
 fun EmberTalkApp(
-    keys: Keys,
+    cryptoService: CryptoService,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -94,12 +94,12 @@ fun EmberTalkApp(
             }
             composable(Screen.Messages.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.messages)) {
-                    MessageView(keys = keys, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+                    MessageView(cryptoService = cryptoService, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
                 }
             }
             composable(Screen.Settings.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
-                    SettingsView(keys, messageViewModel)
+                    SettingsView(cryptoService, messageViewModel)
                 }
             }
             composable(

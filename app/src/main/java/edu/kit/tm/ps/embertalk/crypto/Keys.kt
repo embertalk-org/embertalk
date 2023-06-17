@@ -9,7 +9,7 @@ import edu.kit.tm.ps.PublicKey
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 
-class Keys(
+internal class Keys(
     private val epochProvider: EpochProvider,
     private val prefs: SharedPreferences,
 ) {
@@ -67,9 +67,10 @@ class Keys(
         storeKeys()
     }
 
-    fun ratchetPublicTo(pub: PublicKey, epoch: Long) {
-        if (epoch > pub.currentEpoch()) {
-            pub.fastForward(epoch - pub.currentEpoch())
+    fun ratchetPublicToCurrent(pub: PublicKey) {
+        val currentEpoch = epochProvider.current()
+        if (currentEpoch > pub.currentEpoch()) {
+            pub.fastForward(currentEpoch - pub.currentEpoch())
         }
     }
 

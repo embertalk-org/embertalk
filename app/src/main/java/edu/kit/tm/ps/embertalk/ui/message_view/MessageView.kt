@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.crypto.Keys
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.ui.MessageCard
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
-    keys: Keys,
+    cryptoService: CryptoService,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
@@ -72,13 +72,13 @@ fun MessageView(
                 }
             }
         }
-        SendMessageField(keys = keys, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+        SendMessageField(cryptoService = cryptoService, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
     }
 }
 
 @Composable
 fun SendMessageField(
-    keys: Keys,
+    cryptoService: CryptoService,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier,
@@ -92,7 +92,7 @@ fun SendMessageField(
         )
         Spacer(modifier = Modifier.weight(1f))
         SubmitButton(
-            keys = keys,
+            cryptoService = cryptoService,
             message = message,
             contactsViewModel = contactsViewModel,
             messageViewModel = messageViewModel
@@ -102,7 +102,7 @@ fun SendMessageField(
 
 @Composable
 fun SubmitButton(
-    keys: Keys,
+    cryptoService: CryptoService,
     message: MutableState<String>,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
@@ -146,7 +146,7 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, epoch = 0), keys.decode(item.pubKey)) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, epoch = 0), item.pubKey) }
                                             message.value = ""
                                         }
                                     ) {

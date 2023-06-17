@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.rounded.Warning
@@ -18,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -31,19 +31,22 @@ import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.crypto.Keys
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsView(
-    keys: Keys,
+    cryptoService: CryptoService,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val prefs = PreferenceManager.getDefaultSharedPreferences(context)!!
+
+    val syncState = remember { mutableStateOf(cryptoService.syncState()) }
     Column(
         modifier = Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -67,8 +70,8 @@ fun SettingsView(
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
-            RatchetState(keys)
-            RegenerateKeysButton(keys)
+            RatchetState(syncState, cryptoService)
+            RegenerateKeysButton(syncState, cryptoService)
             DeleteAllButton(messageViewModel = messageViewModel)
         }
     }
@@ -76,10 +79,9 @@ fun SettingsView(
 
 @Composable
 fun RatchetState(
-    keys: Keys,
+    syncState: MutableState<SyncState>,
+    cryptoService: CryptoService,
 ) {
-    val calcRemaining = { keys.remainingRatchets() }
-    val remainingRatchets = remember { mutableStateOf(calcRemaining()) }
     Column(
         Modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
@@ -89,32 +91,26 @@ fun RatchetState(
             style = MaterialTheme.typography.headlineSmall
         )
         Row {
-            if (keys.inSync()) {
-                Text(
+            when (val currentState = syncState.value) {
+                is SyncState.Synchronized -> Text(
                     text = "Synchronized!",
                     color = Color.Green,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
-            } else {
-                Text(
-                    text = "Remaining epochs: %s".format(remainingRatchets.value),
+                is SyncState.Synchronizing -> Text(
+                    text = "Remaining epochs: %s".format(currentState.remainingEpochs),
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+                is SyncState.Initializing -> Text(
+                    text = "Keys are still initializing...",
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
             IconButton(
-                onClick = { remainingRatchets.value = calcRemaining() },
+                onClick = { syncState.value = cryptoService.syncState() },
                 modifier = Modifier.align(Alignment.CenterVertically)
             ) {
                 Icon(imageVector = Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh))
-            }
-            IconButton(
-                onClick = {
-                    keys.private().ratchet()
-                    remainingRatchets.value = calcRemaining()
-                },
-                modifier = Modifier.align(Alignment.CenterVertically)
-            ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = stringResource(id = R.string.refresh))
             }
         }
     }
@@ -122,13 +118,15 @@ fun RatchetState(
 
 @Composable
 fun RegenerateKeysButton(
-    keys: Keys,
+    syncState: MutableState<SyncState>,
+    cryptoService: CryptoService,
     modifier: Modifier = Modifier
 ) {
     val openDialog = remember { mutableStateOf(false) }
-    TextButton(onClick = {
-        openDialog.value = true
-    }) {
+    TextButton(
+        enabled = syncState.value == SyncState.Synchronized,
+        onClick = { openDialog.value = true }
+    ) {
         Row {
             Icon(
                 imageVector = Icons.Rounded.Warning,
@@ -158,7 +156,7 @@ fun RegenerateKeysButton(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
                     onClick = {
                         openDialog.value = false
-                        coroutineScope.launch { keys.regenerate() }
+                        coroutineScope.launch { cryptoService.regenerate() }
                     }
                 ) {
                     Text("Confirm")

@@ -3,7 +3,6 @@ package edu.kit.tm.ps.embertalk.ui.message_view
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.kit.tm.ps.PublicKey
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
@@ -35,7 +34,7 @@ class MessageViewModel(
         }
     }
 
-    suspend fun saveMessage(message: Message, publicKey: PublicKey) {
+    suspend fun saveMessage(message: Message, publicKey: String) {
         messageManager.handle(message, publicKey)
         updateMessages()
     }

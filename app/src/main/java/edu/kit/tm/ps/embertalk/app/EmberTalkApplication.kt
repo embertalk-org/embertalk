@@ -16,7 +16,7 @@ class EmberTalkApplication : Application() {
         applicationScope.launch {
             withContext(Dispatchers.Default) {
                 while (true) {
-                    container.keys.ratchetPrivateToCurrent()
+                    container.cryptoService.initialize()
                 }
             }
         }

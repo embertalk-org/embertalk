@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
             EmberTalkTheme {
                 val app = this.application as EmberTalkApplication
                 EmberTalkApp(
-                    keys = app.container.keys
+                    cryptoService = app.container.cryptoService
                 )
             }
         }

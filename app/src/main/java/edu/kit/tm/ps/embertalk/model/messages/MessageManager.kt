@@ -1,9 +1,7 @@
 package edu.kit.tm.ps.embertalk.model.messages
 
 import android.util.Log
-import edu.kit.tm.ps.PublicKey
-import edu.kit.tm.ps.embertalk.crypto.Keys
-import edu.kit.tm.ps.embertalk.epoch.EpochProvider
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
@@ -13,24 +11,21 @@ import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageReposito
 import kotlinx.coroutines.flow.Flow
 
 class MessageManager(
-    private val epochProvider: EpochProvider,
     private val messageRepository: MessageRepository,
     private val encryptedRepository: EncryptedMessageRepository,
-    private val keys: Keys,
+    private val cryptoService: CryptoService,
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun handle(message: Message, publicKey: PublicKey) {
-        val currentEpoch = epochProvider.current()
-        Log.d(TAG, "Handling message at epoch %s".format(currentEpoch))
-        keys.ratchetPublicTo(publicKey, currentEpoch)
-        val messageWithEpoch = message.copy(epoch = currentEpoch)
+    suspend fun handle(message: Message, publicKey: String) {
+        val messageWithEpoch = message.copy(epoch = cryptoService.currentEpoch())
         messageRepository.insert(messageWithEpoch)
-        encryptedRepository.insert(messageWithEpoch.encode { publicKey.encrypt(it) })
+        val encrypted = cryptoService.encrypt(messageWithEpoch, publicKey)
+        encryptedRepository.insert(encrypted)
     }
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
-        val message = Message.decode(encryptedMessage, keys.private().currentEpoch()) { keys.private().decrypt(it) }
+        val message = cryptoService.decrypt(encryptedMessage)
         encryptedRepository.insert(encryptedMessage)
         if (message != null) {
             messageRepository.insert(message)
