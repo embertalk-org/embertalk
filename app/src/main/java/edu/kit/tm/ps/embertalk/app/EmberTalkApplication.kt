@@ -1,11 +1,9 @@
 package edu.kit.tm.ps.embertalk.app
 
 import android.app.Application
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.runBlocking
 
 class EmberTalkApplication : Application() {
 
@@ -13,14 +11,14 @@ class EmberTalkApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppDataContainer(this)
-        applicationScope.launch {
-            withContext(Dispatchers.Default) {
-                container.cryptoService.initialize()
-                while (true) {
-                    container.cryptoService.ratchetToCurrent()
+        object : Thread() {
+            override fun run() {
+                runBlocking {
+                    container.cryptoService.initialize()
+                    container.cryptoService.fastForward()
                 }
             }
-        }
+        }.start()
     }
 
     override fun onLowMemory() {
