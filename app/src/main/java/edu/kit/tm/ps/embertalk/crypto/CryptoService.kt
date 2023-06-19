@@ -28,6 +28,7 @@ class CryptoService(
     suspend fun encrypt(message: Message, publicKey: String): EncryptedMessage {
         val pubKey = keys.decode(publicKey)
         keys.fastForward(pubKey)
+        keys.fastForward()
         return message.encode(pubKey::encrypt)
     }
 
