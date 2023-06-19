@@ -2,7 +2,6 @@ package edu.kit.tm.ps.embertalk.crypto
 
 import android.content.SharedPreferences
 import android.util.Base64
-import android.util.Log
 import edu.kit.tm.ps.KeyGen
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
@@ -45,29 +44,19 @@ internal class Keys(
     }
 
     fun inSync(): Boolean {
-        return remainingRatchets() == 0L
+        return epochsLate() == 0L
     }
 
-    fun remainingRatchets(): Long {
+    fun epochsLate(): Long {
         return epochProvider.current() - private.currentEpoch()
     }
 
-    fun ratchetPrivateToCurrent() {
-        ratchetPrivateTo(epochProvider.current())
-    }
-
-    private fun ratchetPrivateTo(epoch: Long) {
-        for (i in 0 until epoch - private.currentEpoch()) {
-            private.ratchet()
-            if (i % 10 == 0L) {
-                storeKeys()
-                Log.d(TAG, "Stored intermediate ratchet result")
-            }
-        }
+    fun fastForward() {
+        private.fastForward(epochProvider.current())
         storeKeys()
     }
 
-    fun ratchetPublicToCurrent(pub: PublicKey) {
+    fun fastForward(pub: PublicKey) {
         val currentEpoch = epochProvider.current()
         if (currentEpoch > pub.currentEpoch()) {
             pub.fastForward(currentEpoch - pub.currentEpoch())
@@ -88,9 +77,5 @@ internal class Keys(
 
     private fun pubKeyString(pub: PublicKey): String? {
         return Base64.encodeToString(pub.serialize(), Base64.URL_SAFE)
-    }
-
-    companion object {
-        private const val TAG = "Keys"
     }
 }

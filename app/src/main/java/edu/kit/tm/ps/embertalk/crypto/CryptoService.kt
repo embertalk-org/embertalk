@@ -16,18 +16,18 @@ class CryptoService(
 
     suspend fun initialize() {
         keys = Keys(epochProvider, sharedPreferences)
-        ratchetToCurrent()
+        fastForward()
     }
 
-    suspend fun ratchetToCurrent() {
+    suspend fun fastForward() {
         lock.withLock {
-            keys.ratchetPrivateToCurrent()
+            keys.fastForward()
         }
     }
 
     suspend fun encrypt(message: Message, publicKey: String): EncryptedMessage {
         val pubKey = keys.decode(publicKey)
-        keys.ratchetPublicToCurrent(pubKey)
+        keys.fastForward(pubKey)
         return message.encode(pubKey::encrypt)
     }
 
@@ -41,7 +41,7 @@ class CryptoService(
 
     suspend fun regenerate() {
         keys.regenerate()
-        keys.ratchetPrivateToCurrent()
+        keys.fastForward()
     }
 
     fun isInitialized(): Boolean {
@@ -54,7 +54,7 @@ class CryptoService(
         } else if (keys.inSync()) {
             SyncState.Synchronized
         } else {
-            SyncState.Synchronizing(keys.remainingRatchets())
+            SyncState.Synchronizing(keys.epochsLate())
         }
     }
 }
