@@ -2,8 +2,10 @@ package edu.kit.tm.ps.embertalk.ui.contacts
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -14,8 +16,8 @@ import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -62,7 +64,10 @@ fun AddContactView(
     )
 
     Column(
-        modifier = Modifier.padding(10.dp)
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxHeight(),
+        verticalArrangement = Arrangement.Bottom
     ) {
         OutlinedTextField(
             label = { Text("Contact Name") },
@@ -97,41 +102,40 @@ fun AddContactView(
                 }
             }
         }
-        Row {
-            IconButton(
-                onClick = {
-                    if (name.value != "") {
-                        contactsViewModel.viewModelScope.launch {
-                            val pubKey = buildString {
-                                for (i in 0 until keyParts.size) {
-                                    append(keyParts[i]!!)
-                                }
+        Spacer(modifier = Modifier.weight(1f))
+        FloatingActionButton(
+            onClick = { scanLauncher.launch(ScanOptions()) },
+            modifier = Modifier
+                .align(Alignment.End)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.QrCodeScanner,
+                contentDescription = stringResource(R.string.scan_qr_code)
+            )
+        }
+        Spacer(modifier = Modifier.weight(9f))
+        FloatingActionButton(
+            onClick = {
+                if (name.value != "") {
+                    contactsViewModel.viewModelScope.launch {
+                        val pubKey = buildString {
+                            for (i in 0 until keyParts.size) {
+                                append(keyParts[i]!!)
                             }
-                            contactsViewModel.add(Contact(name = name.value, pubKey = pubKey))
                         }
-                        navController.popBackStack()
+                        contactsViewModel.add(Contact(name = name.value, pubKey = pubKey))
                     }
-                },
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Save,
-                    contentDescription = stringResource(R.string.scan_qr_code)
-                )
-            }
-            IconButton(
-                onClick = { scanLauncher.launch(ScanOptions()) },
-                modifier = Modifier
-                    .padding(10.dp)
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.QrCodeScanner,
-                    contentDescription = stringResource(R.string.scan_qr_code)
-                )
-            }
+                    navController.popBackStack()
+                }
+            },
+            modifier = Modifier
+                .padding(10.dp)
+                .align(Alignment.End)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Save,
+                contentDescription = stringResource(R.string.scan_qr_code)
+            )
         }
     }
 }
