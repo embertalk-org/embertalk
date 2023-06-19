@@ -29,10 +29,6 @@ class ClientExecutorService {
         }
     }
 
-    fun shutdown() {
-        service.shutdown()
-    }
-
     companion object {
         private const val TAG = "ClientExecutorService"
     }

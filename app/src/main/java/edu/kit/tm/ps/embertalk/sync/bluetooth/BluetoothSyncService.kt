@@ -189,7 +189,6 @@ class BluetoothSyncService : Service() {
 
         stopBluetoothLeDiscovery()
         bluetoothClassicServer.shutdown()
-        clientExecutorService.shutdown()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")
