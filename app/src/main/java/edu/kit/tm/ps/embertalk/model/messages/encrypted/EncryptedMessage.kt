@@ -7,7 +7,8 @@ import androidx.room.PrimaryKey
 data class EncryptedMessage(
     @PrimaryKey
     val hash: Int,
-    val bytes: ByteArray
+    val bytes: ByteArray,
+    val epoch: Long,
 ) {
 
     override fun equals(other: Any?): Boolean {

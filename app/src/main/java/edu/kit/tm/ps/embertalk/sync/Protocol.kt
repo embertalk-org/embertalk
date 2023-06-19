@@ -74,7 +74,7 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
     fun readMessage(): EncryptedMessage {
         val bytes = inputStream.readByteArray()
         Log.d(TAG, "Read message of length %s".format(bytes.size))
-        return EncryptedMessage(hash = bytes.contentHashCode(), bytes = bytes)
+        return EncryptedMessage(hash = bytes.contentHashCode(), bytes = bytes, epoch = 0)
     }
 
     private fun DataOutputStream.writeString(string: String) {

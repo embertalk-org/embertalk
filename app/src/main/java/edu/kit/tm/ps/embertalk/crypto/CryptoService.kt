@@ -33,7 +33,7 @@ class CryptoService(
     }
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
-        return Message.decode(encryptedMessage, keys.private().currentEpoch(), keys.private()::decrypt)
+        return Message.decode(encryptedMessage, keys.private()::decrypt)
     }
 
     fun currentEpoch(): Long {

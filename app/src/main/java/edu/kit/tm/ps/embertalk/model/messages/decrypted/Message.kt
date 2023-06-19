@@ -14,24 +14,24 @@ data class Message(
     val id: Int = 0,
     val content: String,
     val mine: Boolean = false,
-    val epoch: Long,
+    val timestamp: Long,
 ): Parcelable {
     fun encode(transformer: (ByteArray) -> ByteArray): EncryptedMessage {
         val bytes = ByteBuffer.allocate(Int.SIZE_BYTES)
             .putInt(content.hashCode()).array() + content.encodeToByteArray()
         val transformed = transformer.invoke(bytes)
-        return EncryptedMessage(hash = transformed.contentHashCode(), bytes = transformed)
+        return EncryptedMessage(hash = transformed.contentHashCode(), bytes = transformed, epoch = 0)
     }
 
     companion object {
-        fun decode(encryptedMessage: EncryptedMessage, epoch: Long, transformer: (ByteArray) -> ByteArray): Message? {
+        fun decode(encryptedMessage: EncryptedMessage, transformer: (ByteArray) -> ByteArray): Message? {
             val transformed = transformer.invoke(encryptedMessage.bytes)
             val buffer = ByteBuffer.wrap(transformed)
             val contentHash = buffer.int
             val contentBytes = ByteArray(buffer.remaining())
             buffer.get(contentBytes)
             val content = contentBytes.decodeToString()
-            return if (contentHash == content.hashCode()) Message(content = content, epoch = epoch) else null
+            return if (contentHash == content.hashCode()) Message(content = content, timestamp = System.currentTimeMillis()) else null
         }
     }
 }

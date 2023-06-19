@@ -23,4 +23,7 @@ interface EncryptedMessageDao {
 
     @Query("DELETE FROM messages")
     suspend fun deleteAll()
+
+    @Query("DELETE FROM messages WHERE epoch < :epoch")
+    suspend fun deleteOlderThan(epoch: Long)
 }

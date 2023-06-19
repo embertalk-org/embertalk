@@ -18,15 +18,14 @@ class MessageManager(
     private val observers = HashSet<EmberObserver>()
 
     suspend fun handle(message: Message, publicKey: String) {
-        val messageWithEpoch = message.copy(epoch = cryptoService.currentEpoch())
-        messageRepository.insert(messageWithEpoch)
-        val encrypted = cryptoService.encrypt(messageWithEpoch, publicKey)
+        messageRepository.insert(message)
+        val encrypted = cryptoService.encrypt(message, publicKey)
         encryptedRepository.insert(encrypted)
     }
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         val message = cryptoService.decrypt(encryptedMessage)
-        encryptedRepository.insert(encryptedMessage)
+        encryptedRepository.insert(encryptedMessage.copy(epoch = cryptoService.currentEpoch()))
         if (message != null) {
             messageRepository.insert(message)
             Log.d(TAG, "Message inserted")
