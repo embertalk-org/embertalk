@@ -15,7 +15,6 @@ class EmberTalkApplication : Application() {
             override fun run() {
                 runBlocking {
                     container.cryptoService.initialize()
-                    container.cryptoService.fastForward()
                 }
             }
         }.start()
