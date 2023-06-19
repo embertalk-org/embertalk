@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.crypto
 
 import android.content.SharedPreferences
 import android.util.Base64
+import android.util.Log
 import edu.kit.tm.ps.KeyGen
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
@@ -29,6 +30,7 @@ internal class Keys(
     }
 
     fun regenerate(): KeyGen.KeyPair {
+        Log.d("Keys", "epochProvider.current %s".format(epochProvider.current()))
         val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
@@ -52,7 +54,10 @@ internal class Keys(
     }
 
     fun fastForward() {
-        private.fastForward(epochProvider.current())
+        val currentEpoch = epochProvider.current()
+        if (currentEpoch > private.currentEpoch()) {
+            private.fastForward(currentEpoch - private.currentEpoch())
+        }
         storeKeys()
     }
 
