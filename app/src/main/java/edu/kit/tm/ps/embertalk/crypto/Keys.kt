@@ -30,7 +30,7 @@ class Keys(
     }
 
     fun regenerate(): KeyGen.KeyPair {
-        val keyPair = KeyGen.generateKeypair()
+        val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
         storeKeys()
