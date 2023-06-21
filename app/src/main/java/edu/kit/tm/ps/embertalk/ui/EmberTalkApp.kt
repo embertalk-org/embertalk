@@ -94,7 +94,7 @@ fun EmberTalkApp(
             }
             composable(Screen.Messages.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.messages)) {
-                    MessageView(cryptoService = cryptoService, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+                    MessageView(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
                 }
             }
             composable(Screen.Settings.route) {

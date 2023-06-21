@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.ui.MessageCard
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
@@ -43,7 +42,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
-    cryptoService: CryptoService,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
@@ -71,13 +69,12 @@ fun MessageView(
                 }
             }
         }
-        SendMessageField(cryptoService = cryptoService, contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
+        SendMessageField(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
     }
 }
 
 @Composable
 fun SendMessageField(
-    cryptoService: CryptoService,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier,
@@ -91,7 +88,6 @@ fun SendMessageField(
         )
         Spacer(modifier = Modifier.weight(1f))
         SubmitButton(
-            cryptoService = cryptoService,
             message = message,
             contactsViewModel = contactsViewModel,
             messageViewModel = messageViewModel
@@ -101,7 +97,6 @@ fun SendMessageField(
 
 @Composable
 fun SubmitButton(
-    cryptoService: CryptoService,
     message: MutableState<String>,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
