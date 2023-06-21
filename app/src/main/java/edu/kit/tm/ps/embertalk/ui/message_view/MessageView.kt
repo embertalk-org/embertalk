@@ -3,12 +3,14 @@
 package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -50,17 +52,17 @@ fun MessageView(
     val messageUiState by messageViewModel.uiState.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Bottom
     ) {
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .weight(9f)
         ) {
             items(messageUiState.messages) { item ->
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = modifier.fillMaxWidth(),
                     horizontalArrangement = if (item.mine) { Arrangement.End } else { Arrangement.Start }
                 ) {
                     MessageCard(
@@ -80,18 +82,25 @@ fun SendMessageField(
     modifier: Modifier = Modifier,
 ) {
     val message = rememberSaveable { mutableStateOf("") }
-    Row {
-        OutlinedTextField(
-            label = { Text(stringResource(id = R.string.your_message)) },
-            value = message.value,
-            onValueChange = { message.value = it }
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        SubmitButton(
-            message = message,
-            contactsViewModel = contactsViewModel,
-            messageViewModel = messageViewModel
-        )
+    BoxWithConstraints(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        val maxWidth = maxWidth
+        Row {
+            OutlinedTextField(
+                label = { Text(stringResource(id = R.string.your_message)) },
+                value = message.value,
+                onValueChange = { message.value = it },
+                modifier = Modifier.width(maxWidth * 0.8f).heightIn(0.dp, 150.dp)
+            )
+            SubmitButton(
+                message = message,
+                contactsViewModel = contactsViewModel,
+                messageViewModel = messageViewModel,
+                modifier = modifier.width(maxWidth * 0.8f).align(Alignment.CenterVertically)
+            )
+        }
     }
 }
 
@@ -107,15 +116,13 @@ fun SubmitButton(
         enabled = message.value != "",
         onClick = {
             openDialog.value = true
-        }
+        },
+        modifier = modifier
     ) {
-        Row {
-            Icon(
-                imageVector = Icons.Filled.Send,
-                contentDescription = stringResource(R.string.send_message),
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-        }
+        Icon(
+            imageVector = Icons.Filled.Send,
+            contentDescription = stringResource(R.string.send_message)
+        )
     }
     if (openDialog.value) {
         Dialog(
@@ -135,7 +142,9 @@ fun SubmitButton(
                                 Row {
                                     Text(
                                         text = item.name,
-                                        modifier = Modifier.padding(10.dp).align(Alignment.CenterVertically)
+                                        modifier = Modifier
+                                            .padding(10.dp)
+                                            .align(Alignment.CenterVertically)
                                     )
                                     IconButton(
                                         onClick = {
