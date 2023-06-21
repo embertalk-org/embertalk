@@ -3,6 +3,7 @@ package edu.kit.tm.ps.embertalk.app
 import android.app.Application
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class EmberTalkApplication : Application() {
@@ -18,6 +19,9 @@ class EmberTalkApplication : Application() {
                 }
             }
         }.start()
+        applicationScope.launch {
+            container.messageManager.deleteOld()
+        }
     }
 
     override fun onLowMemory() {

@@ -52,6 +52,10 @@ class MessageManager(
         encryptedRepository.deleteAll()
     }
 
+    suspend fun deleteOld() {
+        encryptedRepository.deleteOlderThan(cryptoService.currentEpoch())
+    }
+
     companion object {
         private const val TAG = "MessageManager"
     }
