@@ -14,11 +14,11 @@ fun MessageCard(
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        modifier = Modifier.padding(5.dp)
+        modifier = modifier.padding(5.dp)
     ) {
         Text(
             text = message,
-            modifier = Modifier.padding(10.dp)
+            modifier = modifier.padding(10.dp)
         )
     }
 }

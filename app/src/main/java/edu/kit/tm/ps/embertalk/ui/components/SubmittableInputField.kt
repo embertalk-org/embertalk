@@ -53,7 +53,7 @@ fun SubmittableTextField(
                 }
             },
             enabled = !isError.value,
-            modifier = Modifier.align(Alignment.CenterVertically)
+            modifier = modifier.align(Alignment.CenterVertically)
         ) {
             Icon(
                 imageVector = imageVector,
