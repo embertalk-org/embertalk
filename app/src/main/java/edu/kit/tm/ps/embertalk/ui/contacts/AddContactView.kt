@@ -1,16 +1,23 @@
 package edu.kit.tm.ps.embertalk.ui.contacts
 
+import android.content.ClipboardManager
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
@@ -18,6 +25,7 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -49,6 +57,7 @@ fun AddContactView(
 
     val name = rememberSaveable { mutableStateOf ("") }
     val keyParts = remember { mutableStateMapOf(0 to "") }
+    val key = remember { mutableStateOf("") }
 
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract(),
@@ -67,63 +76,113 @@ fun AddContactView(
         modifier = Modifier
             .padding(10.dp)
             .fillMaxHeight(),
-        verticalArrangement = Arrangement.Bottom
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom)
     ) {
         OutlinedTextField(
             label = { Text("Contact Name") },
             value = name.value,
             singleLine = true,
-            onValueChange = { name.value = it },
-            modifier = Modifier.padding(10.dp)
+            onValueChange = { name.value = it }
         )
-        ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
+        Text(
+            text = "Scanned Key Parts",
+            style = MaterialTheme.typography.headlineSmall,
+            modifier = Modifier.padding(10.dp, 0.dp)
+        )
+        BoxWithConstraints(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
         ) {
-            Text(
-                text = "Scanned Key Parts",
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(10.dp)
-            )
-            LazyRow(
-                Modifier.padding(10.dp)
+            val maxWidth = maxWidth
+            Row(
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                itemsIndexed(keyParts.entries.toList()) { index, item ->
-                    if (item.value != "") {
-                        Card(
-                            modifier = Modifier.padding(5.dp)
-                        ) {
-                            Text(
-                                text = "%s".format(item.key),
-                                modifier = Modifier.padding(10.dp)
-                            )
+                ElevatedCard(
+                    modifier = Modifier.width(maxWidth * 0.7f)
+                ) {
+                    LazyRow {
+                        itemsIndexed(keyParts.entries.toList()) { index, item ->
+                            if (item.value != "") {
+                                Card(
+                                    modifier = Modifier.padding(1.dp)
+                                ) {
+                                    Text(
+                                        text = "%s".format(item.key),
+                                        modifier = Modifier.padding(5.dp)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
-            }
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        FloatingActionButton(
-            onClick = { scanLauncher.launch(ScanOptions()) },
-            modifier = Modifier
-                .align(Alignment.End)
-        ) {
-            Icon(
-                imageVector = Icons.Filled.QrCodeScanner,
-                contentDescription = stringResource(R.string.scan_qr_code)
-            )
-        }
-        Spacer(modifier = Modifier.weight(9f))
-        FloatingActionButton(
-            onClick = {
-                if (name.value != "") {
-                    contactsViewModel.viewModelScope.launch {
-                        val pubKey = buildString {
+                IconButton(
+                    modifier = Modifier.width(maxWidth * 0.2f),
+                    onClick = { scanLauncher.launch(ScanOptions()) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.QrCodeScanner,
+                        contentDescription = stringResource(R.string.scan_qr_code)
+                    )
+                }
+                IconButton(
+                    modifier = Modifier.width(maxWidth * 0.2f),
+                    onClick = {
+                        key.value = buildString {
                             for (i in 0 until keyParts.size) {
                                 append(keyParts[i]!!)
                             }
                         }
-                        contactsViewModel.add(Contact(name = name.value, pubKey = pubKey))
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = stringResource(R.string.confirm)
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        BoxWithConstraints(
+            Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            val maxWidth = maxWidth
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    label = { Text(stringResource(id = R.string.public_key)) },
+                    value = key.value,
+                    singleLine = true,
+                    readOnly = true,
+                    modifier = Modifier.width(maxWidth * 0.8f),
+                    onValueChange = { key.value = it }
+                )
+                IconButton(
+                    modifier = Modifier.width(maxWidth * 0.2f),
+                    onClick = {
+                        val clipBoard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        val clipContent = clipBoard.primaryClip
+                        if (clipContent != null && clipContent.itemCount > 0) {
+                            val content = clipContent.getItemAt(0)
+                            if (content.text.startsWith("embertalk://")) {
+                                key.value = content.text.toString().removePrefix("embertalk://")
+                                return@IconButton
+                            }
+                        }
+                        Toast.makeText(context, "Your clipboard doesn't contain an embertalk code", Toast.LENGTH_SHORT).show()
+                    }
+                ) {
+                    Icon(imageVector = Icons.Filled.ContentPaste, contentDescription = "Paste")
+                }
+            }
+        }
+        Spacer(modifier = Modifier.weight(9f))
+        FloatingActionButton(
+            onClick = {
+                if (name.value != "" && key.value != "") {
+                    contactsViewModel.viewModelScope.launch {
+                        contactsViewModel.add(Contact(name = name.value, pubKey = key.value))
                     }
                     navController.popBackStack()
                 }

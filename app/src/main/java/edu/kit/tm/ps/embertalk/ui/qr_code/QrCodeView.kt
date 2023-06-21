@@ -1,33 +1,39 @@
 package edu.kit.tm.ps.embertalk.ui.qr_code
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import edu.kit.tm.ps.embertalk.R
 
 
@@ -36,18 +42,25 @@ fun QrCodeView(
     pubKey: String,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     val keys = pubKey.chunked(750)
     val contents = keys.mapIndexed { index, key ->
         "ember://%s/%s".format(index, key)
     }
     val currentPage = rememberSaveable { mutableStateOf(0) }
     Box(modifier = Modifier.fillMaxSize()) {
-        Column {
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
+                .fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom
+        ) {
             Card(
-                Modifier.padding(25.dp)
+                Modifier.padding(5.dp)
             ) {
                 Image(
-                    bitmap = encodeAsBitmap(contents[currentPage.value], 1500, 1500).asImageBitmap(),
+                    bitmap = encodeAsBitmap(contents[currentPage.value], 2000, 2000).asImageBitmap(),
                     contentDescription = stringResource(R.string.qr_code)
                 )
             }
@@ -74,14 +87,36 @@ fun QrCodeView(
                     )
                 }
             }
+            Spacer(modifier = Modifier.weight(9f))
+            FloatingActionButton(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .align(Alignment.End),
+                onClick = {
+                    val type = "text/plain"
+                    val subject = "EmberTalk Public Key"
+                    val shareWith = "ShareWith"
+
+                    val intent = Intent(Intent.ACTION_SEND)
+                    intent.type = type
+                    intent.putExtra(Intent.EXTRA_SUBJECT, subject)
+                    intent.putExtra(Intent.EXTRA_TEXT, "embertalk://$pubKey")
+
+                    ContextCompat.startActivity(
+                        context,
+                        Intent.createChooser(intent, shareWith),
+                        null
+                    )
+                }
+            ) {
+                Icon(imageVector = Icons.Filled.Share, contentDescription = "Share")
+            }
         }
     }
 }
 
 fun encodeAsBitmap(content: String, width: Int, height: Int): Bitmap {
-    val result: BitMatrix = MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, mapOf(
-        EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.L
-    ))
+    val result: BitMatrix = MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, width, height, null)
     val w = result.width
     val h = result.height
     val pixels = IntArray(w * h)
