@@ -21,9 +21,12 @@ fun InfoDialogButton(
     modifier: Modifier = Modifier
 ) {
     val openDialog = remember { mutableStateOf(false) }
-    IconButton(onClick = {
-        openDialog.value = true
-    }) {
+    IconButton(
+        onClick = {
+            openDialog.value = true
+        },
+        modifier = modifier
+    ) {
         Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(R.string.info))
     }
     if (openDialog.value) {

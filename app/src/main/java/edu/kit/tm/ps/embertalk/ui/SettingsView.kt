@@ -48,7 +48,7 @@ fun SettingsView(
 
     val syncState = remember { mutableStateOf(cryptoService.syncState()) }
     Column(
-        modifier = Modifier.padding(10.dp),
+        modifier = modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Column {
@@ -67,7 +67,7 @@ fun SettingsView(
                 )
                 Text(
                     text = stringResource(R.string.where_to_find_mac),
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    modifier = modifier.align(Alignment.CenterVertically)
                 )
             }
             RatchetState(syncState, cryptoService)
@@ -81,9 +81,10 @@ fun SettingsView(
 fun RatchetState(
     syncState: MutableState<SyncState>,
     cryptoService: CryptoService,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        Modifier.padding(10.dp),
+        modifier.padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         Text(
@@ -95,20 +96,20 @@ fun RatchetState(
                 is SyncState.Synchronized -> Text(
                     text = stringResource(R.string.synced),
                     color = Color.Green,
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    modifier = modifier.align(Alignment.CenterVertically)
                 )
                 is SyncState.Synchronizing -> Text(
                     text = stringResource(R.string.remaining_epochs_format).format(currentState.remainingEpochs),
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    modifier = modifier.align(Alignment.CenterVertically)
                 )
                 is SyncState.Initializing -> Text(
                     text = stringResource(R.string.still_initializing),
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                    modifier = modifier.align(Alignment.CenterVertically)
                 )
             }
             IconButton(
                 onClick = { syncState.value = cryptoService.syncState() },
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = modifier.align(Alignment.CenterVertically)
             ) {
                 Icon(imageVector = Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh))
             }
@@ -131,11 +132,11 @@ fun RegenerateKeysButton(
             Icon(
                 imageVector = Icons.Rounded.Warning,
                 contentDescription = stringResource(R.string.alert),
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = modifier.align(Alignment.CenterVertically)
             )
             Text(
                 text = stringResource(R.string.regenerate_keys),
-                modifier = Modifier
+                modifier = modifier
                     .padding(5.dp)
                     .align(Alignment.CenterVertically)
             )
@@ -180,11 +181,11 @@ fun DeleteAllButton(
             Icon(
                 imageVector = Icons.Rounded.Warning,
                 contentDescription = stringResource(R.string.alert),
-                modifier = Modifier.align(Alignment.CenterVertically)
+                modifier = modifier.align(Alignment.CenterVertically)
             )
             Text(
                 text = stringResource(R.string.delete_all_messages),
-                modifier = Modifier
+                modifier = modifier
                     .padding(5.dp)
                     .align(Alignment.CenterVertically)
             )
