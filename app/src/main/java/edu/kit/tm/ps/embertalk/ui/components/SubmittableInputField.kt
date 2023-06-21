@@ -19,11 +19,11 @@ fun SubmittableTextField(
     label: @Composable () -> Unit,
     imageVector: ImageVector,
     onSubmit: (String) -> Unit,
+    modifier: Modifier = Modifier,
     inputValidator: (String) -> Boolean = { true },
     initialValue: String = "",
     clearOnSubmit: Boolean = true,
     contentDescription: String = "",
-    modifier: Modifier = Modifier
 ) {
     val msgInput = rememberSaveable { mutableStateOf(initialValue) }
 
