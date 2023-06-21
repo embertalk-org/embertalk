@@ -26,7 +26,7 @@
     <string name="back">Back</string>
     <string name="regenerate_keys_alert_text">This will regenerate your keys.
         If you already used EmberTalk before, this will invalidate your old keypair and contacts will
-        need to get your new key to be able to send you messages again! This might take a few seconds.</string>
+        need to get your new key to be able to send you messages again! This operation might take a while.</string>
     <string name="regenerate_keys_alert_title">Regenerate Keys</string>
     <string name="embertalk">EmberTalk</string>
     <string name="share_contact">Share Contact</string>
@@ -36,4 +36,15 @@
     <string name="delete_all_messages_text">This will delete ALL messages from your storage</string>
     <string name="stop_service">Stop Service</string>
     <string name="confirm">Confirm</string>
+    <string name="send_to">Send to…</string>
+    <string name="delete">Delete</string>
+    <string name="not_an_embertalk_code">Your clipboard does not contain an EmberTalk code</string>
+    <string name="understood">Understood</string>
+    <string name="info">Info</string>
+    <string name="synced">Synchronized!</string>
+    <string name="remaining_epochs_format">Remaining epochs: %s</string>
+    <string name="still_initializing">Keys are still initializing…</string>
+    <string name="alert">Alert</string>
+    <string name="regenerate_keys">Regenerate keys</string>
+    <string name="cancel">Cancel</string>
 </resources>

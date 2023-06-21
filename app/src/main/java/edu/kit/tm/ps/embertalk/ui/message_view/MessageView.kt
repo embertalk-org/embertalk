@@ -133,8 +133,9 @@ fun SubmitButton(
                     modifier = Modifier.padding(10.dp)
                 ) {
                     Text(
-                        text = "Send to...",
-                        style = MaterialTheme.typography.headlineSmall
+                        text = stringResource(R.string.send_to),
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(5.dp)
                     )
                     LazyColumn {
                         items(contactsViewModel.uiState.value.contacts) { item ->

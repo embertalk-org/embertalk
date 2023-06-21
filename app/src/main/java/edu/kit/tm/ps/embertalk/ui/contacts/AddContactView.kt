@@ -170,7 +170,7 @@ fun AddContactView(
                                 return@IconButton
                             }
                         }
-                        Toast.makeText(context, "Your clipboard doesn't contain an embertalk code", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, R.string.not_an_embertalk_code, Toast.LENGTH_SHORT).show()
                     }
                 ) {
                     Icon(imageVector = Icons.Filled.ContentPaste, contentDescription = "Paste")

@@ -71,14 +71,14 @@ fun ContactsView(
                                 .align(Alignment.CenterVertically),
                             onClick = { navController.navigate(Screen.qrCodeRoute(item.pubKey)) },
                         ) {
-                            Icon(imageVector = Icons.Filled.QrCode, contentDescription = "delete")
+                            Icon(imageVector = Icons.Filled.QrCode, contentDescription = stringResource(R.string.qr_code))
                         }
                         IconButton(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
                             onClick = { contactsViewModel.viewModelScope.launch { contactsViewModel.delete(item) } },
                         ) {
-                            Icon(imageVector = Icons.Filled.Delete, contentDescription = "delete")
+                            Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(id = R.string.delete))
                         }
                     }
                 }

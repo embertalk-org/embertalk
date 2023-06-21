@@ -93,16 +93,16 @@ fun RatchetState(
         Row {
             when (val currentState = syncState.value) {
                 is SyncState.Synchronized -> Text(
-                    text = "Synchronized!",
+                    text = stringResource(R.string.synced),
                     color = Color.Green,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
                 is SyncState.Synchronizing -> Text(
-                    text = "Remaining epochs: %s".format(currentState.remainingEpochs),
+                    text = stringResource(R.string.remaining_epochs_format).format(currentState.remainingEpochs),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
                 is SyncState.Initializing -> Text(
-                    text = "Keys are still initializing...",
+                    text = stringResource(R.string.still_initializing),
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )
             }
@@ -130,11 +130,11 @@ fun RegenerateKeysButton(
         Row {
             Icon(
                 imageVector = Icons.Rounded.Warning,
-                contentDescription = "Alert",
+                contentDescription = stringResource(R.string.alert),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Text(
-                text = "(Re)generate keys",
+                text = stringResource(R.string.regenerate_keys),
                 modifier = Modifier
                     .padding(5.dp)
                     .align(Alignment.CenterVertically)
@@ -147,7 +147,7 @@ fun RegenerateKeysButton(
             text = { Text(stringResource(R.string.regenerate_keys_alert_text)) },
             dismissButton = {
                 Button(onClick = { openDialog.value = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             confirmButton = {
@@ -159,7 +159,7 @@ fun RegenerateKeysButton(
                         coroutineScope.launch { cryptoService.regenerate() }
                     }
                 ) {
-                    Text("Confirm")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             onDismissRequest = { openDialog.value = false }
@@ -179,7 +179,7 @@ fun DeleteAllButton(
         Row {
             Icon(
                 imageVector = Icons.Rounded.Warning,
-                contentDescription = "Alert",
+                contentDescription = stringResource(R.string.alert),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
             Text(
@@ -196,7 +196,7 @@ fun DeleteAllButton(
             text = { Text(stringResource(R.string.delete_all_messages_text)) },
             dismissButton = {
                 Button(onClick = { openDialog.value = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
             confirmButton = {
@@ -207,7 +207,7 @@ fun DeleteAllButton(
                         messageViewModel.viewModelScope.launch { messageViewModel.deleteAll() }
                     }
                 ) {
-                    Text("Confirm")
+                    Text(stringResource(R.string.confirm))
                 }
             },
             onDismissRequest = { openDialog.value = false }

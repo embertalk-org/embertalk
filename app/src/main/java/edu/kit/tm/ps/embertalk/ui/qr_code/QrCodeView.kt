@@ -71,7 +71,7 @@ fun QrCodeView(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(id = R.string.back)
                     )
                 }
                 Spacer(modifier = modifier.weight(1f))
@@ -83,7 +83,7 @@ fun QrCodeView(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.ArrowForward,
-                        contentDescription = "Back"
+                        contentDescription = stringResource(id = R.string.back)
                     )
                 }
             }
@@ -109,7 +109,7 @@ fun QrCodeView(
                     )
                 }
             ) {
-                Icon(imageVector = Icons.Filled.Share, contentDescription = "Share")
+                Icon(imageVector = Icons.Filled.Share, contentDescription = stringResource(id = R.string.share_contact))
             }
         }
     }
