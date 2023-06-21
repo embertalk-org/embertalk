@@ -19,7 +19,7 @@ class CryptoService(
         fastForward()
     }
 
-    suspend fun fastForward() {
+    private suspend fun fastForward() {
         lock.withLock {
             keys.fastForward()
         }
@@ -33,6 +33,7 @@ class CryptoService(
     }
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
+        keys.fastForward()
         return Message.decode(encryptedMessage, keys.private()::decrypt)
     }
 
