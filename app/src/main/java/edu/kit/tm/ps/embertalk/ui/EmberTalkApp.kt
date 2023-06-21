@@ -45,7 +45,6 @@ import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
-import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
@@ -53,6 +52,8 @@ import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeView
+import edu.kit.tm.ps.embertalk.ui.settings.SettingsView
+import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
     object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
@@ -70,14 +71,16 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
 
 @Composable
 fun EmberTalkApp(
-    cryptoService: CryptoService,
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
 
-    Surface {
+    Surface(
+        modifier = modifier
+    ) {
         val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         NavHost(
             navController = navController,
             startDestination = Screen.Messages.route,
@@ -99,7 +102,7 @@ fun EmberTalkApp(
             }
             composable(Screen.Settings.route) {
                 EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
-                    SettingsView(cryptoService, messageViewModel)
+                    SettingsView(settingsViewModel, messageViewModel)
                 }
             }
             composable(
@@ -199,7 +202,7 @@ fun EmberScaffold(
             }
         }
     ) { innerPadding ->
-        Box(modifier = Modifier
+        Box(modifier = modifier
             .padding(innerPadding)
             .padding(10.dp)) {
             content.invoke()

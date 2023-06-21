@@ -2,15 +2,21 @@ package edu.kit.tm.ps.embertalk.crypto
 
 import android.content.SharedPreferences
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
+import edu.kit.tm.ps.embertalk.model.EmberObservable
+import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
+import java.util.LinkedList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
+@Suppress("RedundantSuspendModifier")
 class CryptoService(
     private val epochProvider: EpochProvider,
     private val sharedPreferences: SharedPreferences,
-) {
+) : EmberObservable {
+    private val observers = LinkedList<EmberObserver>()
+
     private val lock = ReentrantLock()
     private lateinit var keys: Keys
 
@@ -23,6 +29,7 @@ class CryptoService(
         lock.withLock {
             keys.fastForward()
         }
+        notifyObservers()
     }
 
     suspend fun encrypt(message: Message, publicKey: String): EncryptedMessage {
@@ -46,10 +53,6 @@ class CryptoService(
         keys.fastForward()
     }
 
-    fun isInitialized(): Boolean {
-        return this::keys.isInitialized
-    }
-
     fun syncState(): SyncState {
         return if (!this::keys.isInitialized) {
             SyncState.Initializing
@@ -58,5 +61,13 @@ class CryptoService(
         } else {
             SyncState.Synchronizing(keys.epochsLate())
         }
+    }
+
+    override fun register(observer: EmberObserver) {
+        observers.add(observer)
+    }
+
+    override fun notifyObservers() {
+        observers.forEach { it.notifyOfChange() }
     }
 }

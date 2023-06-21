@@ -47,4 +47,5 @@
     <string name="alert">Alert</string>
     <string name="regenerate_keys">Regenerate keys</string>
     <string name="cancel">Cancel</string>
+    <string name="synchronization_state">Synchronization State</string>
 </resources>

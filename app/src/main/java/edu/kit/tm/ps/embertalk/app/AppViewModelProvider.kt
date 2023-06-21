@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
+import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -14,6 +16,9 @@ object AppViewModelProvider {
         }
         initializer {
             ContactsViewModel(emberTalkApplication().container.contactManager)
+        }
+        initializer {
+            SettingsViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
         }
     }
 }
