@@ -38,7 +38,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
-import edu.kit.tm.ps.embertalk.ui.MessageCard
+import edu.kit.tm.ps.embertalk.ui.components.MessageCard
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
 

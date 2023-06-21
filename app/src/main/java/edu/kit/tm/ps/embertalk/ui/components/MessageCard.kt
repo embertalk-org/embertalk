@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.ui
+package edu.kit.tm.ps.embertalk.ui.components
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard

@@ -32,8 +32,8 @@ import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
-import edu.kit.tm.ps.embertalk.ui.InfoDialogButton
-import edu.kit.tm.ps.embertalk.ui.SubmittableTextField
+import edu.kit.tm.ps.embertalk.ui.components.InfoDialogButton
+import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import kotlinx.coroutines.launch
 

@@ -1,4 +1,4 @@
-package edu.kit.tm.ps.embertalk.ui
+package edu.kit.tm.ps.embertalk.ui.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
