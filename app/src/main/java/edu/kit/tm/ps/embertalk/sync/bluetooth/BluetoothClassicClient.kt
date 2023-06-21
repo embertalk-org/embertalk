@@ -16,8 +16,8 @@ class BluetoothClassicClient(
     private val onSyncFinish: () -> Unit,
     private val onSyncSuccessful: () -> Unit
 ) : Runnable {
-    var socket: BluetoothSocket? = null
-    var macAddress: String? = null
+    private var socket: BluetoothSocket? = null
+    private var macAddress: String? = null
 
     init {
         macAddress = device.address
