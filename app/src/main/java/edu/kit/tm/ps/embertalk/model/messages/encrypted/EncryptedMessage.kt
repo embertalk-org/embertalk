@@ -17,9 +17,7 @@ data class EncryptedMessage(
 
         other as EncryptedMessage
 
-        if (!bytes.contentEquals(other.bytes)) return false
-
-        return true
+        return this.hash == other.hash
     }
 
     override fun hashCode(): Int {
