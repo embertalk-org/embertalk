@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -49,7 +49,7 @@ fun ContactsView(
                 .fillMaxWidth()
                 .weight(9f)
         ) {
-            itemsIndexed(contactsUiState.contacts) { _, item ->
+            items(contactsUiState.contacts) { item ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()

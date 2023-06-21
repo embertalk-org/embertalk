@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentPaste
@@ -101,7 +101,7 @@ fun AddContactView(
                     modifier = Modifier.width(maxWidth * 0.7f)
                 ) {
                     LazyRow {
-                        itemsIndexed(keyParts.entries.toList()) { index, item ->
+                        items(keyParts.entries.toList()) { item ->
                             if (item.value != "") {
                                 Card(
                                     modifier = Modifier.padding(1.dp)
