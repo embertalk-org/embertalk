@@ -69,6 +69,9 @@ dependencies {
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
     implementation 'androidx.preference:preference:1.2.0'
 
+    // Rest
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+
     // Room
     var room_version = "2.5.1"
     implementation "androidx.room:room-runtime:$room_version"

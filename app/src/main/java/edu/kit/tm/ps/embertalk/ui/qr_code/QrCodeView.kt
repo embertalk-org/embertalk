@@ -3,6 +3,7 @@ package edu.kit.tm.ps.embertalk.ui.qr_code
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -23,6 +25,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,10 +38,15 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
 fun QrCodeView(
+    qrCodeViewModel: QrCodeViewModel,
     pubKey: String,
     modifier: Modifier = Modifier
 ) {
@@ -86,6 +94,24 @@ fun QrCodeView(
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
+            }
+            if (qrCodeViewModel.isMyKey(pubKey)) {
+                val keyServerScope = rememberCoroutineScope()
+                SubmittableTextField(
+                    label = { Text(stringResource(R.string.name_for_your_key)) },
+                    imageVector = Icons.Filled.Upload,
+                    onSubmit = {
+                        keyServerScope.launch(Dispatchers.IO) {
+                            val msg = when (val result = qrCodeViewModel.emberKeydClient().putKey(it)) {
+                                200 -> "Uploaded Key successfully!"
+                                else -> "Failed to upload key, status: $result"
+                            }
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                )
             }
             Spacer(modifier = Modifier.weight(9f))
             FloatingActionButton(

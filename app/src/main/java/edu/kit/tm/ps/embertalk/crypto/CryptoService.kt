@@ -1,6 +1,7 @@
 package edu.kit.tm.ps.embertalk.crypto
 
 import android.content.SharedPreferences
+import edu.kit.tm.ps.embertalk.emberkeyd.EmberKeydClient
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
@@ -19,6 +20,10 @@ class CryptoService(
 
     private val lock = ReentrantLock()
     private lateinit var keys: Keys
+
+    fun emberKeydClient(keyServerUrl: String): EmberKeydClient {
+        return EmberKeydClient(keyServerUrl, keys.private(), keys.public())
+    }
 
     suspend fun initialize() {
         keys = Keys(epochProvider, sharedPreferences)
@@ -69,5 +74,9 @@ class CryptoService(
 
     override fun notifyObservers() {
         observers.forEach { it.notifyOfChange() }
+    }
+
+    fun isMyKey(pubKey: String): Boolean {
+        return keys.isMyKey(pubKey)
     }
 }

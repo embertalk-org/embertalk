@@ -71,9 +71,6 @@ fun SettingsView(
                     modifier = modifier.align(Alignment.CenterVertically)
                 )
             }
-            RatchetState(syncState = uiState.syncState)
-            RegenerateKeysButton(uiState.syncState, settingsViewModel)
-            DeleteAllButton(messageViewModel = messageViewModel)
             SubmittableTextField(
                 label = { Text(stringResource(R.string.key_server_url)) },
                 imageVector = Icons.Filled.Save,
@@ -82,6 +79,9 @@ fun SettingsView(
                 inputValidator = URLUtil::isValidUrl,
                 onSubmit = settingsViewModel::updateKeyServer
             )
+            RatchetState(syncState = uiState.syncState)
+            RegenerateKeysButton(uiState.syncState, settingsViewModel)
+            DeleteAllButton(messageViewModel = messageViewModel)
         }
     }
 }

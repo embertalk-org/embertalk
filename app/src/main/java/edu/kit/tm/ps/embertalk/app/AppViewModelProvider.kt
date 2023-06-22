@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
+import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeViewModel
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 
 object AppViewModelProvider {
@@ -19,6 +20,9 @@ object AppViewModelProvider {
         }
         initializer {
             SettingsViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
+        }
+        initializer {
+            QrCodeViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
         }
     }
 }

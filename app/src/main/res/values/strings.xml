@@ -44,4 +44,6 @@
     <string name="cancel">Cancel</string>
     <string name="synchronization_state">Synchronization State</string>
     <string name="key_server_url">Key Server Url</string>
+    <string name="upload">Upload</string>
+    <string name="name_for_your_key">Name for your key</string>
 </resources>

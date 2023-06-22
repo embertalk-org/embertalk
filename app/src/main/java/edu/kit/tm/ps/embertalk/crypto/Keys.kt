@@ -58,6 +58,9 @@ internal class Keys(
         if (currentEpoch > private.currentEpoch()) {
             private.fastForward(currentEpoch - private.currentEpoch())
         }
+        if (currentEpoch > public.currentEpoch()) {
+            public.fastForward(currentEpoch - public.currentEpoch())
+        }
         storeKeys()
     }
 
@@ -72,6 +75,10 @@ internal class Keys(
         return private
     }
 
+    fun public(): PublicKey {
+        return public
+    }
+
     fun decode(pubKey: String): PublicKey {
         return PublicKey.deserialize(Base64.decode(pubKey, Base64.URL_SAFE))
     }
@@ -82,5 +89,9 @@ internal class Keys(
 
     private fun pubKeyString(pub: PublicKey): String? {
         return Base64.encodeToString(pub.serialize(), Base64.URL_SAFE)
+    }
+
+    fun isMyKey(pubKey: String): Boolean {
+        return pubKeyString(public).equals(pubKey)
     }
 }

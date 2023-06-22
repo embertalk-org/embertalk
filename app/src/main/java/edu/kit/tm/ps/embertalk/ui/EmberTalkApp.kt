@@ -52,6 +52,7 @@ import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeView
+import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeViewModel
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsView
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 
@@ -81,6 +82,7 @@ fun EmberTalkApp(
         val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
+        val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.Factory)
         NavHost(
             navController = navController,
             startDestination = Screen.Messages.route,
@@ -111,7 +113,7 @@ fun EmberTalkApp(
             ) {
                 EmberScaffold(navController = navController, title = stringResource(R.string.share_contact), toolWindow = true) {
                     val key = it.arguments!!.getString("pubKey")!!
-                    QrCodeView(key)
+                    QrCodeView(qrCodeViewModel, key)
                 }
             }
         }
