@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(
     val macAddress: String = "",
+    val keyServerUrl: String = "",
     val syncState: SyncState = SyncState.Initializing
 )
 
@@ -28,13 +29,29 @@ class SettingsViewModel(
 
     init {
         cryptoService.register(this)
+        if (!prefs.contains(Preferences.KEY_SERVER_URL)) {
+            updateKeyServer("https://i63schadt.tm.kit.edu/embertalk")
+        }
     }
 
     override fun notifyOfChange() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(macAddress = prefs.getString(Preferences.MAC_ADDRESS, "")!!, syncState = cryptoService.syncState())
+            _uiState.value = _uiState.value.copy(
+                macAddress = prefs.getString(Preferences.MAC_ADDRESS, "")!!,
+                keyServerUrl = prefs.getString(Preferences.KEY_SERVER_URL, "")!!,
+                syncState = cryptoService.syncState()
+            )
             Log.d(TAG, "Updated Settings!")
         }
+    }
+
+    fun updateMacAddress(macAddress: String) {
+        prefs.edit().putString(Preferences.MAC_ADDRESS, macAddress.uppercase()).apply()
+    }
+
+    fun updateKeyServer(url: String) {
+        prefs.edit().putString(Preferences.KEY_SERVER_URL, url).apply()
+        notifyOfChange()
     }
 
     suspend fun regenerateKeys() {

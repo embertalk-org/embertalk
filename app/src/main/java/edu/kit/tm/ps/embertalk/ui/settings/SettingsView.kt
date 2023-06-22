@@ -1,5 +1,6 @@
 package edu.kit.tm.ps.embertalk.ui.settings
 
+import android.webkit.URLUtil
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +29,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.preference.PreferenceManager
-import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
@@ -56,10 +56,10 @@ fun SettingsView(
             SubmittableTextField(
                 label = { Text(stringResource(R.string.your_mac_address)) },
                 imageVector = Icons.Filled.Save,
-                initialValue = prefs.getString(Preferences.MAC_ADDRESS, "")!!,
+                initialValue = uiState.macAddress,
                 clearOnSubmit = false,
-                inputValidator = { MacAddressUtils.isValidMacAddress(it) },
-                onSubmit = { prefs.edit().putString(Preferences.MAC_ADDRESS, it.uppercase()).apply() }
+                inputValidator = MacAddressUtils::isValidMacAddress,
+                onSubmit = settingsViewModel::updateMacAddress
             )
             Row {
                 InfoDialogButton(
@@ -74,6 +74,14 @@ fun SettingsView(
             RatchetState(syncState = uiState.syncState)
             RegenerateKeysButton(uiState.syncState, settingsViewModel)
             DeleteAllButton(messageViewModel = messageViewModel)
+            SubmittableTextField(
+                label = { Text(stringResource(R.string.key_server_url)) },
+                imageVector = Icons.Filled.Save,
+                initialValue = uiState.keyServerUrl,
+                clearOnSubmit = false,
+                inputValidator = URLUtil::isValidUrl,
+                onSubmit = settingsViewModel::updateKeyServer
+            )
         }
     }
 }

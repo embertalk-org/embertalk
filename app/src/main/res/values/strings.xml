@@ -43,4 +43,5 @@
     <string name="regenerate_keys">Regenerate keys</string>
     <string name="cancel">Cancel</string>
     <string name="synchronization_state">Synchronization State</string>
+    <string name="key_server_url">Key Server Url</string>
 </resources>
