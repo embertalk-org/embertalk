@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.ui.contacts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +16,7 @@ data class ContactsUiState(
 )
 
 class ContactsViewModel(
+    private val cryptoService: CryptoService,
     private val contactManager: ContactManager,
 ) : ViewModel() {
 
@@ -34,6 +36,10 @@ class ContactsViewModel(
     suspend fun add(contact: Contact) {
         contactManager.add(contact)
         updateContacts()
+    }
+
+    suspend fun downloadKey(name: String): String? {
+        return cryptoService.emberKeydClient().downloadKey(name)
     }
 
     suspend fun delete(contact: Contact) {

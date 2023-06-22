@@ -16,13 +16,13 @@ object AppViewModelProvider {
             MessageViewModel(emberTalkApplication().container.messageManager)
         }
         initializer {
-            ContactsViewModel(emberTalkApplication().container.contactManager)
+            ContactsViewModel(emberTalkApplication().container.cryptoService, emberTalkApplication().container.contactManager)
         }
         initializer {
             SettingsViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
         }
         initializer {
-            QrCodeViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
+            QrCodeViewModel(emberTalkApplication().container.cryptoService)
         }
     }
 }

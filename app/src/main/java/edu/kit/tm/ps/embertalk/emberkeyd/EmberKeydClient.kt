@@ -1,5 +1,6 @@
 package edu.kit.tm.ps.embertalk.emberkeyd
 
+import android.util.Base64
 import android.util.Log
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
@@ -52,12 +53,33 @@ class EmberKeydClient(
         }
     }
 
+    suspend fun downloadKey(name: String): String? {
+        val resp = get("$keyServerUrl/key/$name")
+        Log.d(TAG, "Got status code ${resp.code}")
+        return if (resp.code != 200) {
+            null
+        } else {
+            val json = JSONObject(resp.body!!.string()).getJSONArray("pubkey")
+            Base64.encodeToString(decodeFromJson(json), Base64.URL_SAFE)
+        }
+    }
+
     @Suppress("RedundantSuspendModifier")
     private suspend fun post(url: String, json: String): Response {
         val body: RequestBody = json.toRequestBody(mediaType)
         val request: Request = Request.Builder()
             .url(url)
             .post(body)
+            .build()
+        return client.newCall(request).execute()
+
+    }
+
+    @Suppress("RedundantSuspendModifier")
+    private suspend fun get(url: String): Response {
+        val request: Request = Request.Builder()
+            .url(url)
+            .get()
             .build()
         return client.newCall(request).execute()
 

@@ -21,8 +21,12 @@ class CryptoService(
     private val lock = ReentrantLock()
     private lateinit var keys: Keys
 
-    fun emberKeydClient(keyServerUrl: String): EmberKeydClient {
-        return EmberKeydClient(keyServerUrl, keys.private(), keys.public())
+    fun emberKeydClient(): EmberKeydClient {
+        return EmberKeydClient(
+            sharedPreferences.getString(edu.kit.tm.ps.embertalk.Preferences.KEY_SERVER_URL, "")!!,
+            keys.private(),
+            keys.public()
+        )
     }
 
     suspend fun initialize() {

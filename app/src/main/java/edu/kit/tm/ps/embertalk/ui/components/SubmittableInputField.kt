@@ -20,6 +20,7 @@ fun SubmittableTextField(
     imageVector: ImageVector,
     onSubmit: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit = {},
     inputValidator: (String) -> Boolean = { true },
     initialValue: String = "",
     clearOnSubmit: Boolean = true,
@@ -40,6 +41,7 @@ fun SubmittableTextField(
             onValueChange = {
                 msgInput.value = it
                 isError.value = !validInput()
+                onValueChange.invoke(it)
             }
         )
         IconButton(

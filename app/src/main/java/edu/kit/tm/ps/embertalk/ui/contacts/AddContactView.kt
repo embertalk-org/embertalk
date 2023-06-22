@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Card
@@ -45,7 +46,10 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
+import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,11 +82,23 @@ fun AddContactView(
             .fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom)
     ) {
-        OutlinedTextField(
+        SubmittableTextField(
             label = { Text("Contact Name") },
-            value = name.value,
-            singleLine = true,
-            onValueChange = { name.value = it }
+            imageVector = Icons.Filled.Download,
+            clearOnSubmit = false,
+            onValueChange = { name.value = it },
+            onSubmit = {
+                contactsViewModel.viewModelScope.launch(Dispatchers.IO) {
+                    val result = contactsViewModel.downloadKey(it)
+                    if (result == null) {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "Failed to download this key", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        key.value = result
+                    }
+                }
+            }
         )
         Text(
             text = "Scanned Key Parts",

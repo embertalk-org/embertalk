@@ -102,7 +102,7 @@ fun QrCodeView(
                     imageVector = Icons.Filled.Upload,
                     onSubmit = {
                         keyServerScope.launch(Dispatchers.IO) {
-                            val msg = when (val result = qrCodeViewModel.emberKeydClient().putKey(it)) {
+                            val msg = when (val result = qrCodeViewModel.putKey(it)) {
                                 201 -> "Uploaded Key successfully!"
                                 else -> "Failed to upload key, status: $result"
                             }
