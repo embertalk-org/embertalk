@@ -1,6 +1,8 @@
 package edu.kit.tm.ps.embertalk.ui.components
 
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,35 +34,43 @@ fun SubmittableTextField(
     val validInput: () -> Boolean = { !onlyWhitespace() && inputValidator.invoke(msgInput.value) }
 
     val isError = rememberSaveable { mutableStateOf( !validInput() ) }
-    Row {
-        OutlinedTextField(
-            value = msgInput.value,
-            label = label,
-            singleLine = true,
-            isError = isError.value,
-            onValueChange = {
-                msgInput.value = it
-                isError.value = !validInput()
-                onValueChange.invoke(it)
-            }
-        )
-        IconButton(
-            onClick = {
-                if (validInput()) {
-                    onSubmit.invoke(msgInput.value)
-                    if (clearOnSubmit) {
-                        msgInput.value = ""
-                    }
+    BoxWithConstraints(
+        modifier = modifier,
+    ) {
+        val maxWidth = maxWidth
+        Row {
+            OutlinedTextField(
+                value = msgInput.value,
+                label = label,
+                singleLine = true,
+                isError = isError.value,
+                modifier = modifier.width(maxWidth * 0.8f),
+                onValueChange = {
+                    msgInput.value = it
                     isError.value = !validInput()
+                    onValueChange.invoke(it)
                 }
-            },
-            enabled = !isError.value,
-            modifier = modifier.align(Alignment.CenterVertically)
-        ) {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = contentDescription
             )
+            IconButton(
+                onClick = {
+                    if (validInput()) {
+                        onSubmit.invoke(msgInput.value)
+                        if (clearOnSubmit) {
+                            msgInput.value = ""
+                        }
+                        isError.value = !validInput()
+                    }
+                },
+                enabled = !isError.value,
+                modifier = modifier
+                    .width(maxWidth * 0.2f)
+                    .align(Alignment.CenterVertically)
+            ) {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = contentDescription
+                )
+            }
         }
     }
 }
