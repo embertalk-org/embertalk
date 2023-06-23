@@ -26,6 +26,9 @@ class MajorityVoteOffsetProvider(
 
     private fun majorityVote(): Long {
         val chosenClocks = knownClocks.getRandomElements(3)
+        while (chosenClocks.size < 3) {
+            chosenClocks.add(systimeEpochProvider.current())
+        }
         return if (chosenClocks[0] == chosenClocks[1] || chosenClocks[0] == chosenClocks[2]) {
             chosenClocks[0]
         } else if (chosenClocks[1] == chosenClocks[2]) {
@@ -35,11 +38,12 @@ class MajorityVoteOffsetProvider(
         }
     }
 
-    private fun <K, V> Map<K, V>.getRandomElements(count: Int): List<V> {
+    private fun <K, V> Map<K, V>.getRandomElements(count: Int): MutableList<V> {
         val entries = this.entries.toList()
         return entries
             .shuffled()
             .take(count)
             .map { it.value }
+            .toMutableList()
     }
 }
