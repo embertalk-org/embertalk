@@ -39,7 +39,7 @@ class BluetoothClassicClient(
             Log.e(TAG, "Failed to connect", connectException)
         }
         try {
-            val successful = synchronizer.bidirectionalSync(socket!!.inputStream, socket!!.outputStream)
+            val successful = synchronizer.bidirectionalSync(socket!!.remoteDevice.address, socket!!.inputStream, socket!!.outputStream)
             if (successful) {
                 onSyncSuccessful.invoke()
             }

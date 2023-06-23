@@ -37,7 +37,7 @@ class BluetoothClassicServer(
                 Log.d(TAG, "Listening for a client")
                 socket = serverSocket!!.accept()
                 Log.d(TAG, "Opened a socket successfully")
-                synchronizer.bidirectionalSync(socket.inputStream, socket.outputStream)
+                synchronizer.bidirectionalSync(socket.remoteDevice.address, socket.inputStream, socket.outputStream)
             } catch (connectException: IOException) {
                 Log.e(TAG, "Failed to start a Bluetooth Classic connection", connectException)
             }

@@ -3,7 +3,7 @@ package edu.kit.tm.ps.embertalk.app
 import android.content.Context
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
-import edu.kit.tm.ps.embertalk.epoch.SysTimeEpochprovider
+import edu.kit.tm.ps.embertalk.epoch.MajorityVoteOffsetProvider
 import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import edu.kit.tm.ps.embertalk.model.contacts.OfflineContactRepository
@@ -12,14 +12,18 @@ import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageDb
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.OfflineMessageRepository
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageDb
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.OfflineEncryptedMessageRepository
+import edu.kit.tm.ps.embertalk.sync.Synchronizer
 
 interface AppContainer {
     val messageManager: MessageManager
     val contactManager: ContactManager
+    val synchronizer: Synchronizer
     val cryptoService: CryptoService
 }
 
 class AppDataContainer(private val context: Context) : AppContainer {
+    private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    private val majorityVoteOffsetProvider = MajorityVoteOffsetProvider(prefs)
 
     override val messageManager: MessageManager by lazy {
         MessageManager(
@@ -34,7 +38,12 @@ class AppDataContainer(private val context: Context) : AppContainer {
             OfflineContactRepository(ContactDb.getDb(context).dao())
         )
     }
+
+    override val synchronizer: Synchronizer by lazy {
+        Synchronizer(messageManager, majorityVoteOffsetProvider, majorityVoteOffsetProvider)
+    }
+
     override val cryptoService: CryptoService by lazy {
-        CryptoService(SysTimeEpochprovider(), PreferenceManager.getDefaultSharedPreferences(context))
+        CryptoService(majorityVoteOffsetProvider, prefs)
     }
 }

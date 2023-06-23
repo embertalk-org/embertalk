@@ -1,6 +1,8 @@
 package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
+import edu.kit.tm.ps.embertalk.epoch.ClockManager
+import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import kotlinx.coroutines.flow.first
@@ -12,10 +14,12 @@ import java.io.InputStream
 import java.io.OutputStream
 
 class Synchronizer(
-    private val messageManager: MessageManager
+    private val messageManager: MessageManager,
+    private val epochProvider: EpochProvider,
+    private val clockManager: ClockManager,
     ) {
 
-    fun bidirectionalSync(inputStream: InputStream, outputStream: OutputStream): Boolean {
+    fun bidirectionalSync(remoteName:String, inputStream: InputStream, outputStream: OutputStream): Boolean {
         Log.d(TAG, "Starting sync")
 
         val protocol = Protocol(DataInputStream(inputStream), DataOutputStream(outputStream))
@@ -27,6 +31,9 @@ class Synchronizer(
             Log.e(TAG, "Handshake failed", e)
             return false
         }
+
+        val theirClock = exchangeClocks(protocol)
+        clockManager.rememberClock(remoteName, theirClock)
 
         val myHashes = runBlocking { messageManager.hashes().first() }
         val theirHashes = try {
@@ -53,6 +60,29 @@ class Synchronizer(
         }
     }
 
+    private fun handshake(protocol: Protocol) {
+        protocol.writeHello()
+
+        val msgType = protocol.readMessageType()
+        if (msgType != Protocol.HELLO_ID) {
+            throw IOException("Received HELLO with wrong msgType %s".format(msgType))
+        }
+        val protocolName = protocol.readHello()
+        if (protocolName != Protocol.PROTOCOL_NAME) {
+            throw IOException("protocol \"$protocolName\" not supported")
+        }
+    }
+
+    private fun exchangeClocks(protocol: Protocol): Long {
+        protocol.writeClock(epochProvider.current())
+
+        val msgType = protocol.readMessageType()
+        if (msgType != Protocol.CLOCK_ID) {
+            throw IOException("Received CLOCK with wrong msgType %s".format(msgType))
+        }
+        return protocol.readClock()
+    }
+
     private fun exchangeHashes(
         myHashes: Set<Int>,
         protocol: Protocol
@@ -65,19 +95,6 @@ class Synchronizer(
         }
 
         return protocol.readHashes()
-    }
-
-    private fun handshake(protocol: Protocol) {
-        protocol.writeHello()
-
-        val msgType = protocol.readMessageType()
-        if (msgType != Protocol.HELLO_ID) {
-            throw IOException("Received HELLO with wrong msgType %s".format(msgType))
-        }
-        val protocolName = protocol.readHello()
-        if (protocolName != Protocol.PROTOCOL_NAME) {
-            throw IOException("protocol \"$protocolName\" not supported")
-        }
     }
 
     private fun exchangeMessages(myEncryptedMessages: Set<EncryptedMessage>, theirEncryptedMessages: MutableSet<EncryptedMessage>, protocol: Protocol) {

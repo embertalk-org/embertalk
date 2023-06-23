@@ -1,6 +1,6 @@
 package edu.kit.tm.ps.embertalk.epoch
 
-class SysTimeEpochprovider : EpochProvider {
+internal class SysTimeEpochprovider : EpochProvider {
 
     override fun current(): Long {
         return (System.currentTimeMillis() - START_EPOCH) / EPOCH_LENGTH

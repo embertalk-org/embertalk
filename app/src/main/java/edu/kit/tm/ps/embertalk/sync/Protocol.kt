@@ -11,9 +11,10 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         const val TAG = "Protocol"
         const val PROTOCOL_NAME = "Ember"
         const val HELLO_ID = 0
-        const val HASHES_ID = 1
-        const val MESSAGE_ID = 2
-        const val GOODBYE_ID = 3
+        const val CLOCK_ID = 1
+        const val HASHES_ID = 2
+        const val MESSAGE_ID = 3
+        const val GOODBYE_ID = 4
     }
 
     fun writeHello() {
@@ -21,6 +22,13 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         outputStream.writeString(PROTOCOL_NAME)
         outputStream.flush()
         Log.d(TAG, "Wrote hello")
+    }
+
+    fun writeClock(epoch: Long) {
+        outputStream.writeByte(CLOCK_ID)
+        outputStream.writeLong(epoch)
+        outputStream.flush()
+        Log.d(TAG, "Wrote clock")
     }
 
     fun writeHashes(hashes: Set<Int>) {
@@ -57,6 +65,12 @@ class Protocol(private val inputStream: DataInputStream, private val outputStrea
         val protocolName = inputStream.readString()
         Log.d(TAG, "Read hello with protocol name %s".format(protocolName))
         return protocolName
+    }
+
+    fun readClock(): Long {
+        val epoch = inputStream.readLong()
+        Log.d(TAG, "Read clock %s".format(epoch))
+        return epoch
     }
 
     fun readHashes(): Set<Int> {
