@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.epoch.MajorityVoteOffsetProvider
+import edu.kit.tm.ps.embertalk.epoch.SysTimeEpochprovider
 import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import edu.kit.tm.ps.embertalk.model.contacts.OfflineContactRepository
@@ -23,7 +24,7 @@ interface AppContainer {
 
 class AppDataContainer(private val context: Context) : AppContainer {
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    private val majorityVoteOffsetProvider = MajorityVoteOffsetProvider(prefs)
+    private val majorityVoteOffsetProvider: MajorityVoteOffsetProvider = MajorityVoteOffsetProvider(SysTimeEpochprovider())
 
     override val messageManager: MessageManager by lazy {
         MessageManager(

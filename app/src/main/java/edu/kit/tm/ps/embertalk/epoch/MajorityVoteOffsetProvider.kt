@@ -1,33 +1,25 @@
 package edu.kit.tm.ps.embertalk.epoch
 
-import android.content.SharedPreferences
-import edu.kit.tm.ps.embertalk.Preferences
 import java.util.concurrent.ConcurrentHashMap
 
 class MajorityVoteOffsetProvider(
-    private val prefs: SharedPreferences,
+    private var baseEpochProvider: EpochProvider,
 ) : EpochProvider, ClockManager {
 
     private val knownClocks: MutableMap<String, Long> = ConcurrentHashMap()
-    private val systimeEpochProvider = SysTimeEpochprovider()
-    private var lastLocalEpoch = prefs.getLong(Preferences.STORED_EPOCH, systimeEpochProvider.current())
 
     override fun current(): Long {
-        val currentLocalEpoch = systimeEpochProvider.current()
-        val epochsSinceLast = currentLocalEpoch - lastLocalEpoch
-        lastLocalEpoch = currentLocalEpoch
-        prefs.edit().putLong(Preferences.STORED_EPOCH, lastLocalEpoch).apply()
-        return majorityVote() + epochsSinceLast
+        return baseEpochProvider.current() + majorityVote()
     }
 
     override fun rememberClock(device: String, epoch: Long) {
-        knownClocks[device] = epoch
+        knownClocks[device] = epoch - baseEpochProvider.current()
     }
 
     private fun majorityVote(): Long {
         val chosenClocks = knownClocks.getRandomElements(3)
         while (chosenClocks.size < 3) {
-            chosenClocks.add(systimeEpochProvider.current())
+            chosenClocks.add(0)
         }
         return if (chosenClocks[0] == chosenClocks[1] || chosenClocks[0] == chosenClocks[2]) {
             chosenClocks[0]
