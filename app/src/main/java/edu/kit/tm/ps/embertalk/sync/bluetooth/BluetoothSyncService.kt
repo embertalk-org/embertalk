@@ -39,7 +39,8 @@ class BluetoothSyncService : Service() {
     private lateinit var bluetoothClassicServer: BluetoothClassicServer
     private var started = false
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
-    private val clientExecutorService: ClientExecutorService = ClientExecutorService()
+    private val taskQueue: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val clientExecutorService: ClientExecutorService = ClientExecutorService(taskQueue)
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -106,13 +107,18 @@ class BluetoothSyncService : Service() {
                         if (!ServiceUtils.matchesService(uuid.uuid)) {
                             continue
                         }
-                        if (devicesLastSynced[serviceUuidAndAddress] != null &&
-                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(10))) {
+                        if (devicesLastSynced[serviceUuidAndAddress] != null
+                            && Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(10))) {
                             continue
                         }
 
                         val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
                         val remoteDevice = bluetoothAdapter.getRemoteDevice(remoteDeviceMacAddress)
+
+                        if (taskQueue.contains(remoteDeviceMacAddress)) {
+                            continue
+                        }
+
                         clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer) {
                             devicesLastSynced[serviceUuidAndAddress] = Instant.now()
                         }
@@ -176,7 +182,7 @@ class BluetoothSyncService : Service() {
         startBluetoothLeDiscovery(startId)
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter)
+        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter, taskQueue)
         bluetoothClassicServer.start()
 
         Log.d(TAG, "Started")
