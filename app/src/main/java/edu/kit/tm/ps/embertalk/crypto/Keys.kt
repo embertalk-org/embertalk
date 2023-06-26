@@ -6,6 +6,7 @@ import android.util.Log
 import edu.kit.tm.ps.KeyGen
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
+import edu.kit.tm.ps.RatchetException
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 
@@ -23,14 +24,21 @@ internal class Keys(
             public = keys.publicKey()
             storeKeys()
         } else {
-            private = PrivateKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
-            public = PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PUBLIC_KEY, ""), Base64.URL_SAFE))
-            storeKeys()
+            try {
+                private = PrivateKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
+                public = PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PUBLIC_KEY, ""), Base64.URL_SAFE))
+                storeKeys()
+            } catch (e: RatchetException) {
+                Log.d(TAG, "Failed to deserialize keys... Regenerating...")
+                val keys = this.regenerate()
+                private = keys.privateKey()
+                public = keys.publicKey()
+            }
         }
     }
 
     fun regenerate(): KeyGen.KeyPair {
-        Log.d("Keys", "epochProvider.current %s".format(epochProvider.current()))
+        Log.d(TAG, "epochProvider.current %s".format(epochProvider.current()))
         val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
@@ -93,5 +101,9 @@ internal class Keys(
 
     fun isMyKey(pubKey: String): Boolean {
         return pubKeyString(public).equals(pubKey)
+    }
+
+    companion object {
+        private const val TAG = "Keys"
     }
 }
