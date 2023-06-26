@@ -2,16 +2,13 @@ package edu.kit.tm.ps.embertalk.model.messages.decrypted
 
 import android.os.Parcelable
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import kotlinx.parcelize.Parcelize
 import java.nio.ByteBuffer
 
 @Parcelize
-@Entity(tableName = "messages")
+@Entity(tableName = "messages", primaryKeys = ["content","timestamp"])
 data class Message(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0,
     val content: String,
     val mine: Boolean = false,
     val timestamp: Long,
