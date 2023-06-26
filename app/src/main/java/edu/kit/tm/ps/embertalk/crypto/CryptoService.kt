@@ -50,7 +50,7 @@ class CryptoService(
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
         keys.fastForward()
-        return Message.decode(encryptedMessage, keys.private()::decrypt)
+        return Message.decode(encryptedMessage, epochProvider.current(), keys.private()::decrypt)
     }
 
     fun currentEpoch(): Long {
