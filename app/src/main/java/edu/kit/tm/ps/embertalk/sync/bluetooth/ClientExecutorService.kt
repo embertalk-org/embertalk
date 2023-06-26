@@ -4,23 +4,22 @@ import android.bluetooth.BluetoothDevice
 import android.util.Log
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 
-class ClientExecutorService(
-    private val taskQueue: MutableSet<String>
-) {
+class ClientExecutorService {
 
+    private val taskQueue: MutableSet<UUID> = ConcurrentHashMap.newKeySet()
     private val service = Executors.newCachedThreadPool()
 
     fun enqueue(remoteDevice: BluetoothDevice, uuid: UUID, synchronizer: Synchronizer, onFinishAction: () -> Unit) {
-        val address = remoteDevice.address
-        if (!taskQueue.contains(address)) {
-            taskQueue.add(address)
+        if (!taskQueue.contains(uuid)) {
+            taskQueue.add(uuid)
             val client = BluetoothClassicClient(
                 remoteDevice,
                 synchronizer,
                 uuid,
-                { taskQueue.remove(address) },
+                { taskQueue.remove(uuid) },
                 { onFinishAction.invoke() },
             )
             service.submit(client)
