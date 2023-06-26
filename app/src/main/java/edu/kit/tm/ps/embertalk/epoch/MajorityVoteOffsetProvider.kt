@@ -1,5 +1,6 @@
 package edu.kit.tm.ps.embertalk.epoch
 
+import android.util.Log
 import java.util.concurrent.ConcurrentHashMap
 
 class MajorityVoteOffsetProvider(
@@ -13,7 +14,9 @@ class MajorityVoteOffsetProvider(
     }
 
     override fun rememberClock(device: String, epoch: Long) {
-        knownClocks[device] = epoch - baseEpochProvider.current()
+        val offset = epoch - baseEpochProvider.current()
+        knownClocks[device] = offset
+        Log.d(TAG, "Stored clock of device %s with offset %s".format(device, offset))
     }
 
     private fun majorityVote(): Long {
@@ -26,6 +29,7 @@ class MajorityVoteOffsetProvider(
         } else if (chosenClocks[1] == chosenClocks[2]) {
             chosenClocks[1]
         } else {
+            Log.d(TAG, "Could not find matching clocks, choosing random clock.")
             chosenClocks.shuffled()[0]
         }
     }
@@ -37,5 +41,9 @@ class MajorityVoteOffsetProvider(
             .take(count)
             .map { it.value }
             .toMutableList()
+    }
+
+    companion object {
+        private const val TAG = "MajorityVoteOffsetProvider"
     }
 }
