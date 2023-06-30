@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.io.IOException
 
 data class ContactsUiState(
     val contacts: List<Contact> = ArrayList()
@@ -39,7 +40,11 @@ class ContactsViewModel(
     }
 
     suspend fun downloadKey(name: String): String? {
-        return cryptoService.emberKeydClient().downloadKey(name)
+        return try {
+            cryptoService.emberKeydClient().downloadKey(name)
+        } catch (e: IOException) {
+            null
+        }
     }
 
     suspend fun delete(contact: Contact) {
