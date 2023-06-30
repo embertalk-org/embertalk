@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -92,13 +93,17 @@ fun SendMessageField(
                 label = { Text(stringResource(id = R.string.your_message)) },
                 value = message.value,
                 onValueChange = { message.value = it },
-                modifier = Modifier.width(maxWidth * 0.8f).heightIn(0.dp, 150.dp)
+                modifier = Modifier
+                    .width(maxWidth * 0.8f)
+                    .heightIn(0.dp, 150.dp)
             )
             SubmitButton(
                 message = message,
                 contactsViewModel = contactsViewModel,
                 messageViewModel = messageViewModel,
-                modifier = modifier.width(maxWidth * 0.8f).align(Alignment.CenterVertically)
+                modifier = modifier
+                    .width(maxWidth * 0.8f)
+                    .align(Alignment.CenterVertically)
             )
         }
     }
@@ -128,7 +133,9 @@ fun SubmitButton(
         Dialog(
             onDismissRequest = { openDialog.value = false }
         ) {
-            Card {
+            Card(
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Column(
                     modifier = Modifier.padding(10.dp)
                 ) {
@@ -137,16 +144,23 @@ fun SubmitButton(
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.padding(5.dp)
                     )
-                    LazyColumn {
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         items(contactsViewModel.uiState.value.contacts) { item ->
-                            ElevatedCard {
-                                Row {
+                            ElevatedCard(
+                                modifier = modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    horizontalArrangement = Arrangement.End
+                                ) {
                                     Text(
                                         text = item.name,
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .align(Alignment.CenterVertically)
                                     )
+                                    Spacer(modifier = Modifier.weight(9f))
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
