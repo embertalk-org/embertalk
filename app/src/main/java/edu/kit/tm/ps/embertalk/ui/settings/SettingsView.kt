@@ -72,6 +72,17 @@ fun SettingsView(
                 )
             }
             SubmittableTextField(
+                label = { Text(stringResource(R.string.sync_interval)) },
+                imageVector = Icons.Filled.Save,
+                initialValue = uiState.syncInterval.toString(),
+                clearOnSubmit = false,
+                inputValidator = { it.toLongOrNull() != null },
+                onSubmit = { settingsViewModel.updateSyncInterval(it.toLong()) }
+            )
+            RatchetState(syncState = uiState.syncState)
+            RegenerateKeysButton(uiState.syncState, settingsViewModel)
+            DeleteAllButton(messageViewModel = messageViewModel)
+            SubmittableTextField(
                 label = { Text(stringResource(R.string.key_server_url)) },
                 imageVector = Icons.Filled.Save,
                 initialValue = uiState.keyServerUrl,
@@ -79,9 +90,6 @@ fun SettingsView(
                 inputValidator = URLUtil::isValidUrl,
                 onSubmit = settingsViewModel::updateKeyServer
             )
-            RatchetState(syncState = uiState.syncState)
-            RegenerateKeysButton(uiState.syncState, settingsViewModel)
-            DeleteAllButton(messageViewModel = messageViewModel)
         }
     }
 }

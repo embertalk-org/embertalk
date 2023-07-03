@@ -16,7 +16,8 @@ import kotlinx.coroutines.launch
 data class SettingsUiState(
     val macAddress: String = "",
     val keyServerUrl: String = "",
-    val syncState: SyncState = SyncState.Initializing
+    val syncState: SyncState = SyncState.Initializing,
+    val syncInterval: Long = 10,
 )
 
 class SettingsViewModel(
@@ -31,6 +32,9 @@ class SettingsViewModel(
         cryptoService.register(this)
         if (!prefs.contains(Preferences.KEY_SERVER_URL)) {
             updateKeyServer("https://i63schadt.tm.kit.edu/embertalk")
+        }
+        if (!prefs.contains(Preferences.SYNC_INTERVAL)) {
+            updateSyncInterval(10)
         }
     }
 
@@ -51,6 +55,11 @@ class SettingsViewModel(
 
     fun updateKeyServer(url: String) {
         prefs.edit().putString(Preferences.KEY_SERVER_URL, url).apply()
+        notifyOfChange()
+    }
+
+    fun updateSyncInterval(interval: Long) {
+        prefs.edit().putLong(Preferences.SYNC_INTERVAL, interval).apply()
         notifyOfChange()
     }
 

@@ -38,6 +38,7 @@ class BluetoothSyncService : Service() {
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private lateinit var bluetoothClassicServer: BluetoothClassicServer
     private var started = false
+    private val preferences = PreferenceManager.getDefaultSharedPreferences(this)
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
     private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
@@ -107,7 +108,7 @@ class BluetoothSyncService : Service() {
                             continue
                         }
                         if (devicesLastSynced[serviceUuidAndAddress] != null &&
-                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(10))) {
+                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 10)))) {
                             continue
                         }
 
