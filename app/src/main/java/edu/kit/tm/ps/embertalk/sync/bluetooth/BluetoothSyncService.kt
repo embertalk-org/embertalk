@@ -13,6 +13,7 @@ import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.IBinder
 import android.util.Log
@@ -38,7 +39,7 @@ class BluetoothSyncService : Service() {
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private lateinit var bluetoothClassicServer: BluetoothClassicServer
     private var started = false
-    private val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+    private lateinit var preferences: SharedPreferences
     private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
     private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
@@ -48,6 +49,7 @@ class BluetoothSyncService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
         startForeground(1, Notification.build(
             this,
             "EmberTalk Bluetooth Sync",
