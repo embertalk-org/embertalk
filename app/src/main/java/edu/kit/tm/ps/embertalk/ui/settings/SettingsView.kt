@@ -42,8 +42,6 @@ fun SettingsView(
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-
     val uiState by settingsViewModel.uiState.collectAsState()
 
     Column(
