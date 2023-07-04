@@ -2,9 +2,13 @@
 
 package edu.kit.tm.ps.embertalk.ui
 
+import android.Manifest
+import android.os.Build
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -16,6 +20,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,10 +47,13 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.preference.PreferenceManager
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
+import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
@@ -70,6 +78,7 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun EmberTalkApp(
     modifier: Modifier = Modifier
@@ -83,37 +92,90 @@ fun EmberTalkApp(
         val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Messages.route,
+
+        val permissionState = rememberMultiplePermissionsState(mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.BLUETOOTH,
+            Manifest.permission.BLUETOOTH_ADMIN
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                this.add(Manifest.permission.BLUETOOTH_CONNECT)
+                this.add(Manifest.permission.BLUETOOTH_SCAN)
+                this.add(Manifest.permission.BLUETOOTH_ADVERTISE)
+            }
+        })
+        PermissionsRequired(
+            multiplePermissionsState = permissionState,
+            permissionsNotGrantedContent = {
+               EmberScaffold(navController = navController, toolWindow = true, showBack = false) {
+                   Column(
+                       verticalArrangement = Arrangement.spacedBy(10.dp)
+                   ) {
+                       Text(stringResource(R.string.permission_rationale))
+                       ElevatedButton(onClick = { permissionState.launchMultiplePermissionRequest() }) {
+                           Text(stringResource(R.string.request_permissions))
+                       }
+                   }
+
+               }
+            },
+            permissionsNotAvailableContent = { Text(stringResource(R.string.request_permissions)) }
         ) {
-            composable(Screen.Contacts.route) {
-                EmberScaffold(navController = navController, title = stringResource(id = R.string.contacts)) {
-                    ContactsView(contactsViewModel = contactsViewModel, navController = navController)
-                }
-            }
-            composable(Screen.AddContact.route) {
-                EmberScaffold(navController = navController, title = stringResource(R.string.add_contact), toolWindow = true) {
-                    AddContactView(contactsViewModel, navController)
-                }
-            }
-            composable(Screen.Messages.route) {
-                EmberScaffold(navController = navController, title = stringResource(id = R.string.messages)) {
-                    MessageView(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
-                }
-            }
-            composable(Screen.Settings.route) {
-                EmberScaffold(navController = navController, title = stringResource(id = R.string.settings)) {
-                    SettingsView(settingsViewModel, messageViewModel)
-                }
-            }
-            composable(
-                Screen.QrCode.route,
-                arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Messages.route,
             ) {
-                EmberScaffold(navController = navController, title = stringResource(R.string.share_contact), toolWindow = true) {
-                    val key = it.arguments!!.getString("pubKey")!!
-                    QrCodeView(qrCodeViewModel, key)
+                composable(Screen.Contacts.route) {
+                    EmberScaffold(
+                        navController = navController,
+                        title = stringResource(id = R.string.contacts)
+                    ) {
+                        ContactsView(
+                            contactsViewModel = contactsViewModel,
+                            navController = navController
+                        )
+                    }
+                }
+                composable(Screen.AddContact.route) {
+                    EmberScaffold(
+                        navController = navController,
+                        title = stringResource(R.string.add_contact),
+                        toolWindow = true
+                    ) {
+                        AddContactView(contactsViewModel, navController)
+                    }
+                }
+                composable(Screen.Messages.route) {
+                    EmberScaffold(
+                        navController = navController,
+                        title = stringResource(id = R.string.messages)
+                    ) {
+                        MessageView(
+                            contactsViewModel = contactsViewModel,
+                            messageViewModel = messageViewModel
+                        )
+                    }
+                }
+                composable(Screen.Settings.route) {
+                    EmberScaffold(
+                        navController = navController,
+                        title = stringResource(id = R.string.settings)
+                    ) {
+                        SettingsView(settingsViewModel, messageViewModel)
+                    }
+                }
+                composable(
+                    Screen.QrCode.route,
+                    arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
+                ) {
+                    EmberScaffold(
+                        navController = navController,
+                        title = stringResource(R.string.share_contact),
+                        toolWindow = true
+                    ) {
+                        val key = it.arguments!!.getString("pubKey")!!
+                        QrCodeView(qrCodeViewModel, key)
+                    }
                 }
             }
         }
@@ -126,6 +188,7 @@ fun EmberScaffold(
     modifier: Modifier = Modifier,
     title: String = stringResource(R.string.embertalk),
     toolWindow: Boolean = false,
+    showBack: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
@@ -145,7 +208,7 @@ fun EmberScaffold(
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                     if (toolWindow) {
+                     if (toolWindow && showBack) {
                          IconButton(onClick = { navController.popBackStack() }) {
                              Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                          }

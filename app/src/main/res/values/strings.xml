@@ -47,4 +47,6 @@
     <string name="upload">Upload</string>
     <string name="name_for_your_key">Name for your key</string>
     <string name="sync_interval">Sync Interval (s)</string>
+    <string name="request_permissions">Request permissions</string>
+    <string name="permission_rationale">Embertalk needs access to location services and Bluetooth to sync your messages. Please grant the permissions.</string>
 </resources>
