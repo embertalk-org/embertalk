@@ -66,7 +66,7 @@ fun AddContactView(
     val scanLauncher = rememberLauncherForActivityResult(
         contract = ScanContract(),
         onResult = { result ->
-            if (result == null || !result.contents.startsWith("ember://")) {
+            if (result == null || result.contents == null || !result.contents.startsWith("ember://")) {
                 Toast.makeText(context, "Not a valid EmberTalk-Code", Toast.LENGTH_SHORT).show()
             } else {
                 val withoutPrefix = result.contents.removePrefix("ember://")
