@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
-import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
@@ -44,7 +43,6 @@ fun SettingsView(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)!!
 
     val uiState by settingsViewModel.uiState.collectAsState()
 
