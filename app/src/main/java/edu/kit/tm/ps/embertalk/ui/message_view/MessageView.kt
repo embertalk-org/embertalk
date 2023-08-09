@@ -67,7 +67,8 @@ fun MessageView(
                     horizontalArrangement = if (item.mine) { Arrangement.End } else { Arrangement.Start }
                 ) {
                     MessageCard(
-                        message = item.content
+                        message = item.content,
+                        timestamp = item.timestamp
                     )
                 }
             }
