@@ -69,86 +69,68 @@ class BluetoothSyncService : Service() {
         BLUETOOTH_ADDRESS_UNAVAILABLE
     }
 
+    private val advertiseCallback = object : AdvertiseCallback() {
+        override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
+            super.onStartSuccess(settingsInEffect)
+            Log.d(TAG, "BLE advertise started")
+        }
+
+        override fun onStartFailure(errorCode: Int) {
+            super.onStartFailure(errorCode)
+            Log.e(TAG, "BLE advertise failed to start: error $errorCode")
+        }
+    }
+
+    private val scanCallback = object : ScanCallback() {
+        override fun onScanFailed(errorCode: Int) {
+            super.onScanFailed(errorCode)
+            Log.e(TAG, "BLE scan failed to start: error $errorCode")
+        }
+
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+
+            if (result.scanRecord == null || result.scanRecord!!.serviceUuids == null) {
+                return
+            }
+
+            for (uuid in result.scanRecord!!.serviceUuids) {
+                if (!ServiceUtils.matchesService(uuid.uuid)) {
+                    continue
+                }
+                if (devicesLastSynced[serviceUuidAndAddress] != null &&
+                    Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 10)))) {
+                    continue
+                }
+
+                val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
+                val remoteDevice = bluetoothAdapter.getRemoteDevice(remoteDeviceMacAddress)
+                clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer) {
+                    devicesLastSynced[serviceUuidAndAddress] = Instant.now()
+                }
+            }
+        }
+    }
+
     private fun startBluetoothLeDiscovery(startId: Int) {
         Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuidAndAddress))
         bluetoothLeAdvertiser.startAdvertising(
             BleSettings.ADVERTISE_SETTINGS,
             BleSettings.buildAdvertiseData(serviceUuidAndAddress),
-            object : AdvertiseCallback() {
-                override fun onStartSuccess(settingsInEffect: AdvertiseSettings) {
-                    super.onStartSuccess(settingsInEffect)
-                    Log.d(TAG, "BLE advertise started")
-                }
-
-                override fun onStartFailure(errorCode: Int) {
-                    super.onStartFailure(errorCode)
-                    Log.e(TAG, "BLE advertise failed to start: error $errorCode")
-                    stopSelf(startId)
-                    //TODO can we just restart here again?
-                }
-            })
+            advertiseCallback)
 
         bluetoothLeScanner.startScan(
             BleSettings.SCAN_FILTERS,
             BleSettings.SCAN_SETTINGS,
-            object : ScanCallback() {
-                override fun onScanFailed(errorCode: Int) {
-                    super.onScanFailed(errorCode)
-                    Log.e(TAG, "BLE scan failed to start: error $errorCode")
-                    stopSelf(startId)
-                }
-
-                override fun onScanResult(callbackType: Int, result: ScanResult) {
-                    super.onScanResult(callbackType, result)
-
-                    if (result.scanRecord == null || result.scanRecord!!.serviceUuids == null) {
-                        return
-                    }
-
-                    for (uuid in result.scanRecord!!.serviceUuids) {
-                        if (!ServiceUtils.matchesService(uuid.uuid)) {
-                            continue
-                        }
-                        if (devicesLastSynced[serviceUuidAndAddress] != null &&
-                            Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 10)))) {
-                            continue
-                        }
-
-                        val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
-                        val remoteDevice = bluetoothAdapter.getRemoteDevice(remoteDeviceMacAddress)
-                        clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer) {
-                            devicesLastSynced[serviceUuidAndAddress] = Instant.now()
-                        }
-                    }
-                }
-            })
+            scanCallback)
     }
 
     private fun stopBluetoothLeDiscovery() {
         if (!bluetoothAdapter.isEnabled) {
             return
         }
-
-        bluetoothLeAdvertiser.stopAdvertising(object : AdvertiseCallback() {
-            override fun onStartFailure(errorCode: Int) {
-                super.onStartFailure(errorCode)
-                Log.e(TAG, "BLE advertise failed to stop: error $errorCode")
-            }
-        })
-
-        bluetoothLeScanner.stopScan(object : ScanCallback() {
-            override fun onScanFailed(errorCode: Int) {
-                super.onScanFailed(errorCode)
-                Log.e(TAG, "BLE scan failed to stop: error $errorCode")
-            }
-        })
-
-        bluetoothLeScanner.flushPendingScanResults(object : ScanCallback() {
-            override fun onScanResult(callbackType: Int, result: ScanResult?) {
-                super.onScanResult(callbackType, result)
-                Log.d(TAG, "Ignoring flushed scan result")
-            }
-        })
+        bluetoothLeAdvertiser.stopAdvertising(advertiseCallback)
+        bluetoothLeScanner.stopScan(scanCallback)
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
