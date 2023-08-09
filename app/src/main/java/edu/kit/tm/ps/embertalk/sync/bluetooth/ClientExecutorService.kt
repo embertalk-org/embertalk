@@ -29,6 +29,11 @@ class ClientExecutorService {
         }
     }
 
+    fun shutdown() {
+        taskQueue.clear()
+        Log.d(TAG, "Cleared task queue.")
+    }
+
     companion object {
         private const val TAG = "ClientExecutorService"
     }

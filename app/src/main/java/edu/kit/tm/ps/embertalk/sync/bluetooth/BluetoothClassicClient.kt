@@ -13,7 +13,7 @@ class BluetoothClassicClient(
     device: BluetoothDevice,
     private val synchronizer: Synchronizer,
     uuid: UUID,
-    private val onSyncFinish: () -> Unit,
+    private val onSyncEnd: () -> Unit,
     private val onSyncSuccessful: () -> Unit
 ) : Runnable {
     private var socket: BluetoothSocket? = null
@@ -37,16 +37,20 @@ class BluetoothClassicClient(
             Log.d(TAG, "Connected to a server successfully.")
         } catch (connectException: IOException) {
             Log.e(TAG, "Failed to connect", connectException)
+            onSyncEnd.invoke()
+            socket!!.close()
+            Log.d(TAG, "Closed socket")
+            return
         }
         try {
             val successful = synchronizer.bidirectionalSync(socket!!.remoteDevice.address, socket!!.inputStream, socket!!.outputStream)
             if (successful) {
                 onSyncSuccessful.invoke()
             }
-            onSyncFinish.invoke()
         } catch (e: IOException) {
             Log.e(TAG, "Failed to sync", e)
         }
+        onSyncEnd.invoke()
         socket!!.close()
         Log.d(TAG, "Closed socket")
     }

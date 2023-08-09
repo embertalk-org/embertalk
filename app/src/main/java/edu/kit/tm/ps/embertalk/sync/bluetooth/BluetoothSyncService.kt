@@ -142,6 +142,13 @@ class BluetoothSyncService : Service() {
                 Log.e(TAG, "BLE scan failed to stop: error $errorCode")
             }
         })
+
+        bluetoothLeScanner.flushPendingScanResults(object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                super.onScanResult(callbackType, result)
+                Log.d(TAG, "Ignoring flushed scan result")
+            }
+        })
     }
 
     override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
@@ -192,6 +199,7 @@ class BluetoothSyncService : Service() {
 
         stopBluetoothLeDiscovery()
         bluetoothClassicServer.shutdown()
+        clientExecutorService.shutdown()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")
