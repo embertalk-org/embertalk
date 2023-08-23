@@ -38,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -82,6 +83,7 @@ fun AddContactView(
             .fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom)
     ) {
+        val focusManager = LocalFocusManager.current
         SubmittableTextField(
             label = { Text("Contact Name") },
             imageVector = Icons.Filled.Download,
@@ -96,6 +98,7 @@ fun AddContactView(
                         }
                     } else {
                         key.value = result
+                        focusManager.clearFocus()
                     }
                 }
             }
