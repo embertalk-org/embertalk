@@ -18,7 +18,7 @@ data class Message(
         val bytes = ByteBuffer.allocate(Int.SIZE_BYTES)
             .putInt(content.hashCode()).array() + content.encodeToByteArray()
         val transformed = transformer.invoke(bytes)
-        return EncryptedMessage(hash = transformed.contentHashCode(), bytes = transformed, epoch = 0)
+        return EncryptedMessage(hash = transformed.contentHashCode(), bytes = transformed, epoch = epoch)
     }
 
     companion object {

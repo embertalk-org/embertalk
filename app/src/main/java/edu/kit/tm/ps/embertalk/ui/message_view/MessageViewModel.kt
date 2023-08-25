@@ -34,7 +34,7 @@ class MessageViewModel(
         }
     }
 
-    suspend fun saveMessage(message: Message, publicKey: String) {
+    suspend fun saveMessage(message: String, publicKey: String) {
         messageManager.handle(message, publicKey)
         updateMessages()
     }

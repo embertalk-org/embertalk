@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.ui.components.MessageCard
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
@@ -165,7 +164,7 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, epoch = 0, timestamp = System.currentTimeMillis()), item.pubKey) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.pubKey) }
                                             message.value = ""
                                         }
                                     ) {

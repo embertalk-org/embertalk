@@ -30,7 +30,8 @@ class AppDataContainer(private val context: Context) : AppContainer {
         MessageManager(
             OfflineMessageRepository(MessageDb.getDb(context).dao()),
             OfflineEncryptedMessageRepository(EncryptedMessageDb.getDb(context).dao()),
-            cryptoService
+            cryptoService,
+            majorityVoteOffsetProvider
         )
     }
 

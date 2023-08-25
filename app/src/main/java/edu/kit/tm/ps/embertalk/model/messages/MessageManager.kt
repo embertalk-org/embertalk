@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.model.messages
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
@@ -14,12 +15,14 @@ class MessageManager(
     private val messageRepository: MessageRepository,
     private val encryptedRepository: EncryptedMessageRepository,
     private val cryptoService: CryptoService,
+    private val epochProvider: EpochProvider
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun handle(message: Message, publicKey: String) {
-        messageRepository.insert(message)
-        val encrypted = cryptoService.encrypt(message, publicKey)
+    suspend fun handle(message: String, publicKey: String) {
+        val msg = Message(message, true, epochProvider.current(), System.currentTimeMillis())
+        messageRepository.insert(msg)
+        val encrypted = cryptoService.encrypt(msg, publicKey)
         encryptedRepository.insert(encrypted)
     }
 
