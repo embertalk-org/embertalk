@@ -17,7 +17,7 @@ data class SettingsUiState(
     val macAddress: String = "",
     val keyServerUrl: String = "",
     val syncState: SyncState = SyncState.Initializing,
-    val syncInterval: Long = 10,
+    val syncInterval: Long = 5,
 )
 
 class SettingsViewModel(
@@ -34,7 +34,7 @@ class SettingsViewModel(
             updateKeyServer("https://i63schadt.tm.kit.edu/embertalk")
         }
         if (!prefs.contains(Preferences.SYNC_INTERVAL)) {
-            updateSyncInterval(10)
+            updateSyncInterval(5)
         }
     }
 
