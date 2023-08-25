@@ -28,7 +28,7 @@ data class Message(
             val contentBytes = ByteArray(buffer.remaining())
             buffer.get(contentBytes)
             val content = contentBytes.decodeToString()
-            return if (contentHash == content.hashCode()) Message(content = content, timestamp = epoch) else null
+            return if (contentHash == content.hashCode()) Message(content = content, timestamp = System.currentTimeMillis()) else null
         }
     }
 }
