@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -97,13 +98,17 @@ fun QrCodeView(
             }
             if (qrCodeViewModel.isMyKey(pubKey)) {
                 val keyServerScope = rememberCoroutineScope()
+                val focusManager = LocalFocusManager.current
                 SubmittableTextField(
                     label = { Text(stringResource(R.string.name_for_your_key)) },
                     imageVector = Icons.Filled.Upload,
                     onSubmit = {
                         keyServerScope.launch(Dispatchers.IO) {
                             val msg = when (val result = qrCodeViewModel.putKey(it)) {
-                                201 -> "Uploaded Key successfully!"
+                                201 -> {
+                                    focusManager.clearFocus()
+                                    "Uploaded Key successfully!"
+                                }
                                 else -> "Failed to upload key, status: $result"
                             }
                             withContext(Dispatchers.Main) {
