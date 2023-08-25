@@ -165,7 +165,7 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, timestamp = System.currentTimeMillis()), item.pubKey) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(Message(content = message.value, mine = true, epoch = 0, timestamp = System.currentTimeMillis()), item.pubKey) }
                                             message.value = ""
                                         }
                                     ) {
