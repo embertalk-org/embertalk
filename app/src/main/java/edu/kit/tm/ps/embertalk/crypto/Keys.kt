@@ -122,12 +122,3 @@ internal class Keys(
         private const val TAG = "Keys"
     }
 }
-
-//TODO replace by updated library function
-private fun PublicKey.clone(): PublicKey {
-    return PublicKey.deserialize(this.serialize())
-}
-
-private fun PrivateKey.clone(): PrivateKey {
-    return PrivateKey.deserialize(this.serialize())
-}
