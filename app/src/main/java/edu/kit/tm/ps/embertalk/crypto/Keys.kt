@@ -16,23 +16,31 @@ internal class Keys(
 ) {
     private var private: PrivateKey
     private var public: PublicKey
+    private var rolloverPrivate: PrivateKey
+    private var rolloverPublic: PublicKey
 
     init {
         if (!prefs.contains(Preferences.PRIVATE_KEY) && !prefs.contains(Preferences.PUBLIC_KEY)) {
             val keys = this.regenerate()
             private = keys.privateKey()
             public = keys.publicKey()
+            rolloverPrivate = private.clone()
+            rolloverPublic = public.clone()
             storeKeys()
         } else {
             try {
                 private = PrivateKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
                 public = PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PUBLIC_KEY, ""), Base64.URL_SAFE))
+                rolloverPrivate = private.clone()
+                rolloverPublic = public.clone()
                 storeKeys()
             } catch (e: RatchetException) {
                 Log.d(TAG, "Failed to deserialize keys... Regenerating...")
                 val keys = this.regenerate()
                 private = keys.privateKey()
                 public = keys.publicKey()
+                rolloverPrivate = private.clone()
+                rolloverPublic = public.clone()
             }
         }
     }
@@ -64,9 +72,11 @@ internal class Keys(
     fun fastForward() {
         val currentEpoch = epochProvider.current()
         if (currentEpoch > private.currentEpoch()) {
+            rolloverPrivate = private.clone()
             private.fastForward(currentEpoch - private.currentEpoch())
         }
         if (currentEpoch > public.currentEpoch()) {
+            rolloverPublic = public.clone()
             public.fastForward(currentEpoch - public.currentEpoch())
         }
         storeKeys()
@@ -77,6 +87,11 @@ internal class Keys(
         if (currentEpoch > pub.currentEpoch()) {
             pub.fastForward(currentEpoch - pub.currentEpoch())
         }
+    }
+
+    fun decrypt(message: ByteArray): ByteArray {
+        return rolloverPrivate.decrypt(message)
+            ?: private.decrypt(message)
     }
 
     fun private(): PrivateKey {
@@ -106,4 +121,13 @@ internal class Keys(
     companion object {
         private const val TAG = "Keys"
     }
+}
+
+//TODO replace by updated library function
+private fun PublicKey.clone(): PublicKey {
+    return PublicKey.deserialize(this.serialize())
+}
+
+private fun PrivateKey.clone(): PrivateKey {
+    return PrivateKey.deserialize(this.serialize())
 }
