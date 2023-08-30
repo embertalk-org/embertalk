@@ -1,6 +1,6 @@
 package edu.kit.tm.ps.embertalk.epoch
 
-import android.util.Log
+import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 class MajorityVoteOffsetProvider(
@@ -8,15 +8,27 @@ class MajorityVoteOffsetProvider(
 ) : EpochProvider, ClockManager {
 
     private val knownClocks: MutableMap<String, Long> = ConcurrentHashMap()
+    private val clockTimestamps: MutableMap<String, Instant> = ConcurrentHashMap()
+
+    private var vote: Long = majorityVote()
+    private var voteTimestamp: Instant = Instant.now()
 
     override fun current(): Long {
-        return baseEpochProvider.current() + majorityVote()
+        val now = Instant.now()
+        if (voteTimestamp.isAfter(now.minusSeconds(EVICTION_INTERVAL))) {
+            clockTimestamps
+                .filter { it.value.isBefore(now.minusSeconds(EVICTION_INTERVAL)) }
+                .forEach { knownClocks.remove(it.key) }
+            vote = majorityVote()
+            voteTimestamp = now
+        }
+        return baseEpochProvider.current() + vote
     }
 
     override fun rememberClock(device: String, epoch: Long) {
         val offset = epoch - baseEpochProvider.current()
         knownClocks[device] = offset
-        Log.d(TAG, "Stored clock of device %s with offset %s".format(device, offset))
+        clockTimestamps[device] = Instant.now()
     }
 
     private fun majorityVote(): Long {
@@ -29,7 +41,6 @@ class MajorityVoteOffsetProvider(
         } else if (chosenClocks[1] == chosenClocks[2]) {
             chosenClocks[1]
         } else {
-            Log.d(TAG, "Could not find matching clocks, choosing random clock.")
             chosenClocks.shuffled()[0]
         }
     }
@@ -44,6 +55,6 @@ class MajorityVoteOffsetProvider(
     }
 
     companion object {
-        private const val TAG = "MajorityVoteOffsetProvider"
+        private const val EVICTION_INTERVAL = 120L
     }
 }
