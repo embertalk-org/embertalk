@@ -36,6 +36,7 @@ class SettingsViewModel(
         if (!prefs.contains(Preferences.SYNC_INTERVAL)) {
             updateSyncInterval(5)
         }
+        notifyOfChange()
     }
 
     override fun notifyOfChange() {
