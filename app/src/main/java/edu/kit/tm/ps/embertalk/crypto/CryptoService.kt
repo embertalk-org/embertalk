@@ -34,7 +34,7 @@ class CryptoService(
         fastForward()
     }
 
-    private suspend fun fastForward() {
+    suspend fun fastForward() {
         lock.withLock {
             keys.fastForward()
         }
@@ -49,7 +49,6 @@ class CryptoService(
     }
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
-        keys.fastForward()
         return Message.decode(encryptedMessage, epochProvider.current(), keys::decrypt)
     }
 
