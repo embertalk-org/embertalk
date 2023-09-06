@@ -168,7 +168,7 @@ class BluetoothSyncService : Service() {
         startBluetoothLeDiscovery(startId)
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(uuid, synchronizer, bluetoothAdapter)
+        bluetoothClassicServer = BluetoothClassicServer(synchronizer, bluetoothAdapter)
         bluetoothClassicServer.start()
 
         Log.d(TAG, "Started")

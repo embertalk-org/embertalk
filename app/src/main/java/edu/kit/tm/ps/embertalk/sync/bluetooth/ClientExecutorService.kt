@@ -18,7 +18,6 @@ class ClientExecutorService {
             val client = BluetoothClassicClient(
                 remoteDevice,
                 synchronizer,
-                uuid,
                 { taskQueue.remove(uuid) },
                 { onFinishAction.invoke() },
             )

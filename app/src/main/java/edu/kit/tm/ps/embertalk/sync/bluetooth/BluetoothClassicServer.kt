@@ -7,11 +7,9 @@ import android.bluetooth.BluetoothSocket
 import android.util.Log
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.io.IOException
-import java.util.UUID
 
 @SuppressLint("MissingPermission")
 class BluetoothClassicServer(
-    uuid: UUID,
     private val synchronizer: Synchronizer,
     private val bluetoothAdapter: BluetoothAdapter
     ) : Thread() {
@@ -20,7 +18,7 @@ class BluetoothClassicServer(
 
     init {
         try {
-            serverSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(TAG, uuid)
+            serverSocket = bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord(ServiceUtils.SDP_NAME, ServiceUtils.SDP_UUID)
         } catch (e: IOException) {
             Log.e(TAG, "Failed to set up Bluetooth Classic connection", e)
         }

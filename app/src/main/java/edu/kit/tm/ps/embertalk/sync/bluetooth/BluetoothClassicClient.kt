@@ -6,13 +6,12 @@ import android.bluetooth.BluetoothSocket
 import android.util.Log
 import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.io.IOException
-import java.util.UUID
+
 
 @SuppressLint("MissingPermission")
 class BluetoothClassicClient(
     device: BluetoothDevice,
     private val synchronizer: Synchronizer,
-    uuid: UUID,
     private val onSyncEnd: () -> Unit,
     private val onSyncSuccessful: () -> Unit
 ) : Runnable {
@@ -22,7 +21,7 @@ class BluetoothClassicClient(
     init {
         macAddress = device.address
         try {
-            socket = device.createInsecureRfcommSocketToServiceRecord(uuid)
+            socket = device.createInsecureRfcommSocketToServiceRecord(ServiceUtils.SDP_UUID)
             Log.d(TAG, "Opened a socket successfully")
         } catch (connectException: IOException) {
             Log.e(TAG, "Failed to create socket", connectException)
