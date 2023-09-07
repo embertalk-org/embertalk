@@ -65,7 +65,7 @@ class CryptoService(
         return if (!this::keys.isInitialized) {
             SyncState.Initializing
         } else if (keys.inSync()) {
-            SyncState.Synchronized
+            SyncState.Synchronized(currentEpoch())
         } else {
             SyncState.Synchronizing(keys.epochsLate())
         }

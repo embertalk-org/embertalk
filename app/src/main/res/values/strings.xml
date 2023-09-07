@@ -36,7 +36,7 @@
     <string name="not_an_embertalk_code">Your clipboard does not contain an EmberTalk code</string>
     <string name="understood">Understood</string>
     <string name="info">Info</string>
-    <string name="synced">Synchronized!</string>
+    <string name="synced">Synchronized at</string>
     <string name="remaining_epochs_format">Remaining epochs: %s</string>
     <string name="still_initializing">Keys are still initializing…</string>
     <string name="alert">Alert</string>
@@ -49,4 +49,5 @@
     <string name="sync_interval">Sync Interval (s)</string>
     <string name="request_permissions">Request permissions</string>
     <string name="permission_rationale">Embertalk needs access to location services and Bluetooth to sync your messages. Please grant the permissions.</string>
+    <string name="current_epoch">Current Epoch</string>
 </resources>

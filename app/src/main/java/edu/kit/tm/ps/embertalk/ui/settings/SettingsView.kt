@@ -24,7 +24,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
@@ -106,7 +105,7 @@ fun RatchetState(
         Row {
             when (syncState) {
                 is SyncState.Synchronized -> Text(
-                    text = stringResource(R.string.synced),
+                    text = stringResource(R.string.synced) + " ${syncState.currentEpoch}",
                     color = Color.Green,
                     modifier = modifier.align(Alignment.CenterVertically)
                 )
@@ -131,7 +130,7 @@ fun RegenerateKeysButton(
 ) {
     val openDialog = remember { mutableStateOf(false) }
     TextButton(
-        enabled = syncState == SyncState.Synchronized,
+        enabled = syncState is SyncState.Synchronized,
         onClick = { openDialog.value = true }
     ) {
         Row {
