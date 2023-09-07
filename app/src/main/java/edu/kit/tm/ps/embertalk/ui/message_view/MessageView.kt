@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package edu.kit.tm.ps.embertalk.ui.message_view
 
@@ -67,6 +67,7 @@ fun MessageView(
                 ) {
                     MessageCard(
                         message = item.content,
+                        recipient = item.recipient,
                         timestamp = item.timestamp
                     )
                 }
@@ -164,7 +165,7 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.pubKey) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.name, item.pubKey) }
                                             message.value = ""
                                         }
                                     ) {

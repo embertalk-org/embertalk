@@ -11,6 +11,7 @@ import java.nio.ByteBuffer
 data class Message(
     val content: String,
     val mine: Boolean = false,
+    val recipient: String?,
     val epoch: Long,
     val timestamp: Long,
 ): Parcelable {
@@ -31,7 +32,7 @@ data class Message(
                 buffer.get(contentBytes)
                 val content = contentBytes.decodeToString()
                 if (contentHash == content.hashCode()) {
-                    return Message(content = content, epoch = epoch, timestamp = System.currentTimeMillis())
+                    return Message(content = content, epoch = epoch, recipient = null, timestamp = System.currentTimeMillis())
                 }
             }
             return null

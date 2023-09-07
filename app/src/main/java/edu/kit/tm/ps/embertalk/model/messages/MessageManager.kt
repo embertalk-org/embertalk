@@ -19,8 +19,8 @@ class MessageManager(
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun handle(message: String, publicKey: String) {
-        val msg = Message(message, true, epochProvider.current(), System.currentTimeMillis())
+    suspend fun handle(message: String, recipient: String, publicKey: String) {
+        val msg = Message(message, true, recipient, epochProvider.current(), System.currentTimeMillis())
         messageRepository.insert(msg)
         val encrypted = cryptoService.encrypt(msg, publicKey)
         encryptedRepository.insert(encrypted)
