@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
@@ -30,6 +31,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,11 +57,17 @@ fun MessageView(
         modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Bottom
     ) {
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = messageUiState.messages.size)
+        val coroutineScope = rememberCoroutineScope()
         LazyColumn(
+            state = listState,
             modifier = modifier
                 .fillMaxWidth()
                 .weight(9f)
         ) {
+            coroutineScope.launch {
+                listState.animateScrollToItem(messageUiState.messages.size)
+            }
             items(messageUiState.messages) { item ->
                 Row(
                     modifier = modifier.fillMaxWidth(),
