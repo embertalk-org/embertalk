@@ -22,14 +22,19 @@ data class Message(
     }
 
     companion object {
-        fun decode(encryptedMessage: EncryptedMessage, epoch: Long, transformer: (ByteArray) -> ByteArray): Message? {
+        fun decode(encryptedMessage: EncryptedMessage, epoch: Long, transformer: (ByteArray) -> Array<ByteArray>): Message? {
             val transformed = transformer.invoke(encryptedMessage.bytes)
-            val buffer = ByteBuffer.wrap(transformed)
-            val contentHash = buffer.int
-            val contentBytes = ByteArray(buffer.remaining())
-            buffer.get(contentBytes)
-            val content = contentBytes.decodeToString()
-            return if (contentHash == content.hashCode()) Message(content = content, epoch = epoch, timestamp = System.currentTimeMillis()) else null
+            for (decryptionResult in transformed) {
+                val buffer = ByteBuffer.wrap(decryptionResult)
+                val contentHash = buffer.int
+                val contentBytes = ByteArray(buffer.remaining())
+                buffer.get(contentBytes)
+                val content = contentBytes.decodeToString()
+                if (contentHash == content.hashCode()) {
+                    return Message(content = content, epoch = epoch, timestamp = System.currentTimeMillis())
+                }
+            }
+            return null
         }
     }
 }

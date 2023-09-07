@@ -91,9 +91,8 @@ internal class Keys(
         }
     }
 
-    fun decrypt(message: ByteArray): ByteArray {
-        return rolloverPrivate.decrypt(message)
-            ?: private.decrypt(message)
+    fun decrypt(message: ByteArray): Array<ByteArray> {
+        return arrayOf(rolloverPrivate.decrypt(message), private.decrypt(message))
     }
 
     fun private(): PrivateKey {
