@@ -44,7 +44,7 @@ class CryptoService(
     suspend fun encrypt(message: Message, publicKey: String): EncryptedMessage {
         val pubKey = keys.decode(publicKey)
         keys.fastForward(pubKey)
-        keys.fastForward()
+        fastForward()
         return message.encode(pubKey::encrypt)
     }
 
@@ -58,7 +58,7 @@ class CryptoService(
 
     suspend fun regenerate() {
         keys.regenerate()
-        keys.fastForward()
+        fastForward()
     }
 
     fun syncState(): SyncState {
