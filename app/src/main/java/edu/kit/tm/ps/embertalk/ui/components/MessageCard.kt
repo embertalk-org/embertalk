@@ -36,7 +36,7 @@ fun MessageCard(
             )
             val date = dateFormat.format(Date.from(Instant.ofEpochMilli(timestamp)))
             Text(
-                text = if (recipient != null) { "$date to $recipient" } else { date },
+                text = if (recipient != null) { "$date > $recipient" } else { date },
                 fontSize = 2.em,
                 modifier = modifier.align(Alignment.End)
             )
