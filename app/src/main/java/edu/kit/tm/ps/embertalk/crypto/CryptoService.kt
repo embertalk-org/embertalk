@@ -1,6 +1,8 @@
 package edu.kit.tm.ps.embertalk.crypto
 
 import android.content.SharedPreferences
+import android.util.Log
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.emberkeyd.EmberKeydClient
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.EmberObservable
@@ -23,7 +25,7 @@ class CryptoService(
 
     fun emberKeydClient(): EmberKeydClient {
         return EmberKeydClient(
-            sharedPreferences.getString(edu.kit.tm.ps.embertalk.Preferences.KEY_SERVER_URL, "")!!,
+            sharedPreferences.getString(Preferences.KEY_SERVER_URL, "")!!,
             keys.private(),
             keys.public()
         )
@@ -44,12 +46,13 @@ class CryptoService(
     suspend fun encrypt(message: Message, publicKey: String): EncryptedMessage {
         val pubKey = keys.decode(publicKey)
         keys.fastForward(pubKey)
+        Log.d(TAG, "PublicKey ffed, now at ${pubKey.currentEpoch()}")
         fastForward()
         return message.encode(pubKey::encrypt)
     }
 
     suspend fun decrypt(encryptedMessage: EncryptedMessage): Message? {
-        keys.fastForward()
+        fastForward()
         return Message.decode(encryptedMessage, epochProvider.current(), keys::decrypt)
     }
 
@@ -82,5 +85,9 @@ class CryptoService(
 
     fun isMyKey(pubKey: String): Boolean {
         return keys.isMyKey(pubKey)
+    }
+
+    companion object {
+        private const val TAG = "CryptoService"
     }
 }

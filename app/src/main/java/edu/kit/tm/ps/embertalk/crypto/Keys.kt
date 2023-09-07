@@ -79,6 +79,8 @@ internal class Keys(
             rolloverPublic = public.clone()
             public.fastForward(currentEpoch - public.currentEpoch())
         }
+        Log.d(TAG, "Rollover keys ffed, now at ${rolloverPrivate.currentEpoch()}")
+        Log.d(TAG, "Keys ffed, now at ${private.currentEpoch()}")
         storeKeys()
     }
 
