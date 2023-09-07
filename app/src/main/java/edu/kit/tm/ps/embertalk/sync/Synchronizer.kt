@@ -22,8 +22,6 @@ class Synchronizer(
     fun bidirectionalSync(remoteName:String, inputStream: InputStream, outputStream: OutputStream): Boolean {
         Log.d(TAG, "Starting sync")
 
-        runBlocking { messageManager.setupSync() }
-
         val protocol = Protocol(DataInputStream(inputStream), DataOutputStream(outputStream))
 
         try {

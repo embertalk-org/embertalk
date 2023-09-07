@@ -19,10 +19,6 @@ class MessageManager(
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun setupSync() {
-        cryptoService.fastForward()
-    }
-
     suspend fun handle(message: String, publicKey: String) {
         val msg = Message(message, true, epochProvider.current(), System.currentTimeMillis())
         messageRepository.insert(msg)
