@@ -44,6 +44,7 @@
 
         <service
             android:name=".sync.bluetooth.BluetoothSyncService"
+            android:foregroundServiceType="remoteMessaging"
             android:enabled="true"
             android:exported="false" />
 
