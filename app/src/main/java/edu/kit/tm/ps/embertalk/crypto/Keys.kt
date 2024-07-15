@@ -9,6 +9,7 @@ import edu.kit.tm.ps.PublicKey
 import edu.kit.tm.ps.RatchetException
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
+import java.util.UUID
 
 internal class Keys(
     private val epochProvider: EpochProvider,
@@ -50,6 +51,7 @@ internal class Keys(
         val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
+        prefs.edit().putString("userId", UUID.randomUUID().toString()).apply()
         storeKeys()
         return keyPair
     }
