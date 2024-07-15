@@ -5,13 +5,12 @@ import java.util.UUID
 
 object ServiceUtils {
 
-    val SERVICE_UUID = UUID.fromString("7ba323d4-7021-23c4-0000-000000000000")!!
-    val SERVICE_MASK = UUID.fromString("FFFFFFFF-FFFF-FFFF-FFFF-000000000000")!!
+    val SERVICE_UUID = UUID.fromString("7ba323d4-7021-23c4-1ab4-23456789abcd")!!
     val SDP_UUID = UUID.fromString("7ba323d4-7021-23c4-0000-00805F9B34FB")!!
     const val SDP_NAME = "Embertalk"
 
     fun matchesService(uuid: UUID): Boolean {
-        return SERVICE_UUID.mostSignificantBits == uuid.mostSignificantBits
+        return SERVICE_UUID == uuid
     }
 
     fun toUuid(macAddress: String): UUID {

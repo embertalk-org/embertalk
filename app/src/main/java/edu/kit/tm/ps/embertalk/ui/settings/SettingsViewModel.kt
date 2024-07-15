@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class SettingsUiState(
-    val macAddress: String = "",
     val keyServerUrl: String = "",
     val syncState: SyncState = SyncState.Initializing,
     val syncInterval: Long = 5,
@@ -42,16 +41,11 @@ class SettingsViewModel(
     override fun notifyOfChange() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
-                macAddress = prefs.getString(Preferences.MAC_ADDRESS, "")!!,
                 keyServerUrl = prefs.getString(Preferences.KEY_SERVER_URL, "")!!,
                 syncState = cryptoService.syncState()
             )
             Log.d(TAG, "Updated Settings!")
         }
-    }
-
-    fun updateMacAddress(macAddress: String) {
-        prefs.edit().putString(Preferences.MAC_ADDRESS, macAddress.uppercase()).apply()
     }
 
     fun updateKeyServer(url: String) {

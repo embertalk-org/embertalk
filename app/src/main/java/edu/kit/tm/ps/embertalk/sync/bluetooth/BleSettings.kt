@@ -37,7 +37,7 @@ object BleSettings {
 
     val SCAN_FILTERS: List<ScanFilter> = listOf(
         ScanFilter.Builder()
-            .setServiceUuid(ParcelUuid(ServiceUtils.SERVICE_UUID), ParcelUuid(ServiceUtils.SERVICE_MASK))
+            .setServiceUuid(ParcelUuid(ServiceUtils.SERVICE_UUID))
             .build()
     )
 

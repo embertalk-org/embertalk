@@ -33,14 +33,14 @@ import java.util.concurrent.ConcurrentHashMap
 class BluetoothSyncService : Service() {
 
     private lateinit var synchronizer: Synchronizer
-    private lateinit var serviceUuidAndAddress: UUID
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeAdvertiser: BluetoothLeAdvertiser
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private lateinit var bluetoothClassicServer: BluetoothClassicServer
     private var started = false
     private lateinit var preferences: SharedPreferences
-    private val devicesLastSynced: ConcurrentHashMap<UUID, Instant> = ConcurrentHashMap()
+    private var serviceUuid: UUID = ServiceUtils.SERVICE_UUID
+    private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
     private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
     init {
@@ -98,25 +98,24 @@ class BluetoothSyncService : Service() {
                 if (!ServiceUtils.matchesService(uuid.uuid)) {
                     continue
                 }
-                if (devicesLastSynced[serviceUuidAndAddress] != null &&
-                    Instant.now().isBefore(devicesLastSynced[serviceUuidAndAddress]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 5)))) {
+                val remoteDevice = result.device
+                if (devicesLastSynced[remoteDevice.address] != null &&
+                    Instant.now().isBefore(devicesLastSynced[remoteDevice.address]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 5)))) {
                     continue
                 }
 
-                val remoteDeviceMacAddress = ServiceUtils.fromParcelUuid(uuid)
-                val remoteDevice = bluetoothAdapter.getRemoteDevice(remoteDeviceMacAddress)
-                clientExecutorService.enqueue(remoteDevice, uuid.uuid, synchronizer) {
-                    devicesLastSynced[serviceUuidAndAddress] = Instant.now()
+                clientExecutorService.enqueue(remoteDevice, synchronizer) {
+                    devicesLastSynced[remoteDevice.address] = Instant.now()
                 }
             }
         }
     }
 
-    private fun startBluetoothLeDiscovery(startId: Int) {
-        Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuidAndAddress))
+    private fun startBluetoothLeDiscovery() {
+        Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuid))
         bluetoothLeAdvertiser.startAdvertising(
             BleSettings.ADVERTISE_SETTINGS,
-            BleSettings.buildAdvertiseData(serviceUuidAndAddress),
+            BleSettings.buildAdvertiseData(serviceUuid),
             advertiseCallback)
 
         bluetoothLeScanner.startScan(
@@ -151,21 +150,9 @@ class BluetoothSyncService : Service() {
 
         bluetoothAdapter = getBluetoothAdapter(this)
 
-        // First half identifies that the advertisement is for us.
-        // Second half is the MAC address of this device's Bluetooth adapter so that clients know how to connect to it.
-        // These are not listed separately in the advertisement because a UUID is 16 bytes and ads are limited to 31 bytes.
-        val macAddress = getBluetoothAdapterAddress(this)
-        if (macAddress == null) {
-            Log.e(TAG, "Unable to get this device's Bluetooth MAC address")
-            stopSelf(startId)
-            return START_NOT_STICKY
-        }
-        val uuid = ServiceUtils.toUuid(macAddress)
-        serviceUuidAndAddress = uuid
-
         bluetoothLeAdvertiser = bluetoothAdapter.bluetoothLeAdvertiser
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
-        startBluetoothLeDiscovery(startId)
+        startBluetoothLeDiscovery()
 
         started = true
         bluetoothClassicServer = BluetoothClassicServer(synchronizer, bluetoothAdapter)
@@ -200,8 +187,6 @@ class BluetoothSyncService : Service() {
                 return CanStartResult.BLUETOOTH_OFF
             } else if (!bluetoothAdapter.isMultipleAdvertisementSupported) {
                 return CanStartResult.BLUETOOTH_OR_BLE_UNSUPPORTED
-            } else if (getBluetoothAdapterAddress(context) == null) {
-                return CanStartResult.BLUETOOTH_ADDRESS_UNAVAILABLE
             }
 
             return CanStartResult.CAN_START
@@ -236,11 +221,6 @@ class BluetoothSyncService : Service() {
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter {
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             return bluetoothManager.adapter
-        }
-
-        private fun getBluetoothAdapterAddress(context: Context): String? {
-            val preferences = PreferenceManager.getDefaultSharedPreferences(context)
-            return preferences.getString(Preferences.MAC_ADDRESS, null)?.uppercase()
         }
     }
 }

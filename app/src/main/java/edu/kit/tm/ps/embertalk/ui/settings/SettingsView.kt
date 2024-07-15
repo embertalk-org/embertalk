@@ -29,8 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.SyncState
-import edu.kit.tm.ps.embertalk.sync.MacAddressUtils
-import edu.kit.tm.ps.embertalk.ui.components.InfoDialogButton
 import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import kotlinx.coroutines.launch
@@ -48,24 +46,6 @@ fun SettingsView(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Column {
-            SubmittableTextField(
-                label = { Text(stringResource(R.string.your_mac_address)) },
-                imageVector = Icons.Filled.Save,
-                initialValue = uiState.macAddress,
-                clearOnSubmit = false,
-                inputValidator = MacAddressUtils::isValidMacAddress,
-                onSubmit = settingsViewModel::updateMacAddress
-            )
-            Row {
-                InfoDialogButton(
-                    alertTitle = { Text(stringResource(R.string.mac_address_how_to)) },
-                    alertText = { Text(stringResource(R.string.mac_address_how_to_text)) },
-                )
-                Text(
-                    text = stringResource(R.string.where_to_find_mac),
-                    modifier = modifier.align(Alignment.CenterVertically)
-                )
-            }
             SubmittableTextField(
                 label = { Text(stringResource(R.string.sync_interval)) },
                 imageVector = Icons.Filled.Save,
