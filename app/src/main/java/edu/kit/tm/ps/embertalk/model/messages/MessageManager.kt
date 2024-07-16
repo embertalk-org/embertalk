@@ -31,7 +31,8 @@ class MessageManager(
         encryptedRepository.insert(encryptedMessage.copy(epoch = cryptoService.currentEpoch()))
         if (message != null) {
             messageRepository.insert(message)
-            Log.d(TAG, "Message inserted")
+            notifyObservers()
+            Log.d(TAG, "Message ${message.content} inserted")
         } else {
             Log.d(TAG, "Message could not be decrypted")
         }

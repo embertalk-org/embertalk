@@ -1,37 +1,37 @@
 package edu.kit.tm.ps.embertalk.sync.bluetooth
 
-import android.os.ParcelUuid
+import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattService
 import java.util.UUID
+
+
+private fun makeCharacteristic(uuid: UUID): BluetoothGattCharacteristic {
+    return BluetoothGattCharacteristic(
+        uuid,
+        BluetoothGattCharacteristic.PROPERTY_READ or BluetoothGattCharacteristic.PROPERTY_WRITE,
+        BluetoothGattCharacteristic.PERMISSION_READ or BluetoothGattCharacteristic.PERMISSION_WRITE
+    )
+}
+
+enum class Requests(val uuid: UUID) {
+    CLOCKS(UUID.fromString("32e9a691-e75f-4340-ba98-bf4e34a10b0c")),
+    MESSAGE(UUID.fromString("a6fa6de0-35c7-466f-9495-5a8035ce5feb")),
+    MESSAGES_FINISHED(UUID.fromString("a6fa6de0-473a-e75f-9495-587082312c76"))
+}
 
 object ServiceUtils {
 
-    val SERVICE_UUID = UUID.fromString("7ba323d4-7021-23c4-1ab4-23456789abcd")!!
-    val SDP_UUID = UUID.fromString("7ba323d4-7021-23c4-0000-00805F9B34FB")!!
-    const val SDP_NAME = "Embertalk"
+    val SERVICE_UUID = UUID.fromString("c32ebc7e-0507-4506-9111-673f5811fbbb")!!
 
     fun matchesService(uuid: UUID): Boolean {
         return SERVICE_UUID == uuid
     }
 
-    fun toUuid(macAddress: String): UUID {
-        return UUID(SERVICE_UUID.mostSignificantBits, toLong(macAddress))
-    }
-
-    fun fromParcelUuid(serviceUuid: ParcelUuid): String {
-        return fromLong(serviceUuid.uuid.leastSignificantBits)
-    }
-
-    private fun toLong(macAddress: String): Long {
-        return java.lang.Long.parseLong(macAddress.replace(":".toRegex(), ""), 16)
-    }
-
-    private fun fromLong(macAddressLong: Long): String {
-        return String.format("%02x:%02x:%02x:%02x:%02x:%02x",
-            (macAddressLong shr 40).toByte(),
-            (macAddressLong shr 32).toByte(),
-            (macAddressLong shr 24).toByte(),
-            (macAddressLong shr 16).toByte(),
-            (macAddressLong shr 8).toByte(),
-            macAddressLong.toByte()).uppercase()
+    fun service(): BluetoothGattService {
+        val service = BluetoothGattService(SERVICE_UUID, BluetoothGattService.SERVICE_TYPE_PRIMARY)
+        for (request in Requests.entries) {
+            service.addCharacteristic(makeCharacteristic(request.uuid))
+        }
+        return service
     }
 }

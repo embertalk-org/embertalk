@@ -3,6 +3,8 @@ package edu.kit.tm.ps.embertalk.app
 import android.content.Context
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.epoch.ClockManager
+import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.epoch.MajorityVoteOffsetProvider
 import edu.kit.tm.ps.embertalk.epoch.SysTimeEpochprovider
 import edu.kit.tm.ps.embertalk.model.contacts.ContactDb
@@ -13,12 +15,12 @@ import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageDb
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.OfflineMessageRepository
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageDb
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.OfflineEncryptedMessageRepository
-import edu.kit.tm.ps.embertalk.sync.Synchronizer
 
 interface AppContainer {
     val messageManager: MessageManager
     val contactManager: ContactManager
-    val synchronizer: Synchronizer
+    val clockManager: ClockManager
+    val epochprovider: EpochProvider
     val cryptoService: CryptoService
 }
 
@@ -41,8 +43,12 @@ class AppDataContainer(private val context: Context) : AppContainer {
         )
     }
 
-    override val synchronizer: Synchronizer by lazy {
-        Synchronizer(messageManager, majorityVoteOffsetProvider, majorityVoteOffsetProvider)
+    override val clockManager: ClockManager by lazy {
+        majorityVoteOffsetProvider
+    }
+
+    override val epochprovider: EpochProvider by lazy {
+        majorityVoteOffsetProvider
     }
 
     override val cryptoService: CryptoService by lazy {

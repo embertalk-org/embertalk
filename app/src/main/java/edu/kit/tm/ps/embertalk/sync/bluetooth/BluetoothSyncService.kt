@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.app.NotificationManager
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.AdvertiseCallback
 import android.bluetooth.le.AdvertiseSettings
@@ -15,15 +17,16 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
 import edu.kit.tm.ps.embertalk.notification.Notification
-import edu.kit.tm.ps.embertalk.sync.Synchronizer
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -32,16 +35,16 @@ import java.util.concurrent.ConcurrentHashMap
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
 
-    private lateinit var synchronizer: Synchronizer
+    private lateinit var bluetoothManager: BluetoothManager
     private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeAdvertiser: BluetoothLeAdvertiser
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
-    private lateinit var bluetoothClassicServer: BluetoothClassicServer
+    private lateinit var bleServer: BluetoothGattServer
+    private lateinit var scanCallback: ScanCallback
     private var started = false
     private lateinit var preferences: SharedPreferences
     private var serviceUuid: UUID = ServiceUtils.SERVICE_UUID
     private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
-    private val clientExecutorService: ClientExecutorService = ClientExecutorService()
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -81,32 +84,42 @@ class BluetoothSyncService : Service() {
         }
     }
 
-    private val scanCallback = object : ScanCallback() {
-        override fun onScanFailed(errorCode: Int) {
-            super.onScanFailed(errorCode)
-            Log.e(TAG, "BLE scan failed to start: error $errorCode")
-        }
+    private fun scanCallback(): ScanCallback {
+        return object : ScanCallback() {
+            private val messageManager = (this@BluetoothSyncService.application as EmberTalkApplication).container.messageManager
+            private val clockManager = (this@BluetoothSyncService.application as EmberTalkApplication).container.clockManager
 
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-
-            if (result.scanRecord == null || result.scanRecord!!.serviceUuids == null) {
-                return
+            override fun onScanFailed(errorCode: Int) {
+                super.onScanFailed(errorCode)
+                Log.e(TAG, "BLE scan failed to start: error $errorCode")
             }
 
-            for (uuid in result.scanRecord!!.serviceUuids) {
-                if (!ServiceUtils.matchesService(uuid.uuid)) {
-                    continue
-                }
-                val remoteDevice = result.device
-                if (devicesLastSynced[remoteDevice.address] != null &&
-                    Instant.now().isBefore(devicesLastSynced[remoteDevice.address]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 5)))) {
-                    continue
-                } else {
-                    devicesLastSynced[remoteDevice.address] = Instant.now()
+            @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+            override fun onScanResult(callbackType: Int, result: ScanResult) {
+                super.onScanResult(callbackType, result)
+
+                if (result.scanRecord == null || result.scanRecord!!.serviceUuids == null) {
+                    return
                 }
 
-                clientExecutorService.enqueue(remoteDevice, synchronizer)
+                for (uuid in result.scanRecord!!.serviceUuids) {
+                    if (!ServiceUtils.matchesService(uuid.uuid)) {
+                        continue
+                    }
+                    val remoteDevice = result.device
+                    if (devicesLastSynced[remoteDevice.address] != null
+                        && Instant.now()
+                            .isBefore(devicesLastSynced[remoteDevice.address]!!
+                                .plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 5)))
+                        ) {
+                        continue
+                    } else {
+                        Log.i(TAG, "Found device running EmberTalk with address ${remoteDevice.address}. Syncing.")
+                        devicesLastSynced[remoteDevice.address] = Instant.now()
+                    }
+                    val clientCallback = ClientCallback(remoteDevice.address, messageManager, clockManager)
+                    val gatt = remoteDevice.connectGatt(this@BluetoothSyncService, false, clientCallback, BluetoothDevice.TRANSPORT_LE)
+                }
             }
         }
     }
@@ -118,6 +131,7 @@ class BluetoothSyncService : Service() {
             BleSettings.buildAdvertiseData(serviceUuid),
             advertiseCallback)
 
+        scanCallback = scanCallback()
         bluetoothLeScanner.startScan(
             BleSettings.SCAN_FILTERS,
             BleSettings.SCAN_SETTINGS,
@@ -146,17 +160,21 @@ class BluetoothSyncService : Service() {
             return START_REDELIVER_INTENT
         }
         val app = this.application as EmberTalkApplication
-        synchronizer = app.container.synchronizer
 
-        bluetoothAdapter = getBluetoothAdapter(this)
+        bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        bluetoothAdapter = bluetoothManager.adapter
 
         bluetoothLeAdvertiser = bluetoothAdapter.bluetoothLeAdvertiser
         bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
         startBluetoothLeDiscovery()
 
         started = true
-        bluetoothClassicServer = BluetoothClassicServer(synchronizer, bluetoothAdapter)
-        bluetoothClassicServer.start()
+
+        var gattServer: BluetoothGattServer? = null
+        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager, app.container.epochprovider, app.container.clockManager) { gattServer!! })
+        bleServer = gattServer
+
+        gattServer.addService(ServiceUtils.service())
 
         Log.d(TAG, "Started")
         Toast.makeText(this, R.string.bluetooth_sync_started, Toast.LENGTH_LONG).show()
@@ -167,8 +185,7 @@ class BluetoothSyncService : Service() {
         started = false
 
         stopBluetoothLeDiscovery()
-        bluetoothClassicServer.shutdown()
-        clientExecutorService.shutdown()
+        bleServer.close()
 
         Toast.makeText(this, R.string.bluetooth_sync_stopped, Toast.LENGTH_LONG).show()
         Log.d(TAG, "Stopped")

@@ -2,116 +2,70 @@ package edu.kit.tm.ps.embertalk.sync
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
-import java.io.DataInputStream
+import java.io.ByteArrayOutputStream
 import java.io.DataOutputStream
+import java.nio.ByteBuffer
 
-class Protocol(private val inputStream: DataInputStream, private val outputStream: DataOutputStream) {
+object Protocol {
+    const val TAG = "Protocol"
 
-    companion object {
-        const val TAG = "Protocol"
-        const val PROTOCOL_NAME = "Ember"
-        const val HELLO_ID = 0
-        const val CLOCK_ID = 1
-        const val HASHES_ID = 2
-        const val MESSAGE_ID = 3
-        const val GOODBYE_ID = 4
+    fun fromMessages(messages: Collection<EncryptedMessage>): ByteArray {
+        val buffer = ByteArrayOutputStream()
+        val writer = DataOutputStream(buffer)
+        writer.writeInt(messages.size)
+        for (message in messages) {
+            val msgBytes = message.bytes
+            writer.writeInt(msgBytes.size)
+            for (byte in msgBytes) {
+                writer.writeByte(byte.toInt())
+            }
+        }
+        writer.close()
+        return buffer.toByteArray()
     }
 
-    fun writeHello() {
-        outputStream.writeByte(HELLO_ID)
-        outputStream.writeString(PROTOCOL_NAME)
-        outputStream.flush()
-        Log.d(TAG, "Wrote hello")
+    fun toMessages(bytes: ByteArray): Collection<EncryptedMessage> {
+        val messages: MutableSet<EncryptedMessage> = HashSet()
+        val buffer = ByteBuffer.wrap(bytes)
+        val size = buffer.getInt()
+        for (i in 0 until size) {
+            val msgSize = buffer.getInt()
+            val msgBuffer = ByteArray(msgSize)
+            for (j in 0 until msgSize) {
+                msgBuffer[j] = buffer.get()
+            }
+            messages.add(EncryptedMessage(hash = msgBuffer.contentHashCode(), bytes = msgBuffer, epoch = 0))
+        }
+        return messages
     }
 
-    fun writeClock(epoch: Long) {
-        outputStream.writeByte(CLOCK_ID)
-        outputStream.writeLong(epoch)
-        outputStream.flush()
-        Log.d(TAG, "Wrote clock")
+    fun fromClock(clock: Long): ByteArray {
+        return ByteBuffer.allocate(8).putLong(clock).array()
     }
 
-    fun writeHashes(hashes: Set<Int>) {
-        outputStream.writeByte(HASHES_ID)
-        outputStream.writeInt(hashes.size)
+    fun toClock(bytes: ByteArray): Long {
+        return ByteBuffer.wrap(bytes).getLong()
+    }
+
+    fun fromHashes(hashes: Collection<Int>): ByteArray {
+        val buffer = ByteArrayOutputStream()
+        val writer = DataOutputStream(buffer)
+        writer.writeInt(hashes.size)
         hashes.forEach {
-            outputStream.writeInt(it)
+            writer.writeInt(it)
             Log.d(TAG, "Wrote hash %s".format(it))
         }
-        outputStream.flush()
-        Log.d(TAG, "Wrote %s hashes".format(hashes.size))
+        writer.close()
+        return buffer.toByteArray()
     }
 
-    fun writeMessage(encryptedMessage: EncryptedMessage) {
-        outputStream.writeByte(MESSAGE_ID)
-        outputStream.writeByteArray(encryptedMessage.bytes)
-        outputStream.flush()
-        Log.d(TAG, "Wrote Message")
-    }
-
-    fun writeGoodBye() {
-        outputStream.writeByte(GOODBYE_ID)
-        outputStream.flush()
-        Log.d(TAG, "Wrote Goodbye")
-    }
-
-    fun readMessageType(): Int {
-        val msgType = inputStream.readByte().toInt()
-        Log.d(TAG, "Read msgtype %s".format(msgType))
-        return msgType
-    }
-
-    fun readHello(): String {
-        val protocolName = inputStream.readString()
-        Log.d(TAG, "Read hello with protocol name %s".format(protocolName))
-        return protocolName
-    }
-
-    fun readClock(): Long {
-        val epoch = inputStream.readLong()
-        Log.d(TAG, "Read clock %s".format(epoch))
-        return epoch
-    }
-
-    fun readHashes(): Set<Int> {
-        val numHashes = inputStream.readInt()
-        val hashes = HashSet<Int>()
-        for (i in 0 until numHashes) {
-            val hash = inputStream.readInt()
-            hashes.add(hash)
-            Log.d(TAG, "Read hash %s".format(hash))
+    fun toHashes(bytes: ByteArray): Set<Int> {
+        val hashes: MutableSet<Int> = HashSet()
+        val buffer = ByteBuffer.wrap(bytes)
+        val size = buffer.getInt()
+        for (i in 0 until size) {
+            hashes.add(buffer.getInt())
         }
-        Log.d(TAG, "Read %s hashes".format(numHashes))
         return hashes
-    }
-
-    fun readMessage(): EncryptedMessage {
-        val bytes = inputStream.readByteArray()
-        Log.d(TAG, "Read message of length %s".format(bytes.size))
-        return EncryptedMessage(hash = bytes.contentHashCode(), bytes = bytes, epoch = 0)
-    }
-
-    private fun DataOutputStream.writeString(string: String) {
-        this.writeByteArray(string.encodeToByteArray())
-    }
-
-    private fun DataInputStream.readString(): String {
-        return this.readByteArray().decodeToString()
-    }
-
-    private fun DataInputStream.readByteArray(): ByteArray {
-        val bytes = ByteArray(this.readInt())
-        for (i in bytes.indices) {
-            bytes[i] = this.readByte()
-        }
-        return bytes
-    }
-
-
-    private fun DataOutputStream.writeByteArray(bytes: ByteArray) {
-        this.writeInt(bytes.size)
-        for (byte in bytes) {
-            this.writeByte(byte.toInt())
-        }
     }
 }

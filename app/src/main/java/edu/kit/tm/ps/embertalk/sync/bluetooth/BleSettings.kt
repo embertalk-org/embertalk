@@ -18,17 +18,17 @@ object BleSettings {
 
     val ADVERTISE_SETTINGS: AdvertiseSettings = run {
         val builder = AdvertiseSettings.Builder()
-        builder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_BALANCED)
+        builder.setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_POWER)
         builder.setTimeout(0) // Advertise as long as Bluetooth is on, blatantly ignoring Google's advice.
-        builder.setConnectable(false)
+        builder.setConnectable(true)
         builder.build()
     }
 
     val SCAN_SETTINGS: ScanSettings = run {
         val builder = ScanSettings.Builder()
-        builder.setScanMode(ScanSettings.SCAN_MODE_BALANCED)
+        builder.setScanMode(ScanSettings.SCAN_MODE_LOW_POWER)
 
-        builder.setMatchMode(ScanSettings.MATCH_MODE_AGGRESSIVE)
+        builder.setMatchMode(ScanSettings.MATCH_MODE_STICKY)
         builder.setNumOfMatches(ScanSettings.MATCH_NUM_MAX_ADVERTISEMENT)
         builder.setCallbackType(ScanSettings.CALLBACK_TYPE_ALL_MATCHES)
 
