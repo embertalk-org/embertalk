@@ -102,11 +102,11 @@ class BluetoothSyncService : Service() {
                 if (devicesLastSynced[remoteDevice.address] != null &&
                     Instant.now().isBefore(devicesLastSynced[remoteDevice.address]!!.plusSeconds(preferences.getLong(Preferences.SYNC_INTERVAL, 5)))) {
                     continue
-                }
-
-                clientExecutorService.enqueue(remoteDevice, synchronizer) {
+                } else {
                     devicesLastSynced[remoteDevice.address] = Instant.now()
                 }
+
+                clientExecutorService.enqueue(remoteDevice, synchronizer)
             }
         }
     }

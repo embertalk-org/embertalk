@@ -12,8 +12,7 @@ import java.io.IOException
 class BluetoothClassicClient(
     device: BluetoothDevice,
     private val synchronizer: Synchronizer,
-    private val onSyncEnd: () -> Unit,
-    private val onSyncSuccessful: () -> Unit
+    private val onSyncEnd: () -> Unit
 ) : Runnable {
     private var socket: BluetoothSocket? = null
     private var macAddress: String? = null
@@ -42,10 +41,7 @@ class BluetoothClassicClient(
             return
         }
         try {
-            val successful = synchronizer.bidirectionalSync(socket!!.remoteDevice.address, socket!!.inputStream, socket!!.outputStream)
-            if (successful) {
-                onSyncSuccessful.invoke()
-            }
+            synchronizer.bidirectionalSync(socket!!.remoteDevice.address, socket!!.inputStream, socket!!.outputStream)
         } catch (e: IOException) {
             Log.e(TAG, "Failed to sync", e)
         }

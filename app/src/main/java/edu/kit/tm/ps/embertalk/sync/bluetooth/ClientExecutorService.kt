@@ -11,15 +11,13 @@ class ClientExecutorService {
     private val taskQueue: MutableSet<String> = ConcurrentHashMap.newKeySet()
     private val service = Executors.newCachedThreadPool()
 
-    fun enqueue(remoteDevice: BluetoothDevice, synchronizer: Synchronizer, onFinishAction: () -> Unit) {
+    fun enqueue(remoteDevice: BluetoothDevice, synchronizer: Synchronizer) {
         if (!taskQueue.contains(remoteDevice.address)) {
             taskQueue.add(remoteDevice.address)
             val client = BluetoothClassicClient(
                 remoteDevice,
                 synchronizer,
-                { taskQueue.remove(remoteDevice.address) },
-                { onFinishAction.invoke() },
-            )
+            ) { taskQueue.remove(remoteDevice.address) }
             service.submit(client)
             Log.d(TAG, "Submitted sync task for device %s".format(remoteDevice.address))
         } else {
