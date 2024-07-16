@@ -7,6 +7,6 @@ internal class SysTimeEpochprovider : EpochProvider {
     }
 
     companion object {
-        private const val EPOCH_LENGTH = 75 * 1000
+        private const val EPOCH_LENGTH = 300000
     }
 }
