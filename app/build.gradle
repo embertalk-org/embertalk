@@ -6,6 +6,15 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("github") {
+            storeFile = file(System.getProperty("user.home") + "/work/_temp/keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyPassword = System.getenv("SIGNING_KEY_PASSWORD")
+            keyAlias = System.getenv("SIGNING_KEY_ALIAS")
+        }
+    }
+
     namespace 'edu.kit.tm.ps.embertalk'
     compileSdk 34
 
@@ -13,8 +22,8 @@ android {
         applicationId "edu.kit.tm.ps.embertalk"
         minSdk 26
         targetSdk 34
-        versionCode 2
-        versionName "0.1"
+        versionCode 3
+        versionName "0.1.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -23,9 +32,13 @@ android {
     }
 
     buildTypes {
-        release {
-            minifyEnabled false
+        create("githubRelease") {
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig = signingConfigs["github"]
+        }
+        debug {
+            applicationIdSuffix = ".dev"
         }
     }
     compileOptions {
