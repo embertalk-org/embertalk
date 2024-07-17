@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 @SuppressLint("MissingPermission")
-class BluetoothSyncService : Service() {
+class BleSyncService : Service() {
     private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
 
     private lateinit var bluetoothManager: BluetoothManager
@@ -83,7 +83,7 @@ class BluetoothSyncService : Service() {
 
     private fun scanCallback(): ScanCallback {
         return object : ScanCallback() {
-            private val messageManager = (this@BluetoothSyncService.application as EmberTalkApplication).container.messageManager
+            private val messageManager = (this@BleSyncService.application as EmberTalkApplication).container.messageManager
 
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
@@ -114,7 +114,7 @@ class BluetoothSyncService : Service() {
                         devicesLastSynced[remoteDevice.address] = Instant.now()
                     }
                     val clientCallback = ClientCallback(remoteDevice.address, messageManager)
-                    val gatt = remoteDevice.connectGatt(this@BluetoothSyncService, false, clientCallback, BluetoothDevice.TRANSPORT_LE)
+                    val gatt = remoteDevice.connectGatt(this@BleSyncService, false, clientCallback, BluetoothDevice.TRANSPORT_LE)
                 }
             }
         }
@@ -188,7 +188,7 @@ class BluetoothSyncService : Service() {
     }
 
     companion object {
-        private const val TAG = "BluetoothSyncService"
+        private const val TAG = "BleSyncService"
 
         fun canStart(context: Context): CanStartResult {
             val packageManager = context.packageManager
@@ -208,7 +208,7 @@ class BluetoothSyncService : Service() {
             when (canStart(context)) {
                 CanStartResult.CAN_START -> {
                     Log.d(TAG, "Starting BLE sync service")
-                    context.startForegroundService(Intent(context, BluetoothSyncService::class.java))
+                    context.startForegroundService(Intent(context, BleSyncService::class.java))
                 }
                 CanStartResult.BLUETOOTH_OR_BLE_UNSUPPORTED -> {
                     Log.d(TAG, "BLE not supported, not starting BLE sync service")
@@ -227,7 +227,7 @@ class BluetoothSyncService : Service() {
         }
 
         fun stop(context: Context) {
-            context.stopService(Intent(context, BluetoothSyncService::class.java))
+            context.stopService(Intent(context, BleSyncService::class.java))
         }
 
         private fun getBluetoothAdapter(context: Context): BluetoothAdapter {

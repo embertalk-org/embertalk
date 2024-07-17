@@ -51,7 +51,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
-import edu.kit.tm.ps.embertalk.sync.bluetooth.BluetoothSyncService
+import edu.kit.tm.ps.embertalk.sync.bluetooth.BleSyncService
 import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
@@ -215,7 +215,7 @@ fun EmberScaffold(
                 },
                 actions = {
                     if (!toolWindow) {
-                        IconButton(onClick = { BluetoothSyncService.startOrPromptBluetooth(context) }) {
+                        IconButton(onClick = { BleSyncService.startOrPromptBluetooth(context) }) {
                             Icon(
                                 imageVector = Icons.Filled.PlayArrow,
                                 contentDescription = stringResource(R.string.start_service)
