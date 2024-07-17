@@ -56,10 +56,6 @@ class CryptoService(
         return Message.decode(encryptedMessage, keys::decrypt)
     }
 
-    fun currentEpoch(): Long {
-        return epochProvider.current()
-    }
-
     suspend fun regenerate() {
         keys.regenerate()
         fastForward()
@@ -69,7 +65,7 @@ class CryptoService(
         return if (!this::keys.isInitialized) {
             SyncState.Initializing
         } else if (keys.inSync()) {
-            SyncState.Synchronized(currentEpoch())
+            SyncState.Synchronized(epochProvider.current())
         } else {
             SyncState.Synchronizing(keys.epochsLate())
         }

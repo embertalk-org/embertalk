@@ -58,7 +58,7 @@ class MessageManager(
     }
 
     suspend fun deleteOld() {
-        encryptedRepository.deleteOlderThan(cryptoService.currentEpoch())
+        encryptedRepository.deleteOlderThan(System.currentTimeMillis())
     }
 
     companion object {
