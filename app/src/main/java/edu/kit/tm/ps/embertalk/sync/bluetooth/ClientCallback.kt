@@ -1,6 +1,7 @@
 package edu.kit.tm.ps.embertalk.sync.bluetooth
 
 import android.annotation.SuppressLint
+import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
 import android.bluetooth.BluetoothGattCharacteristic
@@ -33,6 +34,12 @@ class ClientCallback(
             }
             if (newState == BluetoothGatt.STATE_CONNECTED) {
                 Log.d(TAG, "Connected to Server. Discovering Services.")
+                //Coded PHY provides the longest range, but less data rate
+                gatt.setPreferredPhy(
+                    BluetoothDevice.PHY_LE_CODED,
+                    BluetoothDevice.PHY_LE_CODED,
+                    BluetoothDevice.PHY_OPTION_S8
+                )
                 gatt.discoverServices()
             }
         }
