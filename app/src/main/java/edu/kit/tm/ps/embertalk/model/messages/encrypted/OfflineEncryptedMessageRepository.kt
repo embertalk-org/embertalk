@@ -15,5 +15,5 @@ class OfflineEncryptedMessageRepository(private val encryptedMessageDao: Encrypt
         encryptedMessageDao.insert(encryptedMessage)
 
     override suspend fun deleteAll() = encryptedMessageDao.deleteAll()
-    override suspend fun deleteOlderThan(epoch: Long) = encryptedMessageDao.deleteOlderThan(epoch)
+    override suspend fun deleteOlderThan(timestamp: Long) = encryptedMessageDao.deleteOlderThan(timestamp)
 }

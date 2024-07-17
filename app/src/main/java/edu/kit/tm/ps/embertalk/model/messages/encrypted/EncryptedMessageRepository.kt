@@ -12,5 +12,5 @@ interface EncryptedMessageRepository {
 
     suspend fun deleteAll()
 
-    suspend fun deleteOlderThan(epoch: Long)
+    suspend fun deleteOlderThan(timestamp: Long)
 }
