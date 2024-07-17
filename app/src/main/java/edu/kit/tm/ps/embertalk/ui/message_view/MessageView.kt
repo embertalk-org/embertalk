@@ -52,12 +52,13 @@ fun MessageView(
 ) {
 
     val messageUiState by messageViewModel.uiState.collectAsState()
+    val messages = messageUiState.messages.sortedBy { it.timestamp }
 
     Column(
         modifier = modifier.fillMaxHeight(),
         verticalArrangement = Arrangement.Bottom
     ) {
-        val listState = rememberLazyListState(initialFirstVisibleItemIndex = messageUiState.messages.size)
+        val listState = rememberLazyListState(initialFirstVisibleItemIndex = messages.size)
         val coroutineScope = rememberCoroutineScope()
         LazyColumn(
             state = listState,
@@ -66,9 +67,9 @@ fun MessageView(
                 .weight(9f)
         ) {
             coroutineScope.launch {
-                listState.animateScrollToItem(messageUiState.messages.size)
+                listState.animateScrollToItem(messages.size)
             }
-            items(messageUiState.messages) { item ->
+            items(messages) { item ->
                 Row(
                     modifier = modifier.fillMaxWidth(),
                     horizontalArrangement = if (item.senderUserId == contactsViewModel.myId()) { Arrangement.End } else { Arrangement.Start }
