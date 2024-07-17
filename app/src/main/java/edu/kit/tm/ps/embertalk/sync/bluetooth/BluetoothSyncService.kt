@@ -170,7 +170,7 @@ class BluetoothSyncService : Service() {
         started = true
 
         var gattServer: BluetoothGattServer? = null
-        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager, app.container.epochprovider) { gattServer!! })
+        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager) { gattServer!! })
         bleServer = gattServer
 
         gattServer.addService(ServiceUtils.service())

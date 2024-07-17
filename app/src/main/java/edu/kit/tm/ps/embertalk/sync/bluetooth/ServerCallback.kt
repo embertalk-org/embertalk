@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattServerCallback
 import android.util.Log
-import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.sync.Protocol
 import kotlinx.coroutines.flow.first
@@ -18,7 +17,6 @@ import java.nio.ByteBuffer
 @SuppressLint("MissingPermission")
 class ServerCallback(
     private val messageManager: MessageManager,
-    private val epochProvider: EpochProvider,
     private val bluetoothGattServer: () -> BluetoothGattServer
     ) : BluetoothGattServerCallback() {
 
