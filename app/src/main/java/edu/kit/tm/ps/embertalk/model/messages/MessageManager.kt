@@ -2,6 +2,7 @@ package edu.kit.tm.ps.embertalk.model.messages
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
@@ -58,7 +59,9 @@ class MessageManager(
     }
 
     suspend fun deleteOld() {
-        encryptedRepository.deleteOlderThan(System.currentTimeMillis())
+        encryptedRepository.deleteOlderThan(
+            System.currentTimeMillis() - EpochProvider.EPOCH_LENGTH
+        )
     }
 
     companion object {

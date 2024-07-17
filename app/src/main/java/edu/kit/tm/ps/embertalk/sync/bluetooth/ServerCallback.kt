@@ -33,9 +33,9 @@ class ServerCallback(
             }
             if (newState == BluetoothGatt.STATE_CONNECTED) {
                 Log.i(ClientCallback.TAG, "Device is connected.")
+                runBlocking { messageManager.deleteOld() }
             }
         }
-        Log.d(TAG, "Device ${device.address} connected. Status: $status, newState: $newState")
     }
 
     override fun onCharacteristicReadRequest(
