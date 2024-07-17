@@ -13,7 +13,6 @@ import edu.kit.tm.ps.embertalk.sync.Protocol
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.nio.ByteBuffer
-import java.util.UUID
 
 class ClientCallback(
     private val remoteAddress: String,
@@ -23,14 +22,7 @@ class ClientCallback(
 
     private lateinit var sendBuffer: ByteBuffer
 
-    lateinit var hashes: Set<Int>
-
-    private fun nextBufferChunk(): ByteArray {
-        val nextChunkSize = sendBuffer.remaining().coerceAtMost(20)
-        val result = ByteArray(nextChunkSize)
-        sendBuffer.get(result, 0, nextChunkSize)
-        return result
-    }
+    private lateinit var hashBuffer: ByteBuffer
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     @SuppressLint("MissingPermission")
@@ -66,12 +58,27 @@ class ClientCallback(
             Requests.CLOCKS.uuid -> {
                 val clock = Protocol.toClock(value)
                 clockManager.rememberClock(remoteAddress, clock)
-                sendBuffer = ByteBuffer.wrap(Protocol.fromMessages(
-                    runBlocking { messageManager.allEncryptedExcept(setOf()).first() }
-                ))
-                Log.d(TAG, "Received Clock. Sending ${sendBuffer.remaining()} bytes.")
-                if (sendBuffer.hasRemaining()) {
-                    gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGE.uuid), nextBufferChunk(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                gatt.readCharacteristic(gatt.characteristic(Requests.HASHES_SIZE.uuid))
+            }
+            Requests.HASHES_SIZE.uuid -> {
+                hashBuffer = ByteBuffer.allocate(ByteBuffer.wrap(value).getInt())
+                if (hashBuffer.hasRemaining()) {
+                    gatt.readCharacteristic(gatt.characteristic(Requests.HASH.uuid))
+                }
+            }
+            Requests.HASH.uuid -> {
+                if (hashBuffer.hasRemaining()) {
+                    hashBuffer.put(value)
+                    gatt.readCharacteristic(gatt.characteristic(Requests.HASH.uuid))
+                } else {
+                    val hashes = Protocol.toHashes(hashBuffer.array())
+                    sendBuffer = ByteBuffer.wrap(Protocol.fromMessages(
+                        runBlocking { messageManager.allEncryptedExcept(hashes).first() }
+                    ))
+                    Log.d(TAG, "Received Clock. Sending ${sendBuffer.remaining()} bytes.")
+                    if (sendBuffer.hasRemaining()) {
+                        gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGE.uuid), sendBuffer.nextChunk(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                    }
                 }
             }
         }
@@ -87,7 +94,7 @@ class ClientCallback(
         when (characteristic.uuid) {
             Requests.MESSAGE.uuid -> {
                 if (sendBuffer.hasRemaining()) {
-                    gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGE.uuid), nextBufferChunk(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
+                    gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGE.uuid), sendBuffer.nextChunk(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                 } else {
                     Log.d(TAG, "No more chunks. Sending finish mark.")
                     gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGES_FINISHED.uuid), ByteArray(0), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
@@ -103,9 +110,5 @@ class ClientCallback(
 
     companion object {
         const val TAG = "GattClientCallback"
-    }
-
-    private fun BluetoothGatt.characteristic(uuid: UUID): BluetoothGattCharacteristic {
-        return this.getService(ServiceUtils.SERVICE_UUID).getCharacteristic(uuid)
     }
 }

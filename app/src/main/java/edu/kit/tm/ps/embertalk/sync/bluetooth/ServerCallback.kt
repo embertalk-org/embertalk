@@ -11,6 +11,7 @@ import edu.kit.tm.ps.embertalk.epoch.ClockManager
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.sync.Protocol
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayOutputStream
 import java.nio.ByteBuffer
@@ -23,6 +24,7 @@ class ServerCallback(
     private val bluetoothGattServer: () -> BluetoothGattServer
     ) : BluetoothGattServerCallback() {
 
+    private lateinit var hashBuffer: ByteBuffer
     private var receiveBuffer = ByteArrayOutputStream()
 
     override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
@@ -48,6 +50,18 @@ class ServerCallback(
             Requests.CLOCKS.uuid -> {
                 Log.d(TAG, "Handling CLOCKS read.")
                 Protocol.fromClock(epochProvider.current())
+            }
+            Requests.HASHES_SIZE.uuid -> {
+                Log.d(TAG, "Handling HASHES_SIZE read.")
+                hashBuffer = ByteBuffer.wrap(Protocol.fromHashes(runBlocking { messageManager.hashes().first() }))
+                ByteBuffer.allocate(4).putInt(hashBuffer.remaining()).array()
+            }
+            Requests.HASH.uuid -> {
+                if (hashBuffer.hasRemaining()) {
+                    hashBuffer.nextChunk()
+                } else {
+                    null
+                }
             }
             else -> {
                 Log.d(TAG, "Aborting INVALID read.")
