@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattServer
 import android.bluetooth.BluetoothGattServerCallback
 import android.util.Log
-import edu.kit.tm.ps.embertalk.epoch.ClockManager
 import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.sync.Protocol
@@ -20,7 +19,6 @@ import java.nio.ByteBuffer
 class ServerCallback(
     private val messageManager: MessageManager,
     private val epochProvider: EpochProvider,
-    private val clockManager: ClockManager,
     private val bluetoothGattServer: () -> BluetoothGattServer
     ) : BluetoothGattServerCallback() {
 
@@ -47,10 +45,6 @@ class ServerCallback(
         characteristic: BluetoothGattCharacteristic
     ) {
         val reply = when (characteristic.uuid) {
-            Requests.CLOCKS.uuid -> {
-                Log.d(TAG, "Handling CLOCKS read.")
-                Protocol.fromClock(epochProvider.current())
-            }
             Requests.HASHES_SIZE.uuid -> {
                 Log.d(TAG, "Handling HASHES_SIZE read.")
                 hashBuffer = ByteBuffer.wrap(Protocol.fromHashes(runBlocking { messageManager.hashes().first() }))

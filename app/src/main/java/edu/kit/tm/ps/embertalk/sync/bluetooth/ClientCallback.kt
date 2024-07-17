@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
-import edu.kit.tm.ps.embertalk.epoch.ClockManager
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.sync.Protocol
 import kotlinx.coroutines.flow.first
@@ -16,8 +15,7 @@ import java.nio.ByteBuffer
 
 class ClientCallback(
     private val remoteAddress: String,
-    private val messageManager: MessageManager,
-    private val clockManager: ClockManager
+    private val messageManager: MessageManager
 ) : BluetoothGattCallback() {
 
     private lateinit var sendBuffer: ByteBuffer
@@ -42,8 +40,8 @@ class ClientCallback(
 
     @SuppressLint("MissingPermission")
     override fun onServicesDiscovered(gatt: BluetoothGatt, status: Int) {
-        Log.d(TAG, "Services Discovered. Reading Clock.")
-        gatt.readCharacteristic(gatt.characteristic(Requests.CLOCKS.uuid))
+        Log.d(TAG, "Services Discovered. Reading HASHES_SIZE.")
+        gatt.readCharacteristic(gatt.characteristic(Requests.HASHES_SIZE.uuid))
     }
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -55,11 +53,6 @@ class ClientCallback(
         status: Int
     ) {
         when(characteristic.uuid) {
-            Requests.CLOCKS.uuid -> {
-                val clock = Protocol.toClock(value)
-                clockManager.rememberClock(remoteAddress, clock)
-                gatt.readCharacteristic(gatt.characteristic(Requests.HASHES_SIZE.uuid))
-            }
             Requests.HASHES_SIZE.uuid -> {
                 hashBuffer = ByteBuffer.allocate(ByteBuffer.wrap(value).getInt())
                 if (hashBuffer.hasRemaining()) {
@@ -75,7 +68,7 @@ class ClientCallback(
                     sendBuffer = ByteBuffer.wrap(Protocol.fromMessages(
                         runBlocking { messageManager.allEncryptedExcept(hashes).first() }
                     ))
-                    Log.d(TAG, "Received Clock. Sending ${sendBuffer.remaining()} bytes.")
+                    Log.d(TAG, "Received all hashes. Sending ${sendBuffer.remaining()} bytes.")
                     if (sendBuffer.hasRemaining()) {
                         gatt.writeCharacteristic(gatt.characteristic(Requests.MESSAGE.uuid), sendBuffer.nextChunk(), BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT)
                     }

@@ -87,7 +87,6 @@ class BluetoothSyncService : Service() {
     private fun scanCallback(): ScanCallback {
         return object : ScanCallback() {
             private val messageManager = (this@BluetoothSyncService.application as EmberTalkApplication).container.messageManager
-            private val clockManager = (this@BluetoothSyncService.application as EmberTalkApplication).container.clockManager
 
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
@@ -117,7 +116,7 @@ class BluetoothSyncService : Service() {
                         Log.i(TAG, "Found device running EmberTalk with address ${remoteDevice.address}. Syncing.")
                         devicesLastSynced[remoteDevice.address] = Instant.now()
                     }
-                    val clientCallback = ClientCallback(remoteDevice.address, messageManager, clockManager)
+                    val clientCallback = ClientCallback(remoteDevice.address, messageManager)
                     val gatt = remoteDevice.connectGatt(this@BluetoothSyncService, false, clientCallback, BluetoothDevice.TRANSPORT_LE)
                 }
             }
@@ -171,7 +170,7 @@ class BluetoothSyncService : Service() {
         started = true
 
         var gattServer: BluetoothGattServer? = null
-        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager, app.container.epochprovider, app.container.clockManager) { gattServer!! })
+        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager, app.container.epochprovider) { gattServer!! })
         bleServer = gattServer
 
         gattServer.addService(ServiceUtils.service())

@@ -39,14 +39,6 @@ object Protocol {
         return messages
     }
 
-    fun fromClock(clock: Long): ByteArray {
-        return ByteBuffer.allocate(8).putLong(clock).array()
-    }
-
-    fun toClock(bytes: ByteArray): Long {
-        return ByteBuffer.wrap(bytes).getLong()
-    }
-
     fun fromHashes(hashes: Collection<Int>): ByteArray {
         val buffer = ByteArrayOutputStream()
         val writer = DataOutputStream(buffer)

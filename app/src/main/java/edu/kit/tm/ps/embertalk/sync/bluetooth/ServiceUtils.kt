@@ -16,7 +16,6 @@ private fun makeCharacteristic(uuid: UUID): BluetoothGattCharacteristic {
 }
 
 enum class Requests(val uuid: UUID) {
-    CLOCKS(UUID.fromString("32e9a691-e75f-4340-ba98-bf4e34a10b0c")),
     HASH(UUID.fromString("d59a0ca1-8409-4c07-9705-22fbda9b577c")),
     HASHES_SIZE(UUID.fromString("30ff9f11-ee14-4535-b7f1-c9fa2b1c4d52")),
     MESSAGE(UUID.fromString("a6fa6de0-35c7-466f-9495-5a8035ce5feb")),
