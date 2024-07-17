@@ -8,7 +8,7 @@ data class EncryptedMessage(
     @PrimaryKey
     val hash: Int,
     val bytes: ByteArray,
-    val epoch: Long,
+    val timestamp: Long,
 ) {
 
     override fun equals(other: Any?): Boolean {

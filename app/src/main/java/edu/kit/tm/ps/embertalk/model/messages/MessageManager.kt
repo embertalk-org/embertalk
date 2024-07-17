@@ -2,25 +2,26 @@ package edu.kit.tm.ps.embertalk.model.messages
 
 import android.util.Log
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
-import edu.kit.tm.ps.embertalk.epoch.EpochProvider
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
+import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageRepository
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageRepository
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 
 class MessageManager(
+    private val contactManager: ContactManager,
     private val messageRepository: MessageRepository,
     private val encryptedRepository: EncryptedMessageRepository,
-    private val cryptoService: CryptoService,
-    private val epochProvider: EpochProvider
+    private val cryptoService: CryptoService
 ): EmberObservable {
     private val observers = HashSet<EmberObserver>()
 
-    suspend fun handle(message: String, recipient: String, publicKey: String) {
-        val msg = Message(message, true, recipient, epochProvider.current(), System.currentTimeMillis())
+    suspend fun handle(message: String, recipient: UUID, publicKey: String) {
+        val msg = Message(message, contactManager.myId(), recipient, System.currentTimeMillis())
         messageRepository.insert(msg)
         val encrypted = cryptoService.encrypt(msg, publicKey)
         encryptedRepository.insert(encrypted)
@@ -28,7 +29,7 @@ class MessageManager(
 
     suspend fun handle(encryptedMessage: EncryptedMessage) {
         val message = cryptoService.decrypt(encryptedMessage)
-        encryptedRepository.insert(encryptedMessage.copy(epoch = cryptoService.currentEpoch()))
+        encryptedRepository.insert(encryptedMessage.copy(timestamp = System.currentTimeMillis()))
         if (message != null) {
             messageRepository.insert(message)
             notifyObservers()

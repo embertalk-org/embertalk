@@ -71,11 +71,11 @@ fun MessageView(
             items(messageUiState.messages) { item ->
                 Row(
                     modifier = modifier.fillMaxWidth(),
-                    horizontalArrangement = if (item.mine) { Arrangement.End } else { Arrangement.Start }
+                    horizontalArrangement = if (item.senderUserId == contactsViewModel.myId()) { Arrangement.End } else { Arrangement.Start }
                 ) {
                     MessageCard(
                         message = item.content,
-                        recipient = item.recipient,
+                        recipient = item.recipient.toString(),
                         timestamp = item.timestamp
                     )
                 }
@@ -173,7 +173,7 @@ fun SubmitButton(
                                     IconButton(
                                         onClick = {
                                             openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.name, item.pubKey) }
+                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.userId, item.pubKey) }
                                             message.value = ""
                                         }
                                     ) {

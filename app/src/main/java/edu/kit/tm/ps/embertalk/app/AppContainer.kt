@@ -27,15 +27,16 @@ class AppDataContainer(private val context: Context) : AppContainer {
 
     override val messageManager: MessageManager by lazy {
         MessageManager(
+            contactManager,
             OfflineMessageRepository(MessageDb.getDb(context).dao()),
             OfflineEncryptedMessageRepository(EncryptedMessageDb.getDb(context).dao()),
-            cryptoService,
-            epochProvider
+            cryptoService
         )
     }
 
     override val contactManager: ContactManager by lazy {
         ContactManager(
+            prefs,
             OfflineContactRepository(ContactDb.getDb(context).dao())
         )
     }

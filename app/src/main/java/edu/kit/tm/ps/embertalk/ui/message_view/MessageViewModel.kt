@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 data class MessageUiState(
     val messages: List<Message> = ArrayList()
@@ -34,7 +35,7 @@ class MessageViewModel(
         }
     }
 
-    suspend fun saveMessage(message: String, recipient: String, publicKey: String) {
+    suspend fun saveMessage(message: String, recipient: UUID, publicKey: String) {
         messageManager.handle(message, recipient, publicKey)
         updateMessages()
     }

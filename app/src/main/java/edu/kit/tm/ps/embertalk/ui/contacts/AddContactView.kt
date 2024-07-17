@@ -47,10 +47,10 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
-import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +60,8 @@ fun AddContactView(
 ) {
     val context = LocalContext.current
 
-    val name = rememberSaveable { mutableStateOf ("") }
+    val name = rememberSaveable { mutableStateOf("") }
+    val id = rememberSaveable { mutableStateOf ("") }
     val keyParts = remember { mutableStateMapOf(0 to "") }
     val key = remember { mutableStateOf("") }
 
@@ -72,7 +73,12 @@ fun AddContactView(
             } else {
                 val withoutPrefix = result.contents.removePrefix("ember://")
                 val parts = withoutPrefix.split("/")
-                keyParts[parts[0].toInt()] = parts[1].trim()
+                if (parts[0] == "id") {
+                    id.value = parts[1].trim()
+
+                } else {
+                    keyParts[parts[0].toInt()] = parts[1].trim()
+                }
             }
         }
     )
@@ -83,15 +89,23 @@ fun AddContactView(
             .fillMaxHeight(),
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.Bottom)
     ) {
+        OutlinedTextField(
+            label = { Text("Name") },
+            value = name.value,
+            onValueChange = { name.value = it }
+        )
         val focusManager = LocalFocusManager.current
-        SubmittableTextField(
-            label = { Text("Contact Name") },
-            imageVector = Icons.Filled.Download,
-            clearOnSubmit = false,
-            onValueChange = { name.value = it },
-            onSubmit = {
+        OutlinedTextField(
+            label = { Text("ID")},
+            readOnly = true,
+            value = id.value,
+            onValueChange = {}
+        )
+        IconButton(
+            enabled = id.value != "",
+            onClick = {
                 contactsViewModel.viewModelScope.launch(Dispatchers.IO) {
-                    val result = contactsViewModel.downloadKey(it)
+                    val result = contactsViewModel.downloadKey(id.value)
                     if (result == null) {
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, "Failed to download this key", Toast.LENGTH_SHORT).show()
@@ -102,7 +116,9 @@ fun AddContactView(
                     }
                 }
             }
-        )
+        ) {
+            Icon(imageVector = Icons.Filled.Download, contentDescription = "Download")
+        }
         Text(
             text = "Scanned Key Parts",
             style = MaterialTheme.typography.headlineSmall,
@@ -117,7 +133,7 @@ fun AddContactView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ElevatedCard(
-                    modifier = Modifier.width(maxWidth * 0.7f)
+                    modifier = Modifier.width(maxWidth * 0.8f)
                 ) {
                     LazyRow {
                         items(keyParts.entries.toList()) { item ->
@@ -133,15 +149,6 @@ fun AddContactView(
                             }
                         }
                     }
-                }
-                IconButton(
-                    modifier = Modifier.width(maxWidth * 0.2f),
-                    onClick = { scanLauncher.launch(ScanOptions()) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.QrCodeScanner,
-                        contentDescription = stringResource(R.string.scan_qr_code)
-                    )
                 }
                 IconButton(
                     modifier = Modifier.width(maxWidth * 0.2f),
@@ -199,9 +206,22 @@ fun AddContactView(
         Spacer(modifier = Modifier.weight(9f))
         FloatingActionButton(
             onClick = {
-                if (name.value != "" && key.value != "") {
+                scanLauncher.launch(ScanOptions())
+            },
+            modifier = Modifier
+                .padding(10.dp)
+                .align(Alignment.End)
+        ) {
+            Icon(
+                imageVector = Icons.Filled.QrCodeScanner,
+                contentDescription = stringResource(R.string.scan_qr_code)
+            )
+        }
+        FloatingActionButton(
+            onClick = {
+                if (name.value != "" && id.value != "" && key.value != "") {
                     contactsViewModel.viewModelScope.launch {
-                        contactsViewModel.add(Contact(name = name.value, pubKey = key.value))
+                        contactsViewModel.add(Contact(name = name.value, userId = UUID.fromString(id.value), pubKey = key.value))
                     }
                     navController.popBackStack()
                 }

@@ -17,8 +17,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +39,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,6 +47,7 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun QrCodeView(
+    contactsViewModel: ContactsViewModel,
     qrCodeViewModel: QrCodeViewModel,
     pubKey: String,
     modifier: Modifier = Modifier
@@ -54,7 +55,7 @@ fun QrCodeView(
     val context = LocalContext.current
 
     val keys = pubKey.chunked(750)
-    val contents = keys.mapIndexed { index, key ->
+    val contents = listOf("ember://id/${contactsViewModel.myId()}") + keys.mapIndexed { index, key ->
         "ember://%s/%s".format(index, key)
     }
     val currentPage = rememberSaveable { mutableStateOf(0) }
@@ -99,24 +100,22 @@ fun QrCodeView(
             if (qrCodeViewModel.isMyKey(pubKey)) {
                 val keyServerScope = rememberCoroutineScope()
                 val focusManager = LocalFocusManager.current
-                SubmittableTextField(
-                    label = { Text(stringResource(R.string.name_for_your_key)) },
-                    imageVector = Icons.Filled.Upload,
-                    onSubmit = {
-                        keyServerScope.launch(Dispatchers.IO) {
-                            val msg = when (val result = qrCodeViewModel.putKey(it)) {
-                                201 -> {
-                                    focusManager.clearFocus()
-                                    "Uploaded Key successfully!"
-                                }
-                                else -> "Failed to upload key, status: $result"
+                ElevatedButton(onClick = {
+                    keyServerScope.launch(Dispatchers.IO) {
+                        val msg = when (val result = qrCodeViewModel.putKey(contactsViewModel.myId())) {
+                            201 -> {
+                                focusManager.clearFocus()
+                                "Uploaded Key successfully!"
                             }
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
-                            }
+                            else -> "Failed to upload key, status: $result"
+                        }
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
                         }
                     }
-                )
+                }) {
+                    Text("Upload Key")
+                }
             }
             Spacer(modifier = Modifier.weight(9f))
             FloatingActionButton(

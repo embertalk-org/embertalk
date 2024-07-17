@@ -34,7 +34,7 @@ object Protocol {
             for (j in 0 until msgSize) {
                 msgBuffer[j] = buffer.get()
             }
-            messages.add(EncryptedMessage(hash = msgBuffer.contentHashCode(), bytes = msgBuffer, epoch = 0))
+            messages.add(EncryptedMessage(hash = msgBuffer.contentHashCode(), bytes = msgBuffer, timestamp = System.currentTimeMillis()))
         }
         return messages
     }

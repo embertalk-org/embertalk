@@ -173,7 +173,7 @@ fun EmberTalkApp(
                         toolWindow = true
                     ) {
                         val key = it.arguments!!.getString("pubKey")!!
-                        QrCodeView(qrCodeViewModel, key)
+                        QrCodeView(contactsViewModel, qrCodeViewModel, key)
                     }
                 }
             }

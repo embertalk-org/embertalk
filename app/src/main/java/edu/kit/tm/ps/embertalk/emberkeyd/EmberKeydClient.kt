@@ -12,6 +12,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.UUID
 
 
 class EmberKeydClient(
@@ -23,7 +24,7 @@ class EmberKeydClient(
     private val mediaType = "application/json".toMediaType()
     private val client = OkHttpClient()
 
-    suspend fun putKey(name: String): Int {
+    suspend fun putKey(userId: UUID): Int {
         val pubKeyJson = JSONObject()
         pubKeyJson.put("pubkey", encodeAsJson(publicKey.serialize()))
         val chalResp = post("$keyServerUrl/challenge", pubKeyJson.toString())
@@ -35,7 +36,7 @@ class EmberKeydClient(
         val chalBody = JSONObject(chalResp.body!!.string())
         val challengeJson = copyStateAndNonceFrom(chalBody)
         challengeJson.put("response", encodeAsJson(privateKey.decrypt(decodeFromJson(chalBody.getJSONArray("challenge")))))
-        challengeJson.put("name", name)
+        challengeJson.put("name", userId.toString())
         val finalResp = post("$keyServerUrl/response", challengeJson.toString())
         if (finalResp.code != 201) {
             Log.d(TAG, "Got status code ${finalResp.code}")
