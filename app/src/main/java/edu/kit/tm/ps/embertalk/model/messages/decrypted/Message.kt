@@ -47,8 +47,8 @@ data class Message(
                 val contentHash = buffer.int
                 val contentBytes = ByteArray(buffer.remaining())
                 buffer.get(contentBytes)
-                val json = JSONObject(contentBytes.decodeToString())
                 if (contentHash == contentBytes.contentHashCode()) {
+                    val json = JSONObject(contentBytes.decodeToString())
                     return Message(
                         content = json.getString("content"),
                         senderUserId = UUID.fromString(json.getString("sender")),
