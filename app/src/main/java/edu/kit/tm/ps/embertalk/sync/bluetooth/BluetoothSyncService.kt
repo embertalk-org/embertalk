@@ -28,23 +28,20 @@ import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
 import edu.kit.tm.ps.embertalk.notification.Notification
 import java.time.Instant
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
 
 @SuppressLint("MissingPermission")
 class BluetoothSyncService : Service() {
+    private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
 
     private lateinit var bluetoothManager: BluetoothManager
-    private lateinit var bluetoothAdapter: BluetoothAdapter
     private lateinit var bluetoothLeAdvertiser: BluetoothLeAdvertiser
     private lateinit var bluetoothLeScanner: BluetoothLeScanner
     private lateinit var bleServer: BluetoothGattServer
     private lateinit var scanCallback: ScanCallback
     private var started = false
     private lateinit var preferences: SharedPreferences
-    private var serviceUuid: UUID = ServiceUtils.SERVICE_UUID
-    private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
 
     init {
         Log.i("SyncService", "Started Sync Service")
@@ -124,10 +121,10 @@ class BluetoothSyncService : Service() {
     }
 
     private fun startBluetoothLeDiscovery() {
-        Log.i(TAG, "Starting advertise with service uuid %s".format(serviceUuid))
+        Log.i(TAG, "Starting advertise with service uuid %s".format(ServiceUtils.SERVICE_UUID))
         bluetoothLeAdvertiser.startAdvertising(
             BleSettings.ADVERTISE_SETTINGS,
-            BleSettings.buildAdvertiseData(serviceUuid),
+            BleSettings.buildAdvertiseData(ServiceUtils.SERVICE_UUID),
             advertiseCallback)
 
         scanCallback = scanCallback()
@@ -138,7 +135,7 @@ class BluetoothSyncService : Service() {
     }
 
     private fun stopBluetoothLeDiscovery() {
-        if (!bluetoothAdapter.isEnabled) {
+        if (!bluetoothManager.adapter.isEnabled) {
             return
         }
         bluetoothLeAdvertiser.stopAdvertising(advertiseCallback)
@@ -161,10 +158,9 @@ class BluetoothSyncService : Service() {
         val app = this.application as EmberTalkApplication
 
         bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        bluetoothAdapter = bluetoothManager.adapter
 
-        bluetoothLeAdvertiser = bluetoothAdapter.bluetoothLeAdvertiser
-        bluetoothLeScanner = bluetoothAdapter.bluetoothLeScanner
+        bluetoothLeAdvertiser = bluetoothManager.adapter.bluetoothLeAdvertiser
+        bluetoothLeScanner = bluetoothManager.adapter.bluetoothLeScanner
         startBluetoothLeDiscovery()
 
         started = true
