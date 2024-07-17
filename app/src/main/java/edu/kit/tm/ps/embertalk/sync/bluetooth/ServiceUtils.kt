@@ -27,7 +27,7 @@ object ServiceUtils {
 
     val SERVICE_UUID = UUID.fromString("c32ebc7e-0507-4506-9111-673f5811fbbb")!!
 
-    val GATT_PAYLOAD_SIZE = 20
+    const val GATT_PAYLOAD_SIZE = 20
 
     fun matchesService(uuid: UUID): Boolean {
         return SERVICE_UUID == uuid
