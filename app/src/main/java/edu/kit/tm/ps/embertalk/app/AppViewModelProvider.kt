@@ -13,7 +13,7 @@ import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            MessageViewModel(emberTalkApplication().container.messageManager)
+            MessageViewModel(emberTalkApplication().container.contactManager, emberTalkApplication().container.messageManager)
         }
         initializer {
             ContactsViewModel(emberTalkApplication().container.cryptoService, emberTalkApplication().container.contactManager)

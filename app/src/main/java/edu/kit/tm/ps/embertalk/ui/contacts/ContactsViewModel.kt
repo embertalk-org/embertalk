@@ -40,6 +40,10 @@ class ContactsViewModel(
         updateContacts()
     }
 
+    suspend fun get(userId: UUID): Contact {
+        return contactManager.get(userId)
+    }
+
     suspend fun downloadKey(name: String): String? {
         return try {
             cryptoService.emberKeydClient().downloadKey(name)

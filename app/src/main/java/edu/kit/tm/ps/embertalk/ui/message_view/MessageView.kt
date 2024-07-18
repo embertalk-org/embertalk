@@ -3,193 +3,89 @@
 package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
 import edu.kit.tm.ps.embertalk.R
+import edu.kit.tm.ps.embertalk.ui.EmberScaffold
 import edu.kit.tm.ps.embertalk.ui.components.MessageCard
+import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 @Composable
 fun MessageView(
+    contactId: UUID,
+    navController: NavController,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
-
     val messageUiState by messageViewModel.uiState.collectAsState()
-    val messages = messageUiState.messages.sortedBy { it.timestamp }
+    val messages = messageUiState.messages
+        .filter { it.senderUserId == contactId || it.recipient == contactId }
+        .sortedBy { it.timestamp }
+    val contact = messageUiState.contacts.find { it.userId == contactId }!!
 
-    Column(
-        modifier = modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.Bottom
+    EmberScaffold(
+        navController = navController,
+        title = contact.name,
+        toolWindow = true
     ) {
-        val listState = rememberLazyListState(initialFirstVisibleItemIndex = messages.size)
-        val coroutineScope = rememberCoroutineScope()
-        LazyColumn(
-            state = listState,
-            modifier = modifier
-                .fillMaxWidth()
-                .weight(9f)
+        Column(
+            modifier = modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.Bottom
         ) {
-            coroutineScope.launch {
-                listState.animateScrollToItem(messages.size)
-            }
-            items(messages) { item ->
-                Row(
-                    modifier = modifier.fillMaxWidth(),
-                    horizontalArrangement = if (item.senderUserId == contactsViewModel.myId()) { Arrangement.End } else { Arrangement.Start }
-                ) {
-                    MessageCard(
-                        message = item.content,
-                        recipient = item.recipient.toString(),
-                        timestamp = item.timestamp
-                    )
-                }
-            }
-        }
-        SendMessageField(contactsViewModel = contactsViewModel, messageViewModel = messageViewModel)
-    }
-}
-
-@Composable
-fun SendMessageField(
-    contactsViewModel: ContactsViewModel,
-    messageViewModel: MessageViewModel,
-    modifier: Modifier = Modifier,
-) {
-    val message = rememberSaveable { mutableStateOf("") }
-    BoxWithConstraints(
-        modifier = Modifier.fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        val maxWidth = maxWidth
-        Row {
-            OutlinedTextField(
-                label = { Text(stringResource(id = R.string.your_message)) },
-                value = message.value,
-                onValueChange = { message.value = it },
-                modifier = Modifier
-                    .width(maxWidth * 0.8f)
-                    .heightIn(0.dp, 150.dp)
-            )
-            SubmitButton(
-                message = message,
-                contactsViewModel = contactsViewModel,
-                messageViewModel = messageViewModel,
+            val listState = rememberLazyListState(initialFirstVisibleItemIndex = messages.size)
+            val coroutineScope = rememberCoroutineScope()
+            LazyColumn(
+                state = listState,
                 modifier = modifier
-                    .width(maxWidth * 0.8f)
-                    .align(Alignment.CenterVertically)
-            )
-        }
-    }
-}
-
-@Composable
-fun SubmitButton(
-    message: MutableState<String>,
-    contactsViewModel: ContactsViewModel,
-    messageViewModel: MessageViewModel,
-    modifier: Modifier = Modifier
-) {
-    val openDialog = remember { mutableStateOf(false) }
-    IconButton(
-        enabled = message.value != "",
-        onClick = {
-            openDialog.value = true
-        },
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Send,
-            contentDescription = stringResource(R.string.send_message)
-        )
-    }
-    if (openDialog.value) {
-        Dialog(
-            onDismissRequest = { openDialog.value = false }
-        ) {
-            Card(
-                modifier = Modifier.fillMaxWidth()
+                    .fillMaxWidth()
+                    .weight(9f)
             ) {
-                Column(
-                    modifier = Modifier.padding(10.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.send_to),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(5.dp)
-                    )
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                coroutineScope.launch {
+                    listState.animateScrollToItem(messages.size)
+                }
+                items(messages) { item ->
+                    Row(
+                        modifier = modifier.fillMaxWidth(),
+                        horizontalArrangement = if (item.senderUserId == contactsViewModel.myId()) { Arrangement.End } else { Arrangement.Start }
                     ) {
-                        items(contactsViewModel.uiState.value.contacts) { item ->
-                            ElevatedCard(
-                                modifier = modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.End
-                                ) {
-                                    Text(
-                                        text = item.name,
-                                        modifier = Modifier
-                                            .padding(10.dp)
-                                            .align(Alignment.CenterVertically)
-                                    )
-                                    Spacer(modifier = Modifier.weight(9f))
-                                    IconButton(
-                                        onClick = {
-                                            openDialog.value = false
-                                            messageViewModel.viewModelScope.launch { messageViewModel.saveMessage(message.value, item.userId, item.pubKey) }
-                                            message.value = ""
-                                        }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Send,
-                                            contentDescription = stringResource(R.string.send_message),
-                                            modifier = Modifier.align(Alignment.CenterVertically)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        MessageCard(
+                            message = item.content,
+                            timestamp = item.timestamp
+                        )
                     }
                 }
             }
+            SubmittableTextField(
+                label = { stringResource(R.string.your_message) },
+                imageVector = Icons.Filled.Send,
+                singleLine = false,
+                onSubmit = {
+                    messageViewModel.viewModelScope.launch {
+                        messageViewModel.saveMessage(it, contact.userId, contact.pubKey)
+                    }
+                },
+            )
         }
     }
+
 }

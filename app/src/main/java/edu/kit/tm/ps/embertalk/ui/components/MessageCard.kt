@@ -21,7 +21,6 @@ val dateFormat: DateFormat = SimpleDateFormat.getTimeInstance()
 @Composable
 fun MessageCard(
     message: String,
-    recipient: String?,
     timestamp: Long,
     modifier: Modifier = Modifier,
 ) {
@@ -36,7 +35,7 @@ fun MessageCard(
             )
             val date = dateFormat.format(Date.from(Instant.ofEpochMilli(timestamp)))
             Text(
-                text = if (recipient != null) { "$date > $recipient" } else { date },
+                text = date,
                 fontSize = 2.em,
                 modifier = modifier.align(Alignment.End)
             )
@@ -49,7 +48,6 @@ fun MessageCard(
 private fun MessageCardPreview() {
     MessageCard(
         message = "Hello there my friend!",
-        timestamp = 10000000,
-        recipient = "Test"
+        timestamp = 10000000
     )
 }

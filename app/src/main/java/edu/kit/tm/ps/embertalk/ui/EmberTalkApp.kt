@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ElevatedButton
@@ -62,11 +61,11 @@ import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeView
 import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeViewModel
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsView
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
+import java.util.UUID
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
     data object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
     data object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
-    data object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
     data object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
     data object QrCode : Screen("qr/{pubKey}", Icons.Filled.QrCode, R.string.qr_code)
 
@@ -122,7 +121,7 @@ fun EmberTalkApp(
         ) {
             NavHost(
                 navController = navController,
-                startDestination = Screen.Messages.route,
+                startDestination = Screen.Contacts.route,
             ) {
                 composable(Screen.Contacts.route) {
                     EmberScaffold(
@@ -144,16 +143,17 @@ fun EmberTalkApp(
                         AddContactView(contactsViewModel, navController)
                     }
                 }
-                composable(Screen.Messages.route) {
-                    EmberScaffold(
+                composable(
+                    route = "contact/{contactId}",
+                    arguments = listOf(navArgument("contactId") { type = NavType.StringType},)
+                ) { backStackEntry ->
+                    val contactId = UUID.fromString(backStackEntry.arguments?.getString("contactId"))
+                    MessageView(
+                        contactId = contactId,
                         navController = navController,
-                        title = stringResource(id = R.string.messages)
-                    ) {
-                        MessageView(
-                            contactsViewModel = contactsViewModel,
-                            messageViewModel = messageViewModel
-                        )
-                    }
+                        contactsViewModel = contactsViewModel,
+                        messageViewModel = messageViewModel
+                    )
                 }
                 composable(Screen.Settings.route) {
                     EmberScaffold(
@@ -194,7 +194,6 @@ fun EmberScaffold(
     
     val items = listOf(
         Screen.Contacts,
-        Screen.Messages,
         Screen.Settings
     )
 

@@ -6,9 +6,13 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import java.util.UUID
 
 @Dao
 interface ContactDao {
+
+    @Query("SELECT * FROM contacts WHERE userId=:userId")
+    suspend fun byId(userId: UUID): Contact
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(contact: Contact)

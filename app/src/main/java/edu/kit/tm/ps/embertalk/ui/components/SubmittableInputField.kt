@@ -22,6 +22,7 @@ fun SubmittableTextField(
     imageVector: ImageVector,
     onSubmit: (String) -> Unit,
     modifier: Modifier = Modifier,
+    singleLine: Boolean = true,
     onValueChange: (String) -> Unit = {},
     inputValidator: (String) -> Boolean = { true },
     initialValue: String = "",
@@ -42,7 +43,7 @@ fun SubmittableTextField(
             OutlinedTextField(
                 value = msgInput.value,
                 label = label,
-                singleLine = true,
+                singleLine = singleLine,
                 isError = isError.value,
                 modifier = modifier.width(maxWidth * 0.8f),
                 onValueChange = {

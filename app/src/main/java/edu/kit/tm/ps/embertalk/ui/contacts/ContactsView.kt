@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -79,6 +80,13 @@ fun ContactsView(
                             onClick = { contactsViewModel.viewModelScope.launch { contactsViewModel.delete(item) } },
                         ) {
                             Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(id = R.string.delete))
+                        }
+                        IconButton(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically),
+                            onClick = { navController.navigate("contact/${item.userId}") },
+                        ) {
+                            Icon(imageVector = Icons.Filled.Send, contentDescription = stringResource(id = R.string.delete))
                         }
                     }
                 }

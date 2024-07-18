@@ -12,6 +12,8 @@ class ContactManager(
 
     suspend fun add(contact: Contact) = contactRepository.insert(contact)
 
+    suspend fun get(userId: UUID) = contactRepository.byId(userId)
+
     suspend fun delete(contact: Contact) = contactRepository.delete(contact)
     fun myId(): UUID {
         return UUID.fromString(prefs.getString("userId", ""))
