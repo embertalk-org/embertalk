@@ -30,7 +30,7 @@ class SettingsViewModel(
     init {
         cryptoService.register(this)
         if (!prefs.contains(Preferences.KEY_SERVER_URL)) {
-            updateKeyServer("https://i63schadt.tm.kit.edu/embertalk")
+            updateKeyServer("https://emberkeyd.eloque.nz")
         }
         if (!prefs.contains(Preferences.SYNC_INTERVAL)) {
             updateSyncInterval(5)
