@@ -105,7 +105,7 @@ fun AddContactView(
             enabled = id.value != "",
             onClick = {
                 contactsViewModel.viewModelScope.launch(Dispatchers.IO) {
-                    val result = contactsViewModel.downloadKey(id.value)
+                    val result = contactsViewModel.downloadKey(UUID.fromString(id.value))
                     if (result == null) {
                         withContext(Dispatchers.Main) {
                             Toast.makeText(context, "Failed to download this key", Toast.LENGTH_SHORT).show()

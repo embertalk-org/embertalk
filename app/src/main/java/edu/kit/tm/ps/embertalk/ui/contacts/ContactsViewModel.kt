@@ -44,9 +44,9 @@ class ContactsViewModel(
         return contactManager.get(userId)
     }
 
-    suspend fun downloadKey(name: String): String? {
+    suspend fun downloadKey(userId: UUID): String? {
         return try {
-            cryptoService.emberKeydClient().downloadKey(name)
+            cryptoService.emberKeydClient().downloadKey(userId)
         } catch (e: IOException) {
             null
         }

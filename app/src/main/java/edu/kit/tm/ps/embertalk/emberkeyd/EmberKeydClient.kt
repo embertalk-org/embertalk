@@ -14,6 +14,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.util.UUID
 
+const val AUTH_HEADER = "X-Ember-Secret"
+const val AUTH_VAL = "eithu4ae7uzaer5dahfeiwi5Mohy2sah1IBeinguu5afahng8u"
+
 
 class EmberKeydClient(
     private val keyServerUrl: String,
@@ -36,7 +39,7 @@ class EmberKeydClient(
         val chalBody = JSONObject(chalResp.body!!.string())
         val challengeJson = copyStateAndNonceFrom(chalBody)
         challengeJson.put("response", encodeAsJson(privateKey.decrypt(decodeFromJson(chalBody.getJSONArray("challenge")))))
-        challengeJson.put("name", userId.toString())
+        challengeJson.put("user_id", userId.toString())
         val finalResp = post("$keyServerUrl/response", challengeJson.toString())
         if (finalResp.code != 201) {
             Log.d(TAG, "Got status code ${finalResp.code}")
@@ -54,8 +57,8 @@ class EmberKeydClient(
         }
     }
 
-    suspend fun downloadKey(name: String): String? {
-        val resp = get("$keyServerUrl/key/$name")
+    suspend fun downloadKey(userId: UUID): String? {
+        val resp = get("$keyServerUrl/key/$userId")
         Log.d(TAG, "Got status code ${resp.code}")
         return if (resp.code != 200) {
             null
@@ -71,6 +74,7 @@ class EmberKeydClient(
         val request: Request = Request.Builder()
             .url(url)
             .post(body)
+            .header(AUTH_HEADER, AUTH_VAL)
             .build()
         return client.newCall(request).execute()
 
@@ -81,6 +85,7 @@ class EmberKeydClient(
         val request: Request = Request.Builder()
             .url(url)
             .get()
+            .header(AUTH_HEADER, AUTH_VAL)
             .build()
         return client.newCall(request).execute()
 
