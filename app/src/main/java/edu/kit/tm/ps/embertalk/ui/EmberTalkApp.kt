@@ -64,11 +64,11 @@ import edu.kit.tm.ps.embertalk.ui.settings.SettingsView
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
 
 sealed class Screen(val route: String, val icon: ImageVector, @StringRes val resourceId: Int) {
-    object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
-    object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
-    object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
-    object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
-    object QrCode : Screen("qr/{pubKey}", Icons.Filled.QrCode, R.string.qr_code)
+    data object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
+    data object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
+    data object Messages : Screen("messages", Icons.Filled.Send, R.string.messages)
+    data object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
+    data object QrCode : Screen("qr/{pubKey}", Icons.Filled.QrCode, R.string.qr_code)
 
     companion object {
         fun qrCodeRoute(pubKey: String): String {
