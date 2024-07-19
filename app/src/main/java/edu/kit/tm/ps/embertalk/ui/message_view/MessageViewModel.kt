@@ -16,13 +16,14 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 data class MessageUiState(
-    val contacts: List<Contact> = ArrayList(),
+    val contact: Contact = Contact.placeholder(),
     val messages: List<Message> = ArrayList()
 )
 
 class MessageViewModel(
     private val contactManager: ContactManager,
     private val messageManager: MessageManager,
+    private val contactId: UUID,
 ) : ViewModel(), EmberObserver {
 
     private val _uiState = MutableStateFlow(MessageUiState())
@@ -36,14 +37,16 @@ class MessageViewModel(
     private fun updateView() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
-                contacts = contactManager.contacts().first(),
+                contact = contactManager.get(contactId),
                 messages = messageManager.messages().first()
+                    .filter { contactId == it.recipient || contactId == it.senderUserId }
             )
         }
     }
 
-    suspend fun saveMessage(message: String, recipient: UUID, publicKey: String) {
-        messageManager.handle(message, recipient, publicKey)
+    suspend fun saveMessage(message: String) {
+        val contact = contactManager.get(contactId)
+        messageManager.handle(message, contact.userId, contactManager.get(contactId).pubKey)
         updateView()
     }
 

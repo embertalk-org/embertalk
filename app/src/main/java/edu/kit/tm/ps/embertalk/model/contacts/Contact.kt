@@ -13,4 +13,10 @@ data class Contact (
     @PrimaryKey
     val userId: UUID,
     val pubKey: String,
-): Parcelable
+): Parcelable {
+    companion object {
+        fun placeholder(): Contact {
+            return Contact("", UUID.randomUUID(), "")
+        }
+    }
+}

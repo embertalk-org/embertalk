@@ -8,6 +8,7 @@ import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.model.EmberObserver
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,6 +22,7 @@ data class SettingsUiState(
 
 class SettingsViewModel(
     private val prefs: SharedPreferences,
+    private val messageManager: MessageManager,
     private val cryptoService: CryptoService
 ) : ViewModel(), EmberObserver {
 
@@ -56,6 +58,10 @@ class SettingsViewModel(
     fun updateSyncInterval(interval: Long) {
         prefs.edit().putLong(Preferences.SYNC_INTERVAL, interval).apply()
         notifyOfChange()
+    }
+
+    suspend fun deleteAll() {
+        messageManager.deleteAll()
     }
 
     suspend fun regenerateKeys() {

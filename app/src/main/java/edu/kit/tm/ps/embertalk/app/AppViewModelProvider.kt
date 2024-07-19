@@ -9,17 +9,30 @@ import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import edu.kit.tm.ps.embertalk.ui.qr_code.QrCodeViewModel
 import edu.kit.tm.ps.embertalk.ui.settings.SettingsViewModel
+import java.util.UUID
 
 object AppViewModelProvider {
-    val Factory = viewModelFactory {
+
+    fun messageViewModelFactory(contactId: UUID): ViewModelProvider.Factory = viewModelFactory {
         initializer {
-            MessageViewModel(emberTalkApplication().container.contactManager, emberTalkApplication().container.messageManager)
+            MessageViewModel(
+                emberTalkApplication().container.contactManager,
+                emberTalkApplication().container.messageManager,
+                contactId
+            )
         }
+    }
+
+    val Factory = viewModelFactory {
         initializer {
             ContactsViewModel(emberTalkApplication().container.cryptoService, emberTalkApplication().container.contactManager)
         }
         initializer {
-            SettingsViewModel(PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()), emberTalkApplication().container.cryptoService)
+            SettingsViewModel(
+                PreferenceManager.getDefaultSharedPreferences(emberTalkApplication()),
+                emberTalkApplication().container.messageManager,
+                emberTalkApplication().container.cryptoService
+            )
         }
         initializer {
             QrCodeViewModel(emberTalkApplication().container.cryptoService)

@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package edu.kit.tm.ps.embertalk.ui.message_view
 
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +10,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,11 +24,9 @@ import edu.kit.tm.ps.embertalk.ui.components.MessageCard
 import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
-import java.util.UUID
 
 @Composable
 fun MessageView(
-    contactId: UUID,
     navController: NavController,
     contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
@@ -39,13 +34,10 @@ fun MessageView(
 ) {
     val messageUiState by messageViewModel.uiState.collectAsState()
     val messages = messageUiState.messages
-        .filter { it.senderUserId == contactId || it.recipient == contactId }
-        .sortedBy { it.timestamp }
-    val contact = messageUiState.contacts.find { it.userId == contactId }!!
 
     EmberScaffold(
         navController = navController,
-        title = contact.name,
+        title = messageUiState.contact.name,
         toolWindow = true
     ) {
         Column(
@@ -81,7 +73,7 @@ fun MessageView(
                 singleLine = false,
                 onSubmit = {
                     messageViewModel.viewModelScope.launch {
-                        messageViewModel.saveMessage(it, contact.userId, contact.pubKey)
+                        messageViewModel.saveMessage(it)
                     }
                 },
             )

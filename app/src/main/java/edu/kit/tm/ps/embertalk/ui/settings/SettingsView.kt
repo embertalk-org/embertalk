@@ -30,13 +30,11 @@ import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
-import edu.kit.tm.ps.embertalk.ui.message_view.MessageViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun SettingsView(
     settingsViewModel: SettingsViewModel,
-    messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
     val uiState by settingsViewModel.uiState.collectAsState()
@@ -56,7 +54,7 @@ fun SettingsView(
             )
             RatchetState(syncState = uiState.syncState)
             RegenerateKeysButton(uiState.syncState, settingsViewModel)
-            DeleteAllButton(messageViewModel = messageViewModel)
+            DeleteAllButton(settingsViewModel)
             SubmittableTextField(
                 label = { Text(stringResource(R.string.key_server_url)) },
                 imageVector = Icons.Filled.Save,
@@ -155,7 +153,7 @@ fun RegenerateKeysButton(
 
 @Composable
 fun DeleteAllButton(
-    messageViewModel: MessageViewModel,
+    settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
     val openDialog = remember { mutableStateOf(false) }
@@ -190,7 +188,7 @@ fun DeleteAllButton(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red, contentColor = Color.White),
                     onClick = {
                         openDialog.value = false
-                        messageViewModel.viewModelScope.launch { messageViewModel.deleteAll() }
+                        settingsViewModel.viewModelScope.launch { settingsViewModel.deleteAll() }
                     }
                 ) {
                     Text(stringResource(R.string.confirm))

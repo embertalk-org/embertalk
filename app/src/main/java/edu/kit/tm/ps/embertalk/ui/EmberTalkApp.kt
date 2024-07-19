@@ -83,7 +83,6 @@ fun EmberTalkApp(
         modifier = modifier
     ) {
         val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
@@ -150,8 +149,8 @@ fun EmberTalkApp(
                     arguments = listOf(navArgument("contactId") { type = NavType.StringType},)
                 ) { backStackEntry ->
                     val contactId = UUID.fromString(backStackEntry.arguments?.getString("contactId"))
+                    val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.messageViewModelFactory(contactId))
                     MessageView(
-                        contactId = contactId,
                         navController = navController,
                         contactsViewModel = contactsViewModel,
                         messageViewModel = messageViewModel
@@ -162,7 +161,7 @@ fun EmberTalkApp(
                         navController = navController,
                         title = stringResource(id = R.string.settings)
                     ) {
-                        SettingsView(settingsViewModel, messageViewModel)
+                        SettingsView(settingsViewModel)
                     }
                 }
                 composable(
