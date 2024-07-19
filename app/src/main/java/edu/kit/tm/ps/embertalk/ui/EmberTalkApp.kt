@@ -4,55 +4,46 @@ package edu.kit.tm.ps.embertalk.ui
 
 import android.Manifest
 import android.os.Build
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Contacts
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.preference.PreferenceManager
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
-import edu.kit.tm.ps.embertalk.sync.bluetooth.BleSyncService
 import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsActions
+import edu.kit.tm.ps.embertalk.ui.contacts.ContactsBottomBar
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
@@ -75,6 +66,11 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
         }
     }
 }
+
+val NAVIGATION_ITEMS = listOf(
+    Screen.Contacts,
+    Screen.Settings
+)
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -126,7 +122,13 @@ fun EmberTalkApp(
                 composable(Screen.Contacts.route) {
                     EmberScaffold(
                         navController = navController,
-                        title = stringResource(id = R.string.contacts)
+                        title = stringResource(id = R.string.contacts),
+                        bottomBar = {
+                            ContactsBottomBar(navController)
+                        },
+                        actions = {
+                            ContactsActions(navController)
+                        }
                     ) {
                         ContactsView(
                             contactsViewModel = contactsViewModel,
@@ -181,6 +183,7 @@ fun EmberTalkApp(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmberScaffold(
     navController: NavController,
@@ -188,76 +191,27 @@ fun EmberScaffold(
     title: String = stringResource(R.string.embertalk),
     toolWindow: Boolean = false,
     showBack: Boolean = true,
+    actions: @Composable RowScope.() -> Unit = {},
+    floatingActionButton: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val context = LocalContext.current
-    
-    val items = listOf(
-        Screen.Contacts,
-        Screen.Settings
-    )
-
-    val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title) },
                 navigationIcon = {
-                     if (toolWindow && showBack) {
-                         IconButton(onClick = { navController.popBackStack() }) {
-                             Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                         }
-                     }
-                },
-                actions = {
-                    if (!toolWindow) {
-                        IconButton(onClick = { BleSyncService.startOrPromptBluetooth(context) }) {
-                            Icon(
-                                imageVector = Icons.Filled.PlayArrow,
-                                contentDescription = stringResource(R.string.start_service)
-                            )
-                        }
-                        IconButton(onClick = {
-                            if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
-                                Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
-                            } else {
-                                navController.navigate(Screen.qrCodeRoute(prefs.getString(Preferences.PUBLIC_KEY, "")!!))
-                            }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Filled.QrCode,
-                                contentDescription = stringResource(R.string.start_service)
-                            )
+                    if (toolWindow && showBack) {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
-                }
+                },
+                actions = actions
             )
         },
-        bottomBar = {
-            if (!toolWindow) {
-                BottomAppBar {
-                    items.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon, contentDescription = screen.route) },
-                            label = { Text(stringResource(screen.resourceId)) },
-                            selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
-                            onClick = {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        bottomBar = bottomBar,
+        floatingActionButton = floatingActionButton
     ) { innerPadding ->
         Box(modifier = modifier
             .padding(innerPadding)
