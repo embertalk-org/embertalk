@@ -1,10 +1,9 @@
 package edu.kit.tm.ps.embertalk.ui.contacts
 
 import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -59,26 +57,14 @@ fun ContactsView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .align(Alignment.Start)
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = item.name,
-                            modifier
-                                .align(Alignment.CenterVertically)
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            onClick = { navController.navigate("contact/${item.userId}") },
-                        ) {
-                            Icon(imageVector = Icons.Filled.Send, contentDescription = stringResource(id = R.string.delete))
+                        .clickable {
+                            navController.navigate("contact/${item.userId}")
                         }
-                    }
+                ) {
+                    Text(
+                        text = item.name,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
         }
