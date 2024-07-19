@@ -16,24 +16,30 @@ import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -43,7 +49,6 @@ import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsActions
-import edu.kit.tm.ps.embertalk.ui.contacts.ContactsBottomBar
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import edu.kit.tm.ps.embertalk.ui.message_view.MessageView
@@ -123,7 +128,7 @@ fun EmberTalkApp(
                         navController = navController,
                         title = stringResource(id = R.string.contacts),
                         bottomBar = {
-                            ContactsBottomBar(navController)
+                            MainBottomBar(navController)
                         },
                         actions = {
                             ContactsActions(navController)
@@ -159,7 +164,10 @@ fun EmberTalkApp(
                 composable(Screen.Settings.route) {
                     EmberScaffold(
                         navController = navController,
-                        title = stringResource(id = R.string.settings)
+                        title = stringResource(id = R.string.settings),
+                        bottomBar = {
+                            MainBottomBar(navController)
+                        },
                     ) {
                         SettingsView(settingsViewModel)
                     }
@@ -216,6 +224,33 @@ fun EmberScaffold(
             .padding(innerPadding)
             .padding(10.dp)) {
             content.invoke()
+        }
+    }
+}
+
+@Composable
+fun MainBottomBar(
+    navController: NavController
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+
+    BottomAppBar {
+        NAVIGATION_ITEMS.forEach { screen ->
+            NavigationBarItem(
+                icon = { Icon(screen.icon, contentDescription = screen.route) },
+                label = { Text(stringResource(screen.resourceId)) },
+                selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                onClick = {
+                    navController.navigate(screen.route) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                }
+            )
         }
     }
 }
