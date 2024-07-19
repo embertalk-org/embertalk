@@ -3,6 +3,7 @@ package edu.kit.tm.ps.embertalk.ui.contacts
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,13 +21,14 @@ data class ContactsUiState(
 class ContactsViewModel(
     private val cryptoService: CryptoService,
     private val contactManager: ContactManager,
-) : ViewModel() {
+) : ViewModel(), EmberObserver {
 
     private val _uiState = MutableStateFlow(ContactsUiState())
     val uiState: StateFlow<ContactsUiState> = _uiState.asStateFlow()
 
     init {
         updateContacts()
+        contactManager.register(this)
     }
 
     private fun updateContacts() {
@@ -59,5 +61,9 @@ class ContactsViewModel(
 
     fun myId(): UUID {
         return contactManager.myId()
+    }
+
+    override fun notifyOfChange() {
+        updateContacts()
     }
 }

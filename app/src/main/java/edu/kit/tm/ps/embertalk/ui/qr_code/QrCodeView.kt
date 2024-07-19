@@ -39,23 +39,21 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 
 @Composable
 fun QrCodeView(
-    contactsViewModel: ContactsViewModel,
     qrCodeViewModel: QrCodeViewModel,
-    pubKey: String,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
-    val keys = pubKey.chunked(750)
-    val contents = listOf("ember://id/${contactsViewModel.myId()}") + keys.mapIndexed { index, key ->
+    val keys = runBlocking { qrCodeViewModel.pubKey().chunked(750) }
+    val contents = listOf("ember://id/${qrCodeViewModel.id()}") + keys.mapIndexed { index, key ->
         "ember://%s/%s".format(index, key)
     }
     val currentPage = rememberSaveable { mutableStateOf(0) }
@@ -97,12 +95,13 @@ fun QrCodeView(
                     )
                 }
             }
-            if (qrCodeViewModel.isMyKey(pubKey)) {
+            if (qrCodeViewModel.isMe()) {
+                val contactId = qrCodeViewModel.id()
                 val keyServerScope = rememberCoroutineScope()
                 val focusManager = LocalFocusManager.current
                 ElevatedButton(onClick = {
                     keyServerScope.launch(Dispatchers.IO) {
-                        val msg = when (val result = qrCodeViewModel.putKey(contactsViewModel.myId())) {
+                        val msg = when (val result = qrCodeViewModel.putKey(contactId)) {
                             201 -> {
                                 focusManager.clearFocus()
                                 "Uploaded Key successfully!"
@@ -123,20 +122,22 @@ fun QrCodeView(
                     .padding(10.dp)
                     .align(Alignment.End),
                 onClick = {
-                    val type = "text/plain"
-                    val subject = "EmberTalk Public Key"
-                    val shareWith = "ShareWith"
+                    runBlocking {
+                        val type = "text/plain"
+                        val subject = "EmberTalk Public Key"
+                        val shareWith = "ShareWith"
 
-                    val intent = Intent(Intent.ACTION_SEND)
-                    intent.type = type
-                    intent.putExtra(Intent.EXTRA_SUBJECT, subject)
-                    intent.putExtra(Intent.EXTRA_TEXT, "embertalk://$pubKey")
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.type = type
+                        intent.putExtra(Intent.EXTRA_SUBJECT, subject)
+                        intent.putExtra(Intent.EXTRA_TEXT, "embertalk://${qrCodeViewModel.pubKey()}")
 
-                    ContextCompat.startActivity(
-                        context,
-                        Intent.createChooser(intent, shareWith),
-                        null
-                    )
+                        ContextCompat.startActivity(
+                            context,
+                            Intent.createChooser(intent, shareWith),
+                            null
+                        )
+                    }
                 }
             ) {
                 Icon(imageVector = Icons.Filled.Share, contentDescription = stringResource(id = R.string.share_contact))

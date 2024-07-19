@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Send
@@ -29,14 +28,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.sync.bluetooth.BleSyncService
 import edu.kit.tm.ps.embertalk.ui.Screen
-import kotlinx.coroutines.launch
+import java.util.UUID
 
 @Composable
 fun ContactsView(
@@ -73,20 +71,6 @@ fun ContactsView(
                                 .align(Alignment.CenterVertically)
                         )
                         Spacer(modifier = Modifier.weight(1f))
-                        IconButton(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            onClick = { navController.navigate(Screen.qrCodeRoute(item.pubKey)) },
-                        ) {
-                            Icon(imageVector = Icons.Filled.QrCode, contentDescription = stringResource(R.string.qr_code))
-                        }
-                        IconButton(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically),
-                            onClick = { contactsViewModel.viewModelScope.launch { contactsViewModel.delete(item) } },
-                        ) {
-                            Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(id = R.string.delete))
-                        }
                         IconButton(
                             modifier = Modifier
                                 .align(Alignment.CenterVertically),
@@ -131,7 +115,7 @@ fun ContactsActions(
         if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
             Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
         } else {
-            navController.navigate(Screen.qrCodeRoute(prefs.getString(Preferences.PUBLIC_KEY, "")!!))
+            navController.navigate(Screen.qrCodeRoute(UUID.fromString(prefs.getString("userId", ""))))
         }
     }) {
         Icon(

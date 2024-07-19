@@ -23,6 +23,16 @@ object AppViewModelProvider {
         }
     }
 
+    fun qrCodeViewModelFactory(contactId: UUID): ViewModelProvider.Factory = viewModelFactory {
+        initializer {
+            QrCodeViewModel(
+                contactId,
+                emberTalkApplication().container.contactManager,
+                emberTalkApplication().container.cryptoService,
+            )
+        }
+    }
+
     val Factory = viewModelFactory {
         initializer {
             ContactsViewModel(emberTalkApplication().container.cryptoService, emberTalkApplication().container.contactManager)
@@ -33,9 +43,6 @@ object AppViewModelProvider {
                 emberTalkApplication().container.messageManager,
                 emberTalkApplication().container.cryptoService
             )
-        }
-        initializer {
-            QrCodeViewModel(emberTalkApplication().container.cryptoService)
         }
     }
 }

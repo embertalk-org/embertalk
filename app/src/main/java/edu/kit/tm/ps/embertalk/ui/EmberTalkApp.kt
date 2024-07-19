@@ -63,11 +63,11 @@ sealed class Screen(val route: String, val icon: ImageVector, @StringRes val res
     data object Contacts : Screen("contacts", Icons.Filled.Contacts, R.string.contacts)
     data object AddContact : Screen("contacts/add", Icons.Filled.QrCodeScanner, R.string.scan_qr_code)
     data object Settings : Screen("settings", Icons.Filled.Settings, R.string.settings)
-    data object QrCode : Screen("qr/{pubKey}", Icons.Filled.QrCode, R.string.qr_code)
+    data object QrCode : Screen("qr/{userId}", Icons.Filled.QrCode, R.string.qr_code)
 
     companion object {
-        fun qrCodeRoute(pubKey: String): String {
-            return QrCode.route.replace("{pubKey}", pubKey)
+        fun qrCodeRoute(userId: UUID): String {
+            return QrCode.route.replace("{userId}", userId.toString())
         }
     }
 }
@@ -89,7 +89,6 @@ fun EmberTalkApp(
     ) {
         val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
         val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.Factory)
 
         val permissionState = rememberMultiplePermissionsState(mutableListOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
@@ -157,7 +156,6 @@ fun EmberTalkApp(
                     val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.messageViewModelFactory(contactId))
                     MessageView(
                         navController = navController,
-                        contactsViewModel = contactsViewModel,
                         messageViewModel = messageViewModel
                     )
                 }
@@ -174,15 +172,16 @@ fun EmberTalkApp(
                 }
                 composable(
                     Screen.QrCode.route,
-                    arguments = listOf(navArgument("pubKey") { type = NavType.StringType })
+                    arguments = listOf(navArgument("userId") { type = NavType.StringType })
                 ) {
                     EmberScaffold(
                         navController = navController,
                         title = stringResource(R.string.share_contact),
                         toolWindow = true
                     ) {
-                        val key = it.arguments!!.getString("pubKey")!!
-                        QrCodeView(contactsViewModel, qrCodeViewModel, key)
+                        val userId = UUID.fromString(it.arguments!!.getString("userId")!!)
+                        val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.qrCodeViewModelFactory(userId))
+                        QrCodeView(qrCodeViewModel)
                     }
                 }
             }

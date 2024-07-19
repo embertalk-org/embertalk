@@ -8,6 +8,7 @@ import edu.kit.tm.ps.embertalk.model.contacts.Contact
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
+import edu.kit.tm.ps.embertalk.ui.Screen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -58,6 +59,19 @@ class MessageViewModel(
     suspend fun deleteAll() {
         messageManager.deleteAll()
         updateView()
+    }
+
+    suspend fun deleteContact() {
+        contactManager.delete(contactManager.get(contactId))
+        contactManager.notifyObservers()
+    }
+
+    fun isMe(senderUserId: UUID): Boolean {
+        return contactId == senderUserId
+    }
+
+    fun shareContactRoute(): String {
+        return Screen.qrCodeRoute(contactId)
     }
 
     companion object {

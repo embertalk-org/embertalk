@@ -9,11 +9,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewModelScope
@@ -22,13 +27,11 @@ import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.ui.EmberScaffold
 import edu.kit.tm.ps.embertalk.ui.components.MessageCard
 import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
-import edu.kit.tm.ps.embertalk.ui.contacts.ContactsViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun MessageView(
     navController: NavController,
-    contactsViewModel: ContactsViewModel,
     messageViewModel: MessageViewModel,
     modifier: Modifier = Modifier
 ) {
@@ -38,7 +41,26 @@ fun MessageView(
     EmberScaffold(
         navController = navController,
         title = messageUiState.contact.name,
-        toolWindow = true
+        toolWindow = true,
+        actions = {
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically),
+                onClick = { navController.navigate(messageViewModel.shareContactRoute()) },
+            ) {
+                Icon(imageVector = Icons.Filled.QrCode, contentDescription = stringResource(R.string.qr_code))
+            }
+            IconButton(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically),
+                onClick = {
+                    messageViewModel.viewModelScope.launch { messageViewModel.deleteContact() }
+                    navController.popBackStack()
+                },
+            ) {
+                Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(id = R.string.delete))
+            }
+        }
     ) {
         Column(
             modifier = modifier.fillMaxHeight(),
@@ -58,7 +80,7 @@ fun MessageView(
                 items(messages) { item ->
                     Row(
                         modifier = modifier.fillMaxWidth(),
-                        horizontalArrangement = if (item.senderUserId == contactsViewModel.myId()) { Arrangement.End } else { Arrangement.Start }
+                        horizontalArrangement = if (messageViewModel.isMe(item.senderUserId)) { Arrangement.End } else { Arrangement.Start }
                     ) {
                         MessageCard(
                             message = item.content,
