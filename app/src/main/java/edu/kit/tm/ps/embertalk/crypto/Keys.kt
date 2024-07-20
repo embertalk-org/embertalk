@@ -51,7 +51,7 @@ internal class Keys(
         val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
-        prefs.edit().putString("userId", UUID.randomUUID().toString()).apply()
+        prefs.edit().putString(Preferences.USER_ID, UUID.randomUUID().toString()).apply()
         storeKeys()
         return keyPair
     }

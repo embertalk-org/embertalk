@@ -24,6 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,9 +53,10 @@ fun QrCodeView(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val qrCodeUiState by qrCodeViewModel.uiState.collectAsState()
 
-    val keys = runBlocking { qrCodeViewModel.pubKey().chunked(750) }
-    val contents = listOf("ember://id/${qrCodeViewModel.id()}") + keys.mapIndexed { index, key ->
+    val keys = runBlocking { qrCodeUiState.contact.pubKey.chunked(750) }
+    val contents = listOf("ember://id/${qrCodeUiState.contact.userId}") + keys.mapIndexed { index, key ->
         "ember://%s/%s".format(index, key)
     }
     val currentPage = rememberSaveable { mutableStateOf(0) }
@@ -96,7 +99,7 @@ fun QrCodeView(
                 }
             }
             if (qrCodeViewModel.isMe()) {
-                val contactId = qrCodeViewModel.id()
+                val contactId = qrCodeUiState.contact.userId
                 val keyServerScope = rememberCoroutineScope()
                 val focusManager = LocalFocusManager.current
                 ElevatedButton(onClick = {
@@ -130,7 +133,7 @@ fun QrCodeView(
                         val intent = Intent(Intent.ACTION_SEND)
                         intent.type = type
                         intent.putExtra(Intent.EXTRA_SUBJECT, subject)
-                        intent.putExtra(Intent.EXTRA_TEXT, "embertalk://${qrCodeViewModel.pubKey()}")
+                        intent.putExtra(Intent.EXTRA_TEXT, "embertalk://${qrCodeUiState.contact.userId}")
 
                         ContextCompat.startActivity(
                             context,

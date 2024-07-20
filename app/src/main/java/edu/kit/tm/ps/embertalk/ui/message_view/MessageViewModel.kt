@@ -38,7 +38,7 @@ class MessageViewModel(
     private fun updateView() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
-                contact = contactManager.get(contactId),
+                contact = contactManager.get(contactId)!!,
                 messages = messageManager.messages().first()
                     .filter { contactId == it.recipient || contactId == it.senderUserId }
             )
@@ -46,8 +46,8 @@ class MessageViewModel(
     }
 
     suspend fun saveMessage(message: String) {
-        val contact = contactManager.get(contactId)
-        messageManager.handle(message, contact.userId, contactManager.get(contactId).pubKey)
+        val contact = contactManager.get(contactId)!!
+        messageManager.handle(message, contact.userId, contact.pubKey)
         updateView()
     }
 
@@ -62,7 +62,7 @@ class MessageViewModel(
     }
 
     suspend fun deleteContact() {
-        contactManager.delete(contactManager.get(contactId))
+        contactManager.delete(contactManager.get(contactId)!!)
         contactManager.notifyObservers()
     }
 

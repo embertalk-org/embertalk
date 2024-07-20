@@ -22,7 +22,7 @@ class MessageManager(
     private val observers = HashSet<EmberObserver>()
 
     suspend fun handle(message: String, recipient: UUID, publicKey: String) {
-        val msg = Message(message, contactManager.myId(), recipient, System.currentTimeMillis())
+        val msg = Message(message, contactManager.me().userId, recipient, System.currentTimeMillis())
         messageRepository.insert(msg)
         val encrypted = cryptoService.encrypt(msg, publicKey)
         encryptedRepository.insert(encrypted)

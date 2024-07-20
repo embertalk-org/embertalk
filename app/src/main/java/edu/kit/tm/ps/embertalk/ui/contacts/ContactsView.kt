@@ -101,7 +101,7 @@ fun ContactsActions(
         if (prefs.getString(Preferences.PUBLIC_KEY, "") == "") {
             Toast.makeText(context, "You need to generate your keys first!", Toast.LENGTH_SHORT).show()
         } else {
-            navController.navigate(Screen.qrCodeRoute(UUID.fromString(prefs.getString("userId", ""))))
+            navController.navigate(Screen.qrCodeRoute(UUID.fromString(prefs.getString(Preferences.USER_ID, ""))))
         }
     }) {
         Icon(

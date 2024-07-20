@@ -6,7 +6,7 @@ import java.util.UUID
 interface ContactRepository {
     fun all(): Flow<List<Contact>>
 
-    suspend fun byId(userId: UUID): Contact
+    suspend fun byId(userId: UUID): Contact?
     suspend fun insert(contact: Contact)
     suspend fun delete(contact: Contact)
 }

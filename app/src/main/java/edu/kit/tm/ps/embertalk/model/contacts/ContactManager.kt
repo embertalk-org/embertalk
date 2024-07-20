@@ -1,6 +1,7 @@
 package edu.kit.tm.ps.embertalk.model.contacts
 
 import android.content.SharedPreferences
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import kotlinx.coroutines.flow.Flow
@@ -19,8 +20,13 @@ class ContactManager(
     suspend fun get(userId: UUID) = contactRepository.byId(userId)
 
     suspend fun delete(contact: Contact) = contactRepository.delete(contact)
-    fun myId(): UUID {
-        return UUID.fromString(prefs.getString("userId", ""))
+
+    fun me(): Contact {
+        return Contact(
+            "Me",
+            UUID.fromString(prefs.getString(Preferences.USER_ID, "")),
+            prefs.getString(Preferences.PUBLIC_KEY, "")!!
+        )
     }
 
     override fun register(observer: EmberObserver) {

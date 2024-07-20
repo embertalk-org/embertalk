@@ -42,7 +42,7 @@ class ContactsViewModel(
         updateContacts()
     }
 
-    suspend fun get(userId: UUID): Contact {
+    suspend fun get(userId: UUID): Contact? {
         return contactManager.get(userId)
     }
 
@@ -57,10 +57,6 @@ class ContactsViewModel(
     suspend fun delete(contact: Contact) {
         contactManager.delete(contact)
         updateContacts()
-    }
-
-    fun myId(): UUID {
-        return contactManager.myId()
     }
 
     override fun notifyOfChange() {

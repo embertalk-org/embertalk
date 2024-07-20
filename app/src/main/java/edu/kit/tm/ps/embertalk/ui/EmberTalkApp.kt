@@ -44,6 +44,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
@@ -172,14 +173,14 @@ fun EmberTalkApp(
                 }
                 composable(
                     Screen.QrCode.route,
-                    arguments = listOf(navArgument("userId") { type = NavType.StringType })
+                    arguments = listOf(navArgument(Preferences.USER_ID) { type = NavType.StringType })
                 ) {
                     EmberScaffold(
                         navController = navController,
                         title = stringResource(R.string.share_contact),
                         toolWindow = true
                     ) {
-                        val userId = UUID.fromString(it.arguments!!.getString("userId")!!)
+                        val userId = UUID.fromString(it.arguments!!.getString(Preferences.USER_ID)!!)
                         val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.qrCodeViewModelFactory(userId))
                         QrCodeView(qrCodeViewModel)
                     }
