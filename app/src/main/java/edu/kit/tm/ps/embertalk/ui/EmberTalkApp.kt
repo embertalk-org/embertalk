@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -46,7 +47,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.app.AppViewModelProvider
 import edu.kit.tm.ps.embertalk.ui.components.PermissionsRequired
 import edu.kit.tm.ps.embertalk.ui.contacts.AddContactView
 import edu.kit.tm.ps.embertalk.ui.contacts.ContactsActions
@@ -81,6 +81,8 @@ val NAVIGATION_ITEMS = listOf(
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun EmberTalkApp(
+    contactsViewModel: ContactsViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(),
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -88,9 +90,6 @@ fun EmberTalkApp(
     Surface(
         modifier = modifier
     ) {
-        val contactsViewModel: ContactsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-        val settingsViewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory)
-
         val permissionState = rememberMultiplePermissionsState(mutableListOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.BLUETOOTH,
@@ -154,7 +153,7 @@ fun EmberTalkApp(
                     arguments = listOf(navArgument("contactId") { type = NavType.StringType},)
                 ) { backStackEntry ->
                     val contactId = UUID.fromString(backStackEntry.arguments?.getString("contactId"))
-                    val messageViewModel: MessageViewModel = viewModel(factory = AppViewModelProvider.messageViewModelFactory(contactId))
+                    val messageViewModel: MessageViewModel = hiltViewModel<MessageViewModel, MessageViewModel.MessageViewModelFactory> { it.create(contactId) }
                     MessageView(
                         navController = navController,
                         messageViewModel = messageViewModel
@@ -181,7 +180,7 @@ fun EmberTalkApp(
                         toolWindow = true
                     ) {
                         val userId = UUID.fromString(it.arguments!!.getString(Preferences.USER_ID)!!)
-                        val qrCodeViewModel: QrCodeViewModel = viewModel(factory = AppViewModelProvider.qrCodeViewModelFactory(userId))
+                        val qrCodeViewModel: QrCodeViewModel = hiltViewModel<QrCodeViewModel, QrCodeViewModel.QrCodeViewModelFactory> { it.create(userId) }
                         QrCodeView(qrCodeViewModel)
                     }
                 }

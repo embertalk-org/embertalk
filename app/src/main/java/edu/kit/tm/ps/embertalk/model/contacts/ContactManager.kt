@@ -4,10 +4,11 @@ import android.content.SharedPreferences
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-class ContactManager(
+class ContactManager @Inject constructor(
     private val prefs: SharedPreferences,
     private val contactRepository: ContactRepository
 ) : EmberObservable {

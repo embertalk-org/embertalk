@@ -1,32 +1,32 @@
 package edu.kit.tm.ps.embertalk.app
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import edu.kit.tm.ps.embertalk.crypto.CryptoService
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
+import jakarta.inject.Inject
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
+@HiltAndroidApp
 class EmberTalkApplication : Application() {
 
-    lateinit var container: AppContainer
+    @Inject lateinit var messageManager: MessageManager
+    @Inject lateinit var cryptoService: CryptoService
+
     override fun onCreate() {
         super.onCreate()
-        container = AppDataContainer(this)
         object : Thread() {
             override fun run() {
                 runBlocking {
-                    container.cryptoService.initialize()
+                    cryptoService.initialize()
                 }
             }
         }.start()
         applicationScope.launch {
-            container.messageManager.deleteOld()
+            messageManager.deleteOld()
         }
-    }
-
-    override fun onLowMemory() {
-        super.onLowMemory()
-        applicationScope.cancel("OnLowMemory() called by system")
     }
 
     companion object {

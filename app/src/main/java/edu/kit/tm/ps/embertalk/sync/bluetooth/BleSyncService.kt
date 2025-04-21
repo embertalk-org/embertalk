@@ -25,14 +25,17 @@ import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.app.EmberTalkApplication
+import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import edu.kit.tm.ps.embertalk.notification.Notification
+import jakarta.inject.Inject
 import java.time.Instant
 import java.util.concurrent.ConcurrentHashMap
 
 
 @SuppressLint("MissingPermission")
-class BleSyncService : Service() {
+class BleSyncService @Inject constructor(
+    private val messageManager: MessageManager,
+) : Service() {
     private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
 
     private lateinit var bluetoothManager: BluetoothManager
@@ -83,7 +86,6 @@ class BleSyncService : Service() {
 
     private fun scanCallback(): ScanCallback {
         return object : ScanCallback() {
-            private val messageManager = (this@BleSyncService.application as EmberTalkApplication).container.messageManager
 
             override fun onScanFailed(errorCode: Int) {
                 super.onScanFailed(errorCode)
@@ -155,7 +157,6 @@ class BleSyncService : Service() {
             Log.d(TAG, "Started again")
             return START_REDELIVER_INTENT
         }
-        val app = this.application as EmberTalkApplication
 
         bluetoothManager = this.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
 
@@ -166,7 +167,7 @@ class BleSyncService : Service() {
         started = true
 
         var gattServer: BluetoothGattServer? = null
-        gattServer = bluetoothManager.openGattServer(this, ServerCallback(app.container.messageManager) { gattServer!! })
+        gattServer = bluetoothManager.openGattServer(this, ServerCallback(messageManager) { gattServer!! })
         bleServer = gattServer
 
         gattServer.addService(ServiceUtils.service())

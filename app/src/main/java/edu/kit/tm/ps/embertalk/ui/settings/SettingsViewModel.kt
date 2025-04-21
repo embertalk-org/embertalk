@@ -4,11 +4,13 @@ import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +22,8 @@ data class SettingsUiState(
     val syncInterval: Long = 5,
 )
 
-class SettingsViewModel(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val prefs: SharedPreferences,
     private val messageManager: MessageManager,
     private val cryptoService: CryptoService

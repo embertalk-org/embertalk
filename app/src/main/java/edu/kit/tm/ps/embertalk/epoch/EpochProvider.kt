@@ -7,6 +7,6 @@ interface EpochProvider {
     fun fromInstant(instant: Instant): Long
 
     companion object {
-        public const val EPOCH_LENGTH = 300000
+        const val EPOCH_LENGTH = 300000
     }
 }

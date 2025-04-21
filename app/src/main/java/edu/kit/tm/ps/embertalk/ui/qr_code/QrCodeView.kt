@@ -36,7 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
@@ -135,8 +135,7 @@ fun QrCodeView(
                         intent.putExtra(Intent.EXTRA_SUBJECT, subject)
                         intent.putExtra(Intent.EXTRA_TEXT, "embertalk://${qrCodeUiState.contact.userId}")
 
-                        ContextCompat.startActivity(
-                            context,
+                        context.startActivity(
                             Intent.createChooser(intent, shareWith),
                             null
                         )
@@ -160,7 +159,7 @@ fun encodeAsBitmap(content: String, width: Int, height: Int): Bitmap {
             pixels[offset + x] = if (result[x, y]) Color.BLACK else Color.WHITE
         }
     }
-    val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(w, h)
     bitmap.setPixels(pixels, 0, width, 0, 0, w, h)
     return bitmap
 }

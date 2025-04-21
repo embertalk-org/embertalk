@@ -3,6 +3,10 @@ package edu.kit.tm.ps.embertalk.ui.qr_code
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
@@ -18,11 +22,17 @@ data class QrCodeUiState(
     val contact: Contact
 )
 
-class QrCodeViewModel(
-    private val contactId: UUID,
+@HiltViewModel(assistedFactory = QrCodeViewModel.QrCodeViewModelFactory::class)
+class QrCodeViewModel @AssistedInject constructor(
+    @Assisted private val contactId: UUID,
     private val contactManager: ContactManager,
     private val cryptoService: CryptoService,
 ) : ViewModel(), EmberObserver {
+
+    @AssistedFactory
+    interface QrCodeViewModelFactory {
+        fun create(id: UUID): QrCodeViewModel
+    }
 
     private val _uiState = MutableStateFlow(QrCodeUiState(Contact.placeholder()))
     val uiState: StateFlow<QrCodeUiState> = _uiState.asStateFlow()

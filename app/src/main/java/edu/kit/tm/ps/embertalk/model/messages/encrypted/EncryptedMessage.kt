@@ -3,7 +3,7 @@ package edu.kit.tm.ps.embertalk.model.messages.encrypted
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "messages")
+@Entity(tableName = "encrypted")
 data class EncryptedMessage(
     @PrimaryKey
     val hash: Int,

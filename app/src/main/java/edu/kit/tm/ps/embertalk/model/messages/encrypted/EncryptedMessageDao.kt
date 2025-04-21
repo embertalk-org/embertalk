@@ -12,18 +12,18 @@ interface EncryptedMessageDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(encryptedMessage: EncryptedMessage)
 
-    @Query("SELECT * FROM messages")
+    @Query("SELECT * FROM encrypted")
     fun all(): Flow<List<EncryptedMessage>>
 
-    @Query("SELECT hash FROM messages")
+    @Query("SELECT hash FROM encrypted")
     fun hashes(): Flow<List<Int>>
 
-    @Query("SELECT * FROM messages WHERE hash not in (:hashes)")
+    @Query("SELECT * FROM encrypted WHERE hash not in (:hashes)")
     fun allExcept(hashes: List<Int>): Flow<List<EncryptedMessage>>
 
-    @Query("DELETE FROM messages")
+    @Query("DELETE FROM encrypted")
     suspend fun deleteAll()
 
-    @Query("DELETE FROM messages WHERE timestamp < :timestamp")
+    @Query("DELETE FROM encrypted WHERE timestamp < :timestamp")
     suspend fun deleteOlderThan(timestamp: Long)
 }

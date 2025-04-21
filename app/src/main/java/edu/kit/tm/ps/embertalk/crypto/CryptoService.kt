@@ -9,12 +9,13 @@ import edu.kit.tm.ps.embertalk.model.EmberObservable
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
+import jakarta.inject.Inject
 import java.util.LinkedList
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 @Suppress("RedundantSuspendModifier")
-class CryptoService(
+class CryptoService @Inject constructor(
     private val epochProvider: EpochProvider,
     private val sharedPreferences: SharedPreferences,
 ) : EmberObservable {

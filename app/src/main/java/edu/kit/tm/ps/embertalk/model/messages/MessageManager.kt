@@ -10,10 +10,11 @@ import edu.kit.tm.ps.embertalk.model.messages.decrypted.Message
 import edu.kit.tm.ps.embertalk.model.messages.decrypted.MessageRepository
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessage
 import edu.kit.tm.ps.embertalk.model.messages.encrypted.EncryptedMessageRepository
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
-class MessageManager(
+class MessageManager @Inject constructor(
     private val contactManager: ContactManager,
     private val messageRepository: MessageRepository,
     private val encryptedRepository: EncryptedMessageRepository,

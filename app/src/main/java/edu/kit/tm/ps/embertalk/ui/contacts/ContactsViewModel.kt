@@ -2,10 +2,12 @@ package edu.kit.tm.ps.embertalk.ui.contacts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
+import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +20,8 @@ data class ContactsUiState(
     val contacts: List<Contact> = ArrayList()
 )
 
-class ContactsViewModel(
+@HiltViewModel
+class ContactsViewModel @Inject constructor(
     private val cryptoService: CryptoService,
     private val contactManager: ContactManager,
 ) : ViewModel(), EmberObserver {

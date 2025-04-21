@@ -3,6 +3,10 @@ package edu.kit.tm.ps.embertalk.ui.message_view
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.contacts.Contact
 import edu.kit.tm.ps.embertalk.model.contacts.ContactManager
@@ -21,11 +25,17 @@ data class MessageUiState(
     val messages: List<Message> = ArrayList()
 )
 
-class MessageViewModel(
+@HiltViewModel(assistedFactory = MessageViewModel.MessageViewModelFactory::class)
+class MessageViewModel @AssistedInject constructor(
     private val contactManager: ContactManager,
     private val messageManager: MessageManager,
-    private val contactId: UUID,
+    @Assisted private val contactId: UUID,
 ) : ViewModel(), EmberObserver {
+
+    @AssistedFactory
+    interface MessageViewModelFactory {
+        fun create(id: UUID): MessageViewModel
+    }
 
     private val _uiState = MutableStateFlow(MessageUiState())
     val uiState: StateFlow<MessageUiState> = _uiState.asStateFlow()
