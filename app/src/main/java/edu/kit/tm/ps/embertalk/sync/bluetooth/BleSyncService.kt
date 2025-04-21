@@ -23,6 +23,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.preference.PreferenceManager
+import dagger.hilt.android.AndroidEntryPoint
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.R
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
@@ -33,9 +34,11 @@ import java.util.concurrent.ConcurrentHashMap
 
 
 @SuppressLint("MissingPermission")
-class BleSyncService @Inject constructor(
-    private val messageManager: MessageManager,
-) : Service() {
+@AndroidEntryPoint
+class BleSyncService : Service() {
+    @Inject
+    lateinit var messageManager: MessageManager
+
     private val devicesLastSynced: ConcurrentHashMap<String, Instant> = ConcurrentHashMap()
 
     private lateinit var bluetoothManager: BluetoothManager
