@@ -16,4 +16,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "EmberTalk"
-include ':app'
+include(":app")
