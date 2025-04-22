@@ -9,6 +9,13 @@ plugins {
 }
 
 android {
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
     signingConfigs {
         create("github") {
             storeFile = file(System.getProperty("user.home") + "/work/_temp/keystore.jks")
