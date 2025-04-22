@@ -22,18 +22,16 @@ class CryptoService @Inject constructor(
     private val observers = LinkedList<EmberObserver>()
 
     private val lock = ReentrantLock()
-    private lateinit var keys: Keys
+    private var keys: Keys = Keys(epochProvider, sharedPreferences)
 
     fun emberKeydClient(): EmberKeydClient {
         return EmberKeydClient(
             sharedPreferences.getString(Preferences.KEY_SERVER_URL, "")!!,
-            keys.private(),
-            keys.public()
+            keys::keys
         )
     }
 
     suspend fun initialize() {
-        keys = Keys(epochProvider, sharedPreferences)
         fastForward()
     }
 
@@ -60,16 +58,6 @@ class CryptoService @Inject constructor(
     suspend fun regenerate() {
         keys.regenerate()
         fastForward()
-    }
-
-    fun syncState(): SyncState {
-        return if (!this::keys.isInitialized) {
-            SyncState.Initializing
-        } else if (keys.inSync()) {
-            SyncState.Synchronized(epochProvider.current())
-        } else {
-            SyncState.Synchronizing(keys.epochsLate())
-        }
     }
 
     override fun register(observer: EmberObserver) {
