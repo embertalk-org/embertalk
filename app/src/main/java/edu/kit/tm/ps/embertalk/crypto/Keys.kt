@@ -3,6 +3,7 @@ package edu.kit.tm.ps.embertalk.crypto
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.edit
 import edu.kit.tm.ps.KeyGen
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
@@ -51,16 +52,16 @@ internal class Keys(
         val keyPair = KeyGen.generateKeypair(epochProvider.current())
         private = keyPair.privateKey()
         public = keyPair.publicKey()
-        prefs.edit().putString(Preferences.USER_ID, UUID.randomUUID().toString()).apply()
+        prefs.edit { putString(Preferences.USER_ID, UUID.randomUUID().toString()) }
         storeKeys()
         return keyPair
     }
 
     private fun storeKeys() {
-        prefs.edit()
-            .putString(Preferences.PRIVATE_KEY, privKeyString(private))
-            .putString(Preferences.PUBLIC_KEY, pubKeyString(public))
-            .apply()
+        prefs.edit {
+            putString(Preferences.PRIVATE_KEY, privKeyString(private))
+                .putString(Preferences.PUBLIC_KEY, pubKeyString(public))
+        }
     }
 
     fun inSync(): Boolean {
