@@ -12,7 +12,7 @@ import java.util.UUID
 interface ContactDao {
 
     @Query("SELECT * FROM contacts WHERE userId=:userId")
-    suspend fun byId(userId: UUID): Contact
+    suspend fun byId(userId: UUID): Contact?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(contact: Contact)
