@@ -35,7 +35,7 @@ android {
     }
 
     buildTypes {
-        create("githubRelease") {
+        release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
