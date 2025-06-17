@@ -2,8 +2,7 @@ package edu.kit.tm.ps.embertalk.emberkeyd
 
 import android.util.Base64
 import android.util.Log
-import edu.kit.tm.ps.PrivateKey
-import edu.kit.tm.ps.PublicKey
+import edu.kit.tm.ps.embertalk.crypto.KeyPair
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,8 +19,7 @@ const val AUTH_VAL = "eithu4ae7uzaer5dahfeiwi5Mohy2sah1IBeinguu5afahng8u"
 
 class EmberKeydClient(
     private val keyServerUrl: String,
-    private val privateKey: PrivateKey,
-    private val publicKey: PublicKey,
+    private val keys: () -> KeyPair
 ) {
 
     private val mediaType = "application/json".toMediaType()
@@ -29,7 +27,7 @@ class EmberKeydClient(
 
     suspend fun putKey(userId: UUID): Int {
         val pubKeyJson = JSONObject()
-        pubKeyJson.put("pubkey", encodeAsJson(publicKey.serialize()))
+        pubKeyJson.put("pubkey", encodeAsJson(keys.invoke().publicKey.serialize()))
         val chalResp = post("$keyServerUrl/challenge", pubKeyJson.toString())
         if (chalResp.code != 200) {
             Log.d(TAG, "Got status code ${chalResp.code}")
@@ -38,7 +36,7 @@ class EmberKeydClient(
         }
         val chalBody = JSONObject(chalResp.body!!.string())
         val challengeJson = copyStateAndNonceFrom(chalBody)
-        challengeJson.put("response", encodeAsJson(privateKey.decrypt(decodeFromJson(chalBody.getJSONArray("challenge")))))
+        challengeJson.put("response", encodeAsJson(keys.invoke().privateKey.decrypt(decodeFromJson(chalBody.getJSONArray("challenge")))))
         challengeJson.put("user_id", userId.toString())
         val finalResp = post("$keyServerUrl/response", challengeJson.toString())
         if (finalResp.code != 201) {

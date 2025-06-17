@@ -12,7 +12,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,7 +27,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import edu.kit.tm.ps.embertalk.R
-import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.ui.components.SubmittableTextField
 import kotlinx.coroutines.launch
 
@@ -52,8 +50,7 @@ fun SettingsView(
                 inputValidator = { it.toLongOrNull() != null },
                 onSubmit = { settingsViewModel.updateSyncInterval(it.toLong()) }
             )
-            RatchetState(syncState = uiState.syncState)
-            RegenerateKeysButton(uiState.syncState, settingsViewModel)
+            RegenerateKeysButton(settingsViewModel)
             DeleteAllButton(settingsViewModel)
             SubmittableTextField(
                 label = { Text(stringResource(R.string.key_server_url)) },
@@ -68,47 +65,13 @@ fun SettingsView(
 }
 
 @Composable
-fun RatchetState(
-    syncState: SyncState,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier.padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.synchronization_state),
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Row {
-            when (syncState) {
-                is SyncState.Synchronized -> Text(
-                    text = stringResource(R.string.synced) + " ${syncState.currentEpoch}",
-                    color = Color.Green,
-                    modifier = modifier.align(Alignment.CenterVertically)
-                )
-                is SyncState.Synchronizing -> Text(
-                    text = stringResource(R.string.remaining_epochs_format).format(syncState.remainingEpochs),
-                    modifier = modifier.align(Alignment.CenterVertically)
-                )
-                is SyncState.Initializing -> Text(
-                    text = stringResource(R.string.still_initializing),
-                    modifier = modifier.align(Alignment.CenterVertically)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 fun RegenerateKeysButton(
-    syncState: SyncState,
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
     val openDialog = remember { mutableStateOf(false) }
     TextButton(
-        enabled = syncState is SyncState.Synchronized,
+        enabled = true,
         onClick = { openDialog.value = true }
     ) {
         Row {

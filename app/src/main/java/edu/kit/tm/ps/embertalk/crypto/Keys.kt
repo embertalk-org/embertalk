@@ -3,6 +3,7 @@ package edu.kit.tm.ps.embertalk.crypto
 import android.content.SharedPreferences
 import android.util.Base64
 import android.util.Log
+import androidx.core.content.edit
 import edu.kit.tm.ps.KeyGen
 import edu.kit.tm.ps.PrivateKey
 import edu.kit.tm.ps.PublicKey
@@ -15,52 +16,46 @@ internal class Keys(
     private val epochProvider: EpochProvider,
     private val prefs: SharedPreferences,
 ) {
-    private var private: PrivateKey
-    private var public: PublicKey
-    private var rolloverPrivate: PrivateKey
-    private var rolloverPublic: PublicKey
+    private var keys: KeyPair
+    private var rolloverKeys: KeyPair
 
     init {
         if (!prefs.contains(Preferences.PRIVATE_KEY) && !prefs.contains(Preferences.PUBLIC_KEY)) {
-            val keys = this.regenerate()
-            private = keys.privateKey()
-            public = keys.publicKey()
-            rolloverPrivate = private.clone()
-            rolloverPublic = public.clone()
-            storeKeys()
+            val newKeys = this.regenerate()
+            keys = newKeys
+            rolloverKeys = KeyPair(newKeys.publicKey.clone(), newKeys.privateKey.clone())
+            store(newKeys)
         } else {
             try {
-                private = PrivateKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
-                public = PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PUBLIC_KEY, ""), Base64.URL_SAFE))
-                rolloverPrivate = private.clone()
-                rolloverPublic = public.clone()
-                storeKeys()
+                val private = PrivateKey.deserialize(Base64.decode(prefs.getString(Preferences.PRIVATE_KEY, ""), Base64.URL_SAFE))
+                val public = PublicKey.deserialize(Base64.decode(prefs.getString(Preferences.PUBLIC_KEY, ""), Base64.URL_SAFE))
+                keys = KeyPair(public, private)
+                rolloverKeys = keys.clone()
+                store(keys)
             } catch (e: RatchetException) {
                 Log.d(TAG, "Failed to deserialize keys... Regenerating...")
-                val keys = this.regenerate()
-                private = keys.privateKey()
-                public = keys.publicKey()
-                rolloverPrivate = private.clone()
-                rolloverPublic = public.clone()
+                keys = this.regenerate()
+                rolloverKeys = keys.clone()
+                store(keys)
             }
         }
     }
 
-    fun regenerate(): KeyGen.KeyPair {
-        Log.d(TAG, "epochProvider.current %s".format(epochProvider.current()))
-        val keyPair = KeyGen.generateKeypair(epochProvider.current())
-        private = keyPair.privateKey()
-        public = keyPair.publicKey()
-        prefs.edit().putString(Preferences.USER_ID, UUID.randomUUID().toString()).apply()
-        storeKeys()
+    fun regenerate(): KeyPair {
+        val epoch = epochProvider.current()
+        Log.d(TAG, "epochProvider.current %s".format(epoch))
+        val keys = KeyGen.generateKeypair(epoch)
+        prefs.edit { putString(Preferences.USER_ID, UUID.randomUUID().toString()) }
+        val keyPair = KeyPair(keys.publicKey(), keys.privateKey())
+        store(keyPair)
         return keyPair
     }
 
-    private fun storeKeys() {
-        prefs.edit()
-            .putString(Preferences.PRIVATE_KEY, privKeyString(private))
-            .putString(Preferences.PUBLIC_KEY, pubKeyString(public))
-            .apply()
+    private fun store(keyPair: KeyPair) {
+        prefs.edit {
+            putString(Preferences.PRIVATE_KEY, privKeyString(keyPair.privateKey))
+                .putString(Preferences.PUBLIC_KEY, pubKeyString(keyPair.publicKey))
+        }
     }
 
     fun inSync(): Boolean {
@@ -68,22 +63,18 @@ internal class Keys(
     }
 
     fun epochsLate(): Long {
-        return epochProvider.current() - private.currentEpoch()
+        return epochProvider.current() - keys.epoch()
     }
 
     fun fastForward() {
         val currentEpoch = epochProvider.current()
-        if (currentEpoch > private.currentEpoch()) {
-            rolloverPrivate = private.clone()
-            private.fastForward(currentEpoch - private.currentEpoch())
+        if (currentEpoch > keys.epoch()) {
+            rolloverKeys = keys.clone()
+            keys = keys.fastForward(currentEpoch - keys.epoch())
         }
-        if (currentEpoch > public.currentEpoch()) {
-            rolloverPublic = public.clone()
-            public.fastForward(currentEpoch - public.currentEpoch())
-        }
-        Log.d(TAG, "Rollover keys ffed, now at ${rolloverPrivate.currentEpoch()}")
-        Log.d(TAG, "Keys ffed, now at ${private.currentEpoch()}")
-        storeKeys()
+        Log.d(TAG, "Rollover keys ffed, now at ${rolloverKeys.epoch()}")
+        Log.d(TAG, "Keys ffed, now at ${keys.epoch()}")
+        store(keys)
     }
 
     fun fastForward(pub: PublicKey) {
@@ -94,15 +85,11 @@ internal class Keys(
     }
 
     fun decrypt(message: ByteArray): Array<ByteArray> {
-        return arrayOf(rolloverPrivate.decrypt(message), private.decrypt(message))
+        return arrayOf(rolloverKeys.privateKey.decrypt(message), keys.privateKey.decrypt(message))
     }
 
-    fun private(): PrivateKey {
-        return private
-    }
-
-    fun public(): PublicKey {
-        return public
+    fun keys(): KeyPair {
+        return keys
     }
 
     fun decode(pubKey: String): PublicKey {
@@ -118,7 +105,7 @@ internal class Keys(
     }
 
     fun isMyKey(pubKey: String): Boolean {
-        return pubKeyString(public).equals(pubKey)
+        return pubKeyString(keys.publicKey).equals(pubKey)
     }
 
     companion object {

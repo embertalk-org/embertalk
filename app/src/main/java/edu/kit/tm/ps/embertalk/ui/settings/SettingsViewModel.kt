@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.kit.tm.ps.embertalk.Preferences
 import edu.kit.tm.ps.embertalk.crypto.CryptoService
-import edu.kit.tm.ps.embertalk.crypto.SyncState
 import edu.kit.tm.ps.embertalk.model.EmberObserver
 import edu.kit.tm.ps.embertalk.model.messages.MessageManager
 import jakarta.inject.Inject
@@ -18,7 +17,6 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(
     val keyServerUrl: String = "",
-    val syncState: SyncState = SyncState.Initializing,
     val syncInterval: Long = 5,
 )
 
@@ -47,7 +45,6 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 keyServerUrl = prefs.getString(Preferences.KEY_SERVER_URL, "")!!,
-                syncState = cryptoService.syncState()
             )
             Log.d(TAG, "Updated Settings!")
         }
