@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedButton
@@ -81,7 +81,7 @@ fun QrCodeView(
                     onClick = { currentPage.value = (currentPage.value - 1).coerceAtLeast(0) }
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowBack,
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }
@@ -93,7 +93,7 @@ fun QrCodeView(
                     onClick = { currentPage.value = (currentPage.value + 1).coerceAtMost(contents.size - 1) }
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.ArrowForward,
+                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
                         contentDescription = stringResource(id = R.string.back)
                     )
                 }

@@ -9,9 +9,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.QrCode
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -91,7 +91,7 @@ fun MessageView(
             }
             SubmittableTextField(
                 label = { stringResource(R.string.your_message) },
-                imageVector = Icons.Filled.Send,
+                imageVector = Icons.AutoMirrored.Default.Send,
                 singleLine = false,
                 onSubmit = {
                     messageViewModel.viewModelScope.launch {

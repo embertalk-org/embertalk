@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.QrCodeScanner
@@ -209,7 +209,7 @@ fun EmberScaffold(
                 navigationIcon = {
                     if (toolWindow && showBack) {
                         IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
+                            Icon(imageVector = Icons.AutoMirrored.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                         }
                     }
                 },
