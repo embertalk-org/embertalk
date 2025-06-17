@@ -26,7 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -59,7 +59,7 @@ fun QrCodeView(
     val contents = listOf("ember://id/${qrCodeUiState.contact.userId}") + keys.mapIndexed { index, key ->
         "ember://%s/%s".format(index, key)
     }
-    val currentPage = rememberSaveable { mutableStateOf(0) }
+    val currentPage = rememberSaveable { mutableIntStateOf(0) }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -71,14 +71,14 @@ fun QrCodeView(
                 Modifier.padding(5.dp)
             ) {
                 Image(
-                    bitmap = encodeAsBitmap(contents[currentPage.value], 2000, 2000).asImageBitmap(),
+                    bitmap = encodeAsBitmap(contents[currentPage.intValue], 2000, 2000).asImageBitmap(),
                     contentDescription = stringResource(R.string.qr_code)
                 )
             }
             Row {
                 IconButton(
-                    enabled = currentPage.value > 0,
-                    onClick = { currentPage.value = (currentPage.value - 1).coerceAtLeast(0) }
+                    enabled = currentPage.intValue > 0,
+                    onClick = { currentPage.intValue = (currentPage.intValue - 1).coerceAtLeast(0) }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
@@ -86,11 +86,11 @@ fun QrCodeView(
                     )
                 }
                 Spacer(modifier = modifier.weight(1f))
-                Text("%s of %s".format(currentPage.value, contents.size - 1))
+                Text("%s of %s".format(currentPage.intValue, contents.size - 1))
                 Spacer(modifier = modifier.weight(1f))
                 IconButton(
-                    enabled = currentPage.value < contents.size - 1,
-                    onClick = { currentPage.value = (currentPage.value + 1).coerceAtMost(contents.size - 1) }
+                    enabled = currentPage.intValue < contents.size - 1,
+                    onClick = { currentPage.intValue = (currentPage.intValue + 1).coerceAtMost(contents.size - 1) }
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowForward,
